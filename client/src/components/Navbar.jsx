@@ -2,6 +2,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Zap, LogOut, ChevronLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
+import ThemeToggle from './ThemeToggle.jsx';
 
 export default function Navbar({ showBack = false }) {
   const { user, logout } = useAuth();
@@ -28,10 +29,11 @@ export default function Navbar({ showBack = false }) {
         position: 'sticky', top: 0, zIndex: 100,
         display: 'flex', alignItems: 'center', justifyContent: 'space-between',
         padding: '0 24px', height: 64,
-        background: 'rgba(5,5,8,0.8)',
+        background: 'var(--nav-bg)',
         backdropFilter: 'blur(20px)',
         WebkitBackdropFilter: 'blur(20px)',
         borderBottom: '1px solid var(--border-subtle)',
+        transition: 'background 0.35s ease, border-color 0.35s ease',
       }}
     >
       {/* Left — Logo or Back */}
@@ -59,10 +61,16 @@ export default function Navbar({ showBack = false }) {
         </button>
       </div>
 
-      {/* Right — User + Logout */}
+      {/* Right — Theme Toggle + User + Logout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        {/* Theme Toggle — always visible */}
+        <ThemeToggle />
+
         {user && (
           <>
+            {/* Separator */}
+            <div style={{ width: 1, height: 28, background: 'var(--border-subtle)' }} />
+
             <div style={{
               display: 'flex', alignItems: 'center', gap: 10,
               padding: '6px 14px 6px 8px',

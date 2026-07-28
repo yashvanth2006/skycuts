@@ -1,6 +1,6 @@
 @import "tailwindcss";
 
-/* ─── Design Tokens ─────────────────────────────────────────────────────────── */
+/* ─── Design Tokens — Dark Mode (default) ───────────────────────────────────── */
 :root {
   --bg-void:        #050508;
   --bg-deep:        #080810;
@@ -8,6 +8,7 @@
   --bg-card:        rgba(13, 13, 24, 0.7);
   --bg-glass:       rgba(255, 255, 255, 0.04);
   --bg-glass-hover: rgba(255, 255, 255, 0.07);
+  --nav-bg:         rgba(5, 5, 8, 0.82);
 
   --border-subtle:  rgba(255, 255, 255, 0.07);
   --border-glow:    rgba(99, 102, 241, 0.4);
@@ -32,14 +33,42 @@
   --radius-lg:  20px;
   --radius-xl:  28px;
 
-  --font-sans:  'Inter', system-ui, sans-serif;
+  --font-sans:    'Inter', system-ui, sans-serif;
   --font-display: 'Space Grotesk', system-ui, sans-serif;
+}
+
+/* ─── Design Tokens — Light Mode ─────────────────────────────────────────────── */
+html.light {
+  --bg-void:        #f8fafc;
+  --bg-deep:        #f1f5f9;
+  --bg-surface:     #e8edf5;
+  --bg-card:        rgba(255, 255, 255, 0.75);
+  --bg-glass:       rgba(255, 255, 255, 0.55);
+  --bg-glass-hover: rgba(255, 255, 255, 0.75);
+  --nav-bg:         rgba(248, 250, 252, 0.88);
+
+  --border-subtle:  rgba(0, 0, 0, 0.08);
+  --border-glow:    rgba(99, 102, 241, 0.35);
+
+  --text-primary:   #1e1e2e;
+  --text-secondary: #4a4a6e;
+  --text-muted:     #9090aa;
+
+  --shadow-glow-sm: 0 0 20px rgba(99, 102, 241, 0.12);
+  --shadow-glow-md: 0 0 40px rgba(99, 102, 241, 0.16);
+  --shadow-glow-lg: 0 0 80px rgba(99, 102, 241, 0.2);
+  --shadow-card:    0 4px 24px rgba(0, 0, 0, 0.1);
 }
 
 /* ─── Base Reset ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; }
+
+html {
+  scroll-behavior: smooth;
+  /* Smooth colour transition when theme class is toggled */
+  transition: background-color 0.35s ease, color 0.35s ease;
+}
 
 body {
   font-family: var(--font-sans);
@@ -49,6 +78,7 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
+  transition: background-color 0.35s ease, color 0.35s ease;
 }
 
 /* ─── Scrollbar ──────────────────────────────────────────────────────────────── */
@@ -111,6 +141,7 @@ h1, h2, h3, h4, h5, h6 {
   background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
   -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   -webkit-mask-composite: xor;
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
   mask-composite: exclude;
   pointer-events: none;
 }

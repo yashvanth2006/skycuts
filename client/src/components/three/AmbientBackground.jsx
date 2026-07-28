@@ -1,7 +1,7 @@
 import { useRef, useMemo } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import { MeshDistortMaterial, Sphere, Stars } from '@react-three/drei';
-import * as THREE from 'three';
+import { useTheme } from '../../context/ThemeContext.jsx';
 
 // ─── Distorted Glowing Sphere ───────────────────────────────────────────────
 function AmbientSphere({ position, color, speed, distort, radius }) {
@@ -68,9 +68,15 @@ function Particles({ count = 120 }) {
 
 // ─── Main Export ─────────────────────────────────────────────────────────────
 export default function AmbientBackground() {
+  const { theme } = useTheme();
+  const isLight = theme === 'light';
+
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none'
+      position: 'fixed', inset: 0, zIndex: 0, pointerEvents: 'none',
+      // Gracefully reduce opacity in light mode so the canvas doesn't overpower
+      opacity: isLight ? 0.22 : 1,
+      transition: 'opacity 0.6s ease',
     }}>
       <Canvas
         camera={{ position: [0, 0, 6], fov: 60 }}
@@ -109,3 +115,4 @@ export default function AmbientBackground() {
     </div>
   );
 }
+
