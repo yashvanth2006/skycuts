@@ -5,6 +5,7 @@ import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminProjectPage from './pages/admin/AdminProjectPage.jsx';
 import ClientDashboard from './pages/client/ClientDashboard.jsx';
 import ClientProjectPage from './pages/client/ClientProjectPage.jsx';
+import EditorProfile from './pages/public/EditorProfile.jsx';
 
 // ─── Route Guards ──────────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -59,6 +60,9 @@ export default function App() {
     <Routes>
       <Route path="/" element={<RootRedirect />} />
       <Route path="/login" element={<LoginPage />} />
+
+      {/* Public Route */}
+      <Route path="/profile" element={<EditorProfile />} />
 
       {/* Admin Routes */}
       <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
