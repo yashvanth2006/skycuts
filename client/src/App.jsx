@@ -15,7 +15,7 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-const AdminRoute = ({ children }) => {
+const EditorRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <FullPageLoader />;
   if (!user) return <Navigate to="/login" replace />;
@@ -27,7 +27,7 @@ const ClientRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <FullPageLoader />;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'client') return <Navigate to="/admin" replace />;
+  if (user.role !== 'client') return <Navigate to="/editor" replace />;
   return children;
 };
 
@@ -52,7 +52,7 @@ const RootRedirect = () => {
   if (loading) return <FullPageLoader />;
   if (!user) return <Navigate to="/login" replace />;
   return user.role === 'admin'
-    ? <Navigate to="/admin" replace />
+    ? <Navigate to="/editor" replace />
     : <Navigate to="/dashboard" replace />;
 };
 
@@ -67,9 +67,9 @@ export default function App() {
         {/* Public Route */}
         <Route path="/profile" element={<EditorProfile />} />
 
-        {/* Admin Routes */}
-        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-        <Route path="/admin/project/:id" element={<AdminRoute><AdminProjectPage /></AdminRoute>} />
+        {/* Editor Routes */}
+        <Route path="/editor" element={<EditorRoute><AdminDashboard /></EditorRoute>} />
+        <Route path="/editor/project/:id" element={<EditorRoute><AdminProjectPage /></EditorRoute>} />
 
         {/* Client Routes */}
         <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />

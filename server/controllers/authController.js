@@ -41,19 +41,19 @@ export const registerUser = async (req, res) => {
     }
 };
 
-export const seedAdmin = async (req, res) => {
-    const adminExists = await User.findOne({ role: 'admin' });
+export const seedEditor = async (req, res) => {
+    const editorExists = await User.findOne({ role: 'admin' });
 
-    if (adminExists) {
-        return res.status(400).json({ message: 'Admin account already exists' });
+    if (editorExists) {
+        return res.status(400).json({ message: 'Editor account already exists' });
     }
 
-    const admin = await User.create({
-        name: 'SkyCuts Admin',
-        email: 'admin@skycuts.io',
-        password: 'Admin@123',
+    const editor = await User.create({
+        name: 'Yashvanth',
+        email: 'yashvanth@skycuts.io',
+        password: 'yash2468',
         role: 'admin'
     });
 
-    res.status(201).json({ message: 'Admin user successfully created!', admin });
+    res.status(201).json({ message: 'Editor user successfully created!', editor });
 };

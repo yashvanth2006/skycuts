@@ -20,6 +20,9 @@ export default function Navbar({ showBack = false }) {
     ? user.name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2)
     : '?';
 
+  // Check if user is the master editor (Yashvanth)
+  const isMasterEditor = user?.role === 'admin' && user?.email === 'yashvanth@skycuts.io';
+
   return (
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
@@ -44,7 +47,7 @@ export default function Navbar({ showBack = false }) {
           </button>
         )}
         <button
-          onClick={() => navigate(user?.role === 'admin' ? '/admin' : '/dashboard')}
+          onClick={() => navigate(user?.role === 'admin' ? '/editor' : '/dashboard')}
           style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}
         >
           <div style={{
@@ -65,6 +68,39 @@ export default function Navbar({ showBack = false }) {
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {/* Theme Toggle — always visible */}
         <ThemeToggle />
+
+        {/* Editor Dashboard Button — only for master editor */}
+        {isMasterEditor && location.pathname !== '/editor' && location.pathname !== '/editor/project/' && (
+          <>
+            <button
+              onClick={() => navigate('/editor')}
+              style={{
+                padding: '8px 16px',
+                borderRadius: 8,
+                background: 'linear-gradient(135deg, #F5A623, #FFB74D)',
+                color: '#111',
+                border: 'none',
+                cursor: 'pointer',
+                fontSize: 13,
+                fontWeight: 700,
+                letterSpacing: '0.02em',
+                transition: 'all 0.2s ease',
+                boxShadow: '0 4px 12px rgba(245,166,35,0.3)',
+              }}
+              onMouseEnter={e => {
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 6px 16px rgba(245,166,35,0.4)';
+              }}
+              onMouseLeave={e => {
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(245,166,35,0.3)';
+              }}
+            >
+              Editor Dashboard
+            </button>
+            <div style={{ width: 1, height: 28, background: 'var(--border-subtle)' }} />
+          </>
+        )}
 
         {user && (
           <>
@@ -87,10 +123,10 @@ export default function Navbar({ showBack = false }) {
               </div>
               <div>
                 <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2 }}>{user.name}</p>
-                <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{user.role}</p>
+                <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{user.role === 'admin' ? 'editor' : user.role}</p>
               </div>
               <span className={`badge badge-${user.role}`} style={{ marginLeft: 4 }}>
-                {user.role}
+                {user.role === 'admin' ? 'editor' : user.role}
               </span>
             </div>
 
