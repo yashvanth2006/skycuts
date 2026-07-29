@@ -2,7 +2,7 @@
 import { motion, useInView } from "framer-motion";
 import {
   Monitor, Film, Layers, Cpu, Star, Award, Clock,
-  Play, ChevronRight, Globe, Mail, Instagram, Youtube,
+  Play, ChevronRight, Globe, Mail,
   Zap, Eye, Download
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
@@ -742,8 +742,7 @@ export default function EditorProfile() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[
                 { icon: <Mail size={14} />, label: "marcus@skycuts.studio" },
-                { icon: <Instagram size={14} />, label: "@marcusreid_color" },
-                { icon: <Youtube size={14} />, label: "youtube.com/marcusreid" },
+                
               ].map((c, i) => (
                 <div key={i} style={{
                   display: "flex", alignItems: "center", gap: 10,
