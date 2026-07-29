@@ -107,7 +107,7 @@ export default function AdminDashboard() {
           style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}
         >
           <div>
-            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>Studio Dashboard</h1>
+            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>Editor Dashboard</h1>
             <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Manage all your client projects from one place.</p>
           </div>
           <button
@@ -154,7 +154,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="grid-auto">
             {filtered.map((p, i) => (
-              <ProjectCard key={p._id} project={p} index={i} basePath="/admin" />
+              <ProjectCard key={p._id} project={p} index={i} basePath="/editor" />
             ))}
           </div>
         )}
