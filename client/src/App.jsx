@@ -6,6 +6,7 @@ import AdminProjectPage from './pages/admin/AdminProjectPage.jsx';
 import ClientDashboard from './pages/client/ClientDashboard.jsx';
 import ClientProjectPage from './pages/client/ClientProjectPage.jsx';
 import EditorProfile from './pages/public/EditorProfile.jsx';
+import CustomCursor from './components/CustomCursor.jsx';
 
 // ─── Route Guards ──────────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -57,23 +58,26 @@ const RootRedirect = () => {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<RootRedirect />} />
-      <Route path="/login" element={<LoginPage />} />
+    <>
+      <CustomCursor />
+      <Routes>
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="/login" element={<LoginPage />} />
 
-      {/* Public Route */}
-      <Route path="/profile" element={<EditorProfile />} />
+        {/* Public Route */}
+        <Route path="/profile" element={<EditorProfile />} />
 
-      {/* Admin Routes */}
-      <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-      <Route path="/admin/project/:id" element={<AdminRoute><AdminProjectPage /></AdminRoute>} />
+        {/* Admin Routes */}
+        <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+        <Route path="/admin/project/:id" element={<AdminRoute><AdminProjectPage /></AdminRoute>} />
 
-      {/* Client Routes */}
-      <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
-      <Route path="/dashboard/project/:id" element={<ClientRoute><ClientProjectPage /></ClientRoute>} />
+        {/* Client Routes */}
+        <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
+        <Route path="/dashboard/project/:id" element={<ClientRoute><ClientProjectPage /></ClientRoute>} />
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </>
   );
 }
