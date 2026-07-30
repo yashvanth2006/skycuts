@@ -7,34 +7,35 @@ import {
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
 import DaVinciNodeTree from "../../components/three/DaVinciNodeTree.jsx";
+import { useTheme } from "../../context/ThemeContext.jsx";
 
-// ─── DaVinci Resolve-inspired color palette (locked dark) ──────────────────
-const dv = {
-  bg0:    "#111111",
-  bg1:    "#181818",
-  bg2:    "#202020",
-  bg3:    "#272727",
-  panel:  "#1c1c1c",
-  border: "rgba(255,255,255,0.06)",
+// ─── DaVinci Resolve-inspired color palette (theme-aware) ──────────────────
+const getDaVinciColors = (isDark) => ({
+  bg0:    isDark ? "#111111" : "#f8fafc",
+  bg1:    isDark ? "#181818" : "#f1f5f9",
+  bg2:    isDark ? "#202020" : "#e8edf5",
+  bg3:    isDark ? "#272727" : "#e2e8f0",
+  panel:  isDark ? "#1c1c1c" : "#ffffff",
+  border: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)",
   borderHover: "rgba(47,116,208,0.5)",
   blue:   "#2F74D0",
   blueL:  "#4A9EFF",
   amber:  "#F5A623",
   amberL: "#FFB74D",
-  white:  "#E8E8E8",
-  gray1:  "#9A9A9A",
-  gray2:  "#5A5A5A",
-  gray3:  "#3A3A3A",
-};
+  white:  isDark ? "#E8E8E8" : "#1e1e2e",
+  gray1:  isDark ? "#9A9A9A" : "#4a4a6e",
+  gray2:  isDark ? "#5A5A5A" : "#9090aa",
+  gray3:  isDark ? "#3A3A3A" : "#cbd5e1",
+});
 
 // ─── Mock Data ──────────────────────────────────────────────────────────────
 const PORTFOLIO = [
-  { id: 1, title: "AURORA — Fashion Campaign",   category: "Commercial",   duration: "2:34", year: 2024, views: "2.4M", grade: "Bleach Bypass",  accent: dv.blue  },
-  { id: 2, title: "ECHOES — Music Video",         category: "Music Video",  duration: "4:12", year: 2024, views: "8.1M", grade: "Desaturated Teal", accent: dv.amber },
-  { id: 3, title: "THRESHOLD — Short Film",       category: "Narrative",    duration: "18:45", year: 2023, views: "340K", grade: "Warm Cinematic",  accent: dv.blue  },
-  { id: 4, title: "KINETIC — Sports Promo",       category: "Commercial",   duration: "0:30", year: 2024, views: "5.7M", grade: "High Contrast",   accent: dv.amber },
-  { id: 5, title: "SOLSTICE — Documentary",       category: "Documentary",  duration: "52:00", year: 2023, views: "120K", grade: "Filmic Grain",    accent: dv.blue  },
-  { id: 6, title: "REVERIE — Brand Identity",    category: "Commercial",   duration: "1:00", year: 2025, views: "1.2M", grade: "Matte Orange",    accent: dv.amber },
+  { id: 1, title: "AURORA — Fashion Campaign",   category: "Commercial",   duration: "2:34", year: 2024, views: "2.4M", grade: "Bleach Bypass",  accentKey: "blue"  },
+  { id: 2, title: "ECHOES — Music Video",         category: "Music Video",  duration: "4:12", year: 2024, views: "8.1M", grade: "Desaturated Teal", accentKey: "amber" },
+  { id: 3, title: "THRESHOLD — Short Film",       category: "Narrative",    duration: "18:45", year: 2023, views: "340K", grade: "Warm Cinematic",  accentKey: "blue"  },
+  { id: 4, title: "KINETIC — Sports Promo",       category: "Commercial",   duration: "0:30", year: 2024, views: "5.7M", grade: "High Contrast",   accentKey: "amber" },
+  { id: 5, title: "SOLSTICE — Documentary",       category: "Documentary",  duration: "52:00", year: 2023, views: "120K", grade: "Filmic Grain",    accentKey: "blue"  },
+  { id: 6, title: "REVERIE — Brand Identity",    category: "Commercial",   duration: "1:00", year: 2025, views: "1.2M", grade: "Matte Orange",    accentKey: "amber" },
 ];
 
 const TOOLKIT = [
@@ -53,12 +54,12 @@ const AWARDS = [
   { label: "Awards Won",         value: "14",    icon: <Star size={18} /> },
 ];
 
-const CATEGORY_COLORS = {
+const getCategoryColors = (dv) => ({
   "Commercial":  { bg: "rgba(47,116,208,0.12)",  border: "rgba(47,116,208,0.3)",  text: dv.blueL },
   "Music Video": { bg: "rgba(245,166,35,0.12)",  border: "rgba(245,166,35,0.3)",  text: dv.amberL },
   "Narrative":   { bg: "rgba(74,158,255,0.12)",  border: "rgba(74,158,255,0.3)",  text: "#7CBFFF" },
   "Documentary": { bg: "rgba(155,155,155,0.10)", border: "rgba(155,155,155,0.25)",text: "#BBBBBB" },
-};
+});
 
 // ─── Section fade-in wrapper ─────────────────────────────────────────────────
 function SectionReveal({ children, delay = 0 }) {
@@ -77,7 +78,7 @@ function SectionReveal({ children, delay = 0 }) {
 }
 
 // ─── DaVinci-style section header ────────────────────────────────────────────
-function PanelHeader({ icon, title, subtitle }) {
+function PanelHeader({ icon, title, subtitle, dv }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
       <div style={{
@@ -108,7 +109,7 @@ function PanelHeader({ icon, title, subtitle }) {
 }
 
 // ─── Horizontal rule with label ───────────────────────────────────────────────
-function DVDivider({ label }) {
+function DVDivider({ label, dv }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "48px 0 36px" }}>
       <div style={{ flex: 1, height: 1, background: dv.border }} />
@@ -126,9 +127,10 @@ function DVDivider({ label }) {
 }
 
 // ─── Portfolio Clip Card ──────────────────────────────────────────────────────
-function ClipCard({ item }) {
+function ClipCard({ item, dv }) {
   const [hovered, setHovered] = useState(false);
-  const cat = CATEGORY_COLORS[item.category] || CATEGORY_COLORS["Documentary"];
+  const cat = getCategoryColors(dv)[item.category] || getCategoryColors(dv)["Documentary"];
+  const accent = item.accentKey === "blue" ? dv.blue : dv.amber;
 
   return (
     <motion.div
@@ -141,13 +143,13 @@ function ClipCard({ item }) {
       transition={{ duration: 0.25, ease: "easeOut" }}
       style={{
         background: dv.bg2,
-        border: `1px solid ${hovered ? item.accent : dv.border}`,
+        border: `1px solid ${hovered ? accent : dv.border}`,
         borderRadius: 6,
         overflow: "hidden",
         cursor: "pointer",
         position: "relative",
         boxShadow: hovered
-          ? `0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px ${item.accent}55`
+          ? `0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px ${accent}55`
           : "0 4px 16px rgba(0,0,0,0.3)",
         transition: "border-color 0.2s ease, box-shadow 0.2s ease",
       }}
@@ -163,7 +165,7 @@ function ClipCard({ item }) {
         <div style={{
           position: "absolute", inset: 0,
           backgroundImage: `
-            radial-gradient(ellipse at 30% 40%, ${item.accent}18 0%, transparent 60%),
+            radial-gradient(ellipse at 30% 40%, ${accent}18 0%, transparent 60%),
             radial-gradient(ellipse at 70% 60%, ${dv.blue}12 0%, transparent 55%)
           `,
         }} />
@@ -174,7 +176,7 @@ function ClipCard({ item }) {
             <div key={i} style={{
               flex: 1,
               height: `${Math.max(20, Math.sin(i * 0.7) * 50 + 60)}%`,
-              background: item.accent,
+              background: accent,
               borderRadius: 1,
               opacity: 0.6 + Math.sin(i) * 0.4,
             }} />
@@ -187,7 +189,7 @@ function ClipCard({ item }) {
           transition={{ duration: 0.2 }}
           style={{
             position: "absolute", inset: 0,
-            border: `2px solid ${item.accent}`,
+            border: `2px solid ${accent}`,
             pointerEvents: "none",
           }}
         />
@@ -203,12 +205,12 @@ function ClipCard({ item }) {
         >
           <div style={{
             width: 48, height: 48, borderRadius: "50%",
-            background: `${item.accent}22`,
+            background: `${accent}22`,
             backdropFilter: "blur(8px)",
-            border: `1px solid ${item.accent}88`,
+            border: `1px solid ${accent}88`,
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <Play size={18} color={item.accent} style={{ marginLeft: 3 }} />
+            <Play size={18} color={accent} style={{ marginLeft: 3 }} />
           </div>
         </motion.div>
 
@@ -228,9 +230,9 @@ function ClipCard({ item }) {
         <div style={{
           position: "absolute", top: 10, left: 10,
           padding: "3px 8px", borderRadius: 4,
-          background: `${item.accent}22`,
-          border: `1px solid ${item.accent}44`,
-          fontSize: 9, fontWeight: 600, color: item.accent,
+          background: `${accent}22`,
+          border: `1px solid ${accent}44`,
+          fontSize: 9, fontWeight: 600, color: accent,
           letterSpacing: "0.08em", textTransform: "uppercase",
         }}>
           {item.grade}
@@ -270,7 +272,7 @@ function ClipCard({ item }) {
 }
 
 // ─── Toolkit Row ─────────────────────────────────────────────────────────────
-function ToolkitRow({ tool, delay }) {
+function ToolkitRow({ tool, delay, dv }) {
   const [hovered, setHovered] = useState(false);
   return (
     <motion.div
@@ -334,7 +336,7 @@ function ToolkitRow({ tool, delay }) {
 }
 
 // ─── Stat tile ───────────────────────────────────────────────────────────────
-function StatTile({ stat, delay }) {
+function StatTile({ stat, delay, dv }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -366,14 +368,16 @@ function StatTile({ stat, delay }) {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function EditorProfile() {
+  const { theme } = useTheme();
+  const isDark = theme === 'dark';
+  const dv = getDaVinciColors(isDark);
+
   return (
     <div style={{
       minHeight: "100vh",
       background: dv.bg0,
       color: dv.white,
       fontFamily: "'Inter', system-ui, sans-serif",
-      // Force dark mode regardless of user setting
-      colorScheme: "dark",
     }}>
 
       {/* Google Fonts */}
@@ -401,7 +405,7 @@ export default function EditorProfile() {
 
       {/* Navbar — always shown */}
       <div style={{
-        background: "#141414",
+        background: dv.bg1,
         borderBottom: `1px solid ${dv.border}`,
       }}>
         <Navbar />
@@ -414,7 +418,7 @@ export default function EditorProfile() {
         minHeight: 600,
         maxHeight: 900,
         overflow: "hidden",
-        background: `linear-gradient(to bottom, ${dv.bg0} 0%, #0d1520 60%, ${dv.bg0} 100%)`,
+        background: `linear-gradient(to bottom, ${dv.bg0} 0%, ${isDark ? '#0d1520' : '#e2e8f0'} 60%, ${dv.bg0} 100%)`,
       }}>
         {/* 3D Node Canvas — fills hero */}
         <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
@@ -624,12 +628,12 @@ export default function EditorProfile() {
             margin: "40px 0",
           }}>
             {AWARDS.map((s, i) => (
-              <StatTile key={i} stat={s} delay={i * 0.08} />
+              <StatTile key={i} stat={s} delay={i * 0.08} dv={dv} />
             ))}
           </div>
         </SectionReveal>
 
-        <DVDivider label="Software Arsenal" />
+        <DVDivider label="Software Arsenal" dv={dv} />
 
         {/* ── Toolkit Panel ───────────────────────────────────────────────── */}
         <SectionReveal>
@@ -677,12 +681,12 @@ export default function EditorProfile() {
 
             {/* Tool rows */}
             {TOOLKIT.map((tool, i) => (
-              <ToolkitRow key={i} tool={tool} delay={i * 0.06} />
+              <ToolkitRow key={i} tool={tool} delay={i * 0.06} dv={dv} />
             ))}
           </div>
         </SectionReveal>
 
-        <DVDivider label="Selected Works" />
+        <DVDivider label="Selected Works" dv={dv} />
 
         {/* ── Portfolio Grid ───────────────────────────────────────────────── */}
         <SectionReveal>
@@ -690,6 +694,7 @@ export default function EditorProfile() {
             icon={<Film size={16} />}
             title="Portfolio"
             subtitle="Media Pool — Selected Works"
+            dv={dv}
           />
           <div
             id="portfolio-grid"
@@ -706,13 +711,13 @@ export default function EditorProfile() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07, duration: 0.5, ease: "easeOut" }}
               >
-                <ClipCard item={item} />
+                <ClipCard item={item} dv={dv} />
               </motion.div>
             ))}
           </div>
         </SectionReveal>
 
-        <DVDivider label="Contact" />
+        <DVDivider label="Contact" dv={dv} />
 
         {/* ── Contact Footer ─────────────────────────────────────────────── */}
         <SectionReveal>
