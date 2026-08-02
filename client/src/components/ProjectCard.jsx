@@ -28,6 +28,7 @@ export default function ProjectCard({ project, index = 0, basePath = '/dashboard
       variants={cardVariants}
       initial="hidden"
       animate="visible"
+      whileHover={{ y: -4, transition: { duration: 0.2 } }}
       className="glass-card"
       onClick={() => navigate(`${basePath}/project/${project._id}`)}
       style={{ padding: '24px', cursor: 'pointer', userSelect: 'none' }}

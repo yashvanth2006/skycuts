@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Film, Loader2, Zap } from 'lucide-react';
+import { Film, Loader2, Zap, AlertCircle } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
 import ProjectCard from '../../components/ProjectCard.jsx';
+import SkeletonCard from '../../components/SkeletonCard.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import api from '../../api/axiosInstance.js';
 
@@ -10,13 +11,18 @@ export default function ClientDashboard() {
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
 
   useEffect(() => {
     const fetch = async () => {
       try {
+        setError(null);
         const { data } = await api.get('/projects');
         setProjects(data);
-      } catch {/* */}
+      } catch (e) {
+        console.error(e);
+        setError('Failed to load projects. Please check your connection and try again.');
+      }
       finally { setLoading(false); }
     };
     fetch();
@@ -69,9 +75,19 @@ export default function ClientDashboard() {
           </p>
         </div>
 
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-            <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
+        {error ? (
+          <div className="glass-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <AlertCircle size={48} style={{ margin: '0 auto 16px', opacity: 0.3, display: 'block', color: '#ef4444' }} />
+            <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 16 }}>{error}</p>
+            <button onClick={() => window.location.reload()} className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}>
+              Refresh Page
+            </button>
+          </div>
+        ) : loading ? (
+          <div className="grid-auto">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <SkeletonCard key={i} delay={i * 0.05} />
+            ))}
           </div>
         ) : projects.length === 0 ? (
           <motion.div

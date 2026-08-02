@@ -10,14 +10,23 @@ const statusConfig = {
 export default function StatusBadge({ status }) {
   const cfg = statusConfig[status] || { label: status, cls: 'badge-progress', dot: '#818cf8' };
   return (
-    <span className={`badge ${cfg.cls}`}>
-      <span style={{
-        width: 6, height: 6, borderRadius: '50%',
-        background: cfg.dot,
-        boxShadow: `0 0 6px ${cfg.dot}`,
-        display: 'inline-block'
-      }} />
+    <motion.span
+      className={`badge ${cfg.cls}`}
+      initial={{ scale: 0.9, opacity: 0 }}
+      animate={{ scale: 1, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+    >
+      <motion.span
+        style={{
+          width: 6, height: 6, borderRadius: '50%',
+          background: cfg.dot,
+          boxShadow: `0 0 6px ${cfg.dot}`,
+          display: 'inline-block'
+        }}
+        animate={{ scale: [1, 1.2, 1] }}
+        transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+      />
       {cfg.label}
-    </span>
+    </motion.span>
   );
 }
