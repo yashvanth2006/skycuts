@@ -3,7 +3,7 @@ import { X } from 'lucide-react';
 
 export default function Modal({ isOpen, onClose, title, children, maxWidth = 520 }) {
   return (
-    <AnimatePresence>
+    <AnimatePresence mode="wait">
       {isOpen && (
         <>
           {/* Backdrop */}
@@ -11,6 +11,7 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 520
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
             onClick={onClose}
             style={{
               position: 'fixed', inset: 0, zIndex: 200,
@@ -33,8 +34,10 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 520
               pointerEvents: 'none',
             }}
           >
-            <div
+            <motion.div
               className="glass-card"
+              initial={{ y: 0 }}
+              whileInView={{ y: 0 }}
               style={{
                 width: '100%', maxWidth,
                 padding: '32px',
@@ -45,16 +48,20 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 520
             >
               <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
                 <h3 style={{ fontSize: 18, fontWeight: 700 }}>{title}</h3>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.1, rotate: 90 }}
+                  whileTap={{ scale: 0.9 }}
                   onClick={onClose}
-                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4 }}
+                  style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 4, transition: 'color 0.2s' }}
+                  onMouseEnter={(e) => e.currentTarget.style.color = 'var(--text-primary)'}
+                  onMouseLeave={(e) => e.currentTarget.style.color = 'var(--text-muted)'}
                   aria-label="Close modal"
                 >
                   <X size={20} />
-                </button>
+                </motion.button>
               </div>
               {children}
-            </div>
+            </motion.div>
           </motion.div>
         </>
       )}

@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus, Film, Users, Clock, TrendingUp,
-  Loader2, ChevronRight, Search
+  Loader2, ChevronRight, Search, AlertCircle
 } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
 import ProjectCard from '../../components/ProjectCard.jsx';
+import SkeletonCard from '../../components/SkeletonCard.jsx';
 import Modal from '../../components/Modal.jsx';
 import api from '../../api/axiosInstance.js';
 
@@ -35,6 +36,7 @@ export default function AdminDashboard() {
   const [projects, setProjects] = useState([]);
   const [clients,  setClients]  = useState([]);
   const [loading,  setLoading]  = useState(true);
+  const [error,    setError]    = useState(null);
   const [search,   setSearch]   = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [creating,  setCreating]  = useState(false);
@@ -43,6 +45,7 @@ export default function AdminDashboard() {
 
   const fetchAll = async () => {
     try {
+      setError(null);
       const [projRes, clientRes] = await Promise.all([
         api.get('/projects'),
         api.get('/projects/clients'),
@@ -51,6 +54,7 @@ export default function AdminDashboard() {
       setClients(clientRes.data);
     } catch (e) {
       console.error(e);
+      setError('Failed to load data. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -60,21 +64,33 @@ export default function AdminDashboard() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    if (!form.title || !form.clientId) {
-      setFormError('Title and client are required.');
+    setTouched({ title: true, clientId: true, price: true });
+    
+    if (!form.title.trim()) {
+      setFormError('Project title is required.');
       return;
     }
+    if (!form.clientId) {
+      setFormError('Please select a client.');
+      return;
+    }
+    if (form.price && isNaN(parseFloat(form.price))) {
+      setFormError('Please enter a valid price.');
+      return;
+    }
+    
     setCreating(true);
     setFormError('');
     try {
       await api.post('/projects', {
-        title: form.title,
-        description: form.description,
+        title: form.title.trim(),
+        description: form.description.trim(),
         clientId: form.clientId,
         price: parseFloat(form.price) || 0,
       });
       setModalOpen(false);
       setForm({ title: '', description: '', clientId: '', price: '' });
+      setTouched({ title: false, clientId: false, price: false });
       await fetchAll();
     } catch (err) {
       setFormError(err.response?.data?.message || 'Failed to create project.');
@@ -140,16 +156,41 @@ export default function AdminDashboard() {
         </div>
 
         {/* Project Grid */}
-        {loading ? (
-          <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-            <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
+        {error ? (
+          <div className="glass-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
+            <AlertCircle size={48} style={{ margin: '0 auto 16px', opacity: 0.3, display: 'block', color: '#ef4444' }} />
+            <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 16 }}>{error}</p>
+            <button onClick={fetchAll} className="btn-primary" style={{ padding: '10px 20px', fontSize: 13 }}>
+              Try Again
+            </button>
+          </div>
+        ) : loading ? (
+          <div className="grid-auto">
+            {[1, 2, 3, 4, 5, 6].map((i) => (
+              <SkeletonCard key={i} delay={i * 0.05} />
+            ))}
           </div>
         ) : filtered.length === 0 ? (
           <div className="glass-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
-            <Film size={40} style={{ margin: '0 auto 16px', opacity: 0.2, display: 'block', color: 'var(--accent-indigo)' }} />
-            <p style={{ color: 'var(--text-muted)', fontSize: 15 }}>
-              {search ? 'No projects match your search.' : 'No projects yet. Create your first one!'}
-            </p>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.4 }}
+            >
+              <Film size={40} style={{ margin: '0 auto 16px', opacity: 0.2, display: 'block', color: 'var(--accent-indigo)' }} />
+              <p style={{ color: 'var(--text-muted)', fontSize: 15, marginBottom: 16 }}>
+                {search ? 'No projects match your search.' : 'No projects yet. Create your first one!'}
+              </p>
+              {!search && (
+                <button
+                  onClick={() => setModalOpen(true)}
+                  className="btn-primary"
+                  style={{ padding: '10px 20px', fontSize: 13 }}
+                >
+                  <Plus size={14} /> Create Project
+                </button>
+              )}
+            </motion.div>
           </div>
         ) : (
           <div className="grid-auto">

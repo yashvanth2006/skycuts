@@ -49,15 +49,21 @@ export default function Navbar({ showBack = false }) {
         <button
           onClick={() => navigate(user?.role === 'admin' ? '/editor' : '/dashboard')}
           style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
         >
-          <div style={{
-            width: 32, height: 32, borderRadius: 8,
-            background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
-            display: 'flex', alignItems: 'center', justifyContent: 'center',
-            boxShadow: '0 0 16px rgba(99,102,241,0.4)'
-          }}>
+          <motion.div
+            style={{
+              width: 32, height: 32, borderRadius: 8,
+              background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              boxShadow: '0 0 16px rgba(99,102,241,0.4)'
+            }}
+            whileHover={{ rotate: 360 }}
+            transition={{ duration: 0.6 }}
+          >
             <Zap size={17} color="#fff" />
-          </div>
+          </motion.div>
           <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
             Sky<span style={{ background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Cuts</span>
           </span>
@@ -130,7 +136,7 @@ export default function Navbar({ showBack = false }) {
               </span>
             </div>
 
-            <button onClick={handleLogout} className="btn-ghost" style={{ padding: '8px 12px', gap: 6 }}>
+            <button onClick={handleLogout} className="btn-ghost" style={{ padding: '8px 12px', gap: 6 }} whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <LogOut size={15} /> Logout
             </button>
           </>
