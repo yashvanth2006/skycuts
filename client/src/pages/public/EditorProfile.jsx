@@ -399,6 +399,10 @@ export default function EditorProfile() {
   const [requestSuccess, setRequestSuccess] = useState(false);
   const [requestError, setRequestError] = useState('');
 
+  // Request action loading state
+  const [acceptingRequest, setAcceptingRequest] = useState(null);
+  const [acceptSuccess, setAcceptSuccess] = useState('');
+
   // Fetch editor-only data
   const fetchEditorData = async () => {
     if (!isEditor) return;
@@ -496,11 +500,23 @@ export default function EditorProfile() {
   // Handle accepting/declining pending requests
   const handleRequestAction = async (projectId, action) => {
     try {
-      const newStatus = action === 'accept' ? 'awaiting_assets' : 'declined';
-      await api.patch(`/projects/${projectId}/status`, { status: newStatus });
+      if (action === 'accept') {
+        setAcceptingRequest(projectId);
+        const newStatus = 'awaiting_assets';
+        await api.patch(`/projects/${projectId}/status`, { status: newStatus });
+        const project = pendingRequests.find(p => p._id === projectId);
+        const email = project?.requesterEmail || project?.client?.email;
+        setAcceptSuccess(`Project Accepted! Client account created and credentials emailed to ${email || 'client'}.`);
+        setTimeout(() => setAcceptSuccess(''), 5000);
+      } else {
+        const newStatus = 'declined';
+        await api.patch(`/projects/${projectId}/status`, { status: newStatus });
+      }
       await fetchEditorData();
     } catch (err) {
       console.error('Failed to update project status:', err);
+    } finally {
+      setAcceptingRequest(null);
     }
   };
 
@@ -683,23 +699,43 @@ export default function EditorProfile() {
             >
               <Play size={15} /> View Portfolio
             </button>
-            <button
-              onClick={() => setRequestModalOpen(true)}
-              style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "12px 24px", borderRadius: 6,
-                background: dv.amber, color: "#111",
-                border: "none", cursor: "pointer",
-                fontSize: 14, fontWeight: 600,
-                fontFamily: "'Inter', system-ui",
-                transition: "all 0.2s ease",
-                boxShadow: "0 0 20px rgba(245,166,35,0.4)",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.background = dv.amberL; e.currentTarget.style.boxShadow = "0 0 30px rgba(245,166,35,0.6)"; }}
-              onMouseLeave={e => { e.currentTarget.style.background = dv.amber; e.currentTarget.style.boxShadow = "0 0 20px rgba(245,166,35,0.4)"; }}
-            >
-              <Zap size={15} /> Start a Project
-            </button>
+            {!isEditor ? (
+              <button
+                onClick={() => setRequestModalOpen(true)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "12px 24px", borderRadius: 6,
+                  background: dv.amber, color: "#111",
+                  border: "none", cursor: "pointer",
+                  fontSize: 14, fontWeight: 600,
+                  fontFamily: "'Inter', system-ui",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 0 20px rgba(245,166,35,0.4)",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = dv.amberL; e.currentTarget.style.boxShadow = "0 0 30px rgba(245,166,35,0.6)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = dv.amber; e.currentTarget.style.boxShadow = "0 0 20px rgba(245,166,35,0.4)"; }}
+              >
+                <Zap size={15} /> Start a Project
+              </button>
+            ) : (
+              <button
+                onClick={() => document.getElementById("studio-workspace")?.scrollIntoView({ behavior: "smooth" })}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "12px 24px", borderRadius: 6,
+                  background: dv.amber, color: "#111",
+                  border: "none", cursor: "pointer",
+                  fontSize: 14, fontWeight: 600,
+                  fontFamily: "'Inter', system-ui",
+                  transition: "all 0.2s ease",
+                  boxShadow: "0 0 20px rgba(245,166,35,0.4)",
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = dv.amberL; e.currentTarget.style.boxShadow = "0 0 30px rgba(245,166,35,0.6)"; }}
+                onMouseLeave={e => { e.currentTarget.style.background = dv.amber; e.currentTarget.style.boxShadow = "0 0 20px rgba(245,166,35,0.4)"; }}
+              >
+                <Zap size={15} /> Go to Workspace
+              </button>
+            )}
             <button
               style={{
                 display: "flex", alignItems: "center", gap: 8,
@@ -765,11 +801,14 @@ export default function EditorProfile() {
 
       {/* ═══ STUDIO WORKSPACE (Editor Only) ═══════════════════════════════════ */}
       {isEditor && (
-        <section style={{
-          padding: "40px 24px",
-          background: dv.bg0,
-          borderBottom: `1px solid ${dv.border}`,
-        }}>
+        <section
+          id="studio-workspace"
+          style={{
+            padding: "40px 24px",
+            background: dv.bg0,
+            borderBottom: `1px solid ${dv.border}`,
+          }}
+        >
           <div style={{ maxWidth: 1400, margin: "0 auto" }}>
             {/* Workspace Toggle */}
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
@@ -848,6 +887,27 @@ export default function EditorProfile() {
             {/* Incoming Requests Section */}
             {pendingRequests.length > 0 && (
               <div style={{ marginBottom: 36 }}>
+                {acceptSuccess && (
+                  <motion.div
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      padding: "12px 16px",
+                      background: "rgba(52,211,153,0.15)",
+                      border: "1px solid rgba(52,211,153,0.3)",
+                      borderRadius: 8,
+                      color: "#34d399",
+                      fontSize: 13,
+                      marginBottom: 16,
+                      display: "flex",
+                      alignItems: "center",
+                      gap: 8,
+                    }}
+                  >
+                    <Zap size={14} />
+                    {acceptSuccess}
+                  </motion.div>
+                )}
                 <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
                   <motion.div
                     initial={{ opacity: 0, x: -10 }}
@@ -907,29 +967,37 @@ export default function EditorProfile() {
                       <div style={{ display: "flex", gap: 8 }}>
                         <button
                           onClick={() => handleRequestAction(request._id, 'accept')}
+                          disabled={acceptingRequest === request._id}
                           style={{
                             flex: 1, padding: "10px", borderRadius: 6,
                             background: dv.blue, color: "#fff",
-                            border: "none", cursor: "pointer",
+                            border: "none", cursor: acceptingRequest === request._id ? "not-allowed" : "pointer",
                             fontSize: 13, fontWeight: 600,
                             transition: "all 0.2s ease",
+                            opacity: acceptingRequest === request._id ? 0.7 : 1,
                           }}
-                          onMouseEnter={e => e.currentTarget.style.background = dv.blueL}
-                          onMouseLeave={e => e.currentTarget.style.background = dv.blue}
+                          onMouseEnter={e => { if (acceptingRequest !== request._id) e.currentTarget.style.background = dv.blueL; }}
+                          onMouseLeave={e => { if (acceptingRequest !== request._id) e.currentTarget.style.background = dv.blue; }}
                         >
-                          Accept
+                          {acceptingRequest === request._id ? (
+                            <><Loader2 size={14} style={{ animation: "spin 0.8s linear infinite" }} /> Processing…</>
+                          ) : (
+                            "Accept"
+                          )}
                         </button>
                         <button
                           onClick={() => handleRequestAction(request._id, 'decline')}
+                          disabled={acceptingRequest === request._id}
                           style={{
                             flex: 1, padding: "10px", borderRadius: 6,
                             background: "transparent", color: dv.gray1,
-                            border: `1px solid ${dv.border}`, cursor: "pointer",
+                            border: `1px solid ${dv.border}`, cursor: acceptingRequest === request._id ? "not-allowed" : "pointer",
                             fontSize: 13, fontWeight: 500,
                             transition: "all 0.2s ease",
+                            opacity: acceptingRequest === request._id ? 0.7 : 1,
                           }}
-                          onMouseEnter={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; }}
-                          onMouseLeave={e => { e.currentTarget.style.borderColor = dv.border; e.currentTarget.style.color = dv.gray1; }}
+                          onMouseEnter={e => { if (acceptingRequest !== request._id) { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; } }}
+                          onMouseLeave={e => { if (acceptingRequest !== request._id) { e.currentTarget.style.borderColor = dv.border; e.currentTarget.style.color = dv.gray1; } }}
                         >
                           Decline
                         </button>

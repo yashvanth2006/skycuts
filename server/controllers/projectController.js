@@ -1,5 +1,8 @@
 import Project from '../models/Project.js';
 import User from '../models/User.js';
+import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
+import { sendWelcomeEmail } from '../utils/emailHelper.js';
 
 // @desc   Create a new project (Admin only)
 // @route  POST /api/projects
@@ -71,7 +74,7 @@ export const submitRawAssets = async (req, res) => {
     res.json(project);
 };
 
-// @desc   Admin updates project status
+// @desc   Admin updates project status (with auto-client onboarding for pending projects)
 // @route  PATCH /api/projects/:id/status
 export const updateProjectStatus = async (req, res) => {
     const { status } = req.body;
@@ -81,13 +84,45 @@ export const updateProjectStatus = async (req, res) => {
         return res.status(400).json({ message: 'Invalid status value' });
     }
 
-    const project = await Project.findByIdAndUpdate(
-        req.params.id,
-        { status },
-        { new: true }
-    ).populate('client', 'name email');
+    const project = await Project.findById(req.params.id).populate('client', 'name email');
 
     if (!project) return res.status(404).json({ message: 'Project not found' });
+
+    // Auto-client onboarding: if accepting a pending project from a non-registered user
+    if (status === 'awaiting_assets' && project.status === 'pending' && !project.client) {
+        const { requesterName, requesterEmail } = project;
+        
+        // Check if user was created since the project request
+        let existingUser = await User.findOne({ email: requesterEmail });
+        
+        if (!existingUser) {
+            // Generate temporary password
+            const tempPassword = `SkyCuts${crypto.randomBytes(4).toString('hex')}`;
+            const hashedPassword = await bcrypt.hash(tempPassword, 10);
+            
+            // Create new client account
+            existingUser = await User.create({
+                name: requesterName,
+                email: requesterEmail,
+                password: hashedPassword,
+                role: 'client',
+            });
+            
+            // Send welcome email with credentials
+            await sendWelcomeEmail(requesterEmail, requesterName, tempPassword);
+        }
+        
+        // Link project to the client
+        project.client = existingUser._id;
+        project.requesterName = '';
+        project.requesterEmail = '';
+        await project.save();
+    }
+
+    project.status = status;
+    await project.save();
+    
+    await project.populate('client', 'name email');
     res.json(project);
 };
 
