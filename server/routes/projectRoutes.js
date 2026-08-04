@@ -6,10 +6,14 @@ import {
     submitRawAssets,
     updateProjectStatus,
     getAllClients,
+    createProjectRequest,
 } from '../controllers/projectController.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
+
+// Public route for project requests (no auth required)
+router.post('/request', createProjectRequest);
 
 router.get('/clients', protect, adminOnly, getAllClients);
 router.route('/').get(protect, getProjects).post(protect, adminOnly, createProject);
