@@ -1,13 +1,19 @@
-﻿import { useState, useRef } from "react";
+﻿import { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Monitor, Film, Layers, Cpu, Star, Award, Clock,
   Play, ChevronRight, Globe, Mail,
-  Zap, Eye, Download
+  Zap, Eye, Download, Plus, Users, TrendingUp, Search, AlertCircle, Loader2
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
 import DaVinciNodeTree from "../../components/three/DaVinciNodeTree.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
+import ProjectCard from "../../components/ProjectCard.jsx";
+import SkeletonCard from "../../components/SkeletonCard.jsx";
+import Modal from "../../components/Modal.jsx";
+import StatusBadge from "../../components/StatusBadge.jsx";
+import api from "../../api/axiosInstance.js";
 
 // ─── DaVinci Resolve-inspired color palette (theme-aware) ──────────────────
 const getDaVinciColors = (isDark) => ({
@@ -369,8 +375,123 @@ function StatTile({ stat, delay, dv }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function EditorProfile() {
   const { theme } = useTheme();
+  const { user } = useAuth();
   const isDark = theme === 'dark';
   const dv = getDaVinciColors(isDark);
+  
+  // Editor-only state
+  const isEditor = user?.role === 'admin' && user?.email === 'yashvanth@skycuts.io';
+  const [projects, setProjects] = useState([]);
+  const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [search, setSearch] = useState('');
+  const [modalOpen, setModalOpen] = useState(false);
+  const [creating, setCreating] = useState(false);
+  const [form, setForm] = useState({ title: '', description: '', clientId: '', price: '' });
+  const [formError, setFormError] = useState('');
+  const [showWorkspace, setShowWorkspace] = useState(false);
+
+  // Public project request state
+  const [requestModalOpen, setRequestModalOpen] = useState(false);
+  const [requestForm, setRequestForm] = useState({ name: '', email: '', title: '', description: '', assetLink: '' });
+  const [requestSubmitting, setRequestSubmitting] = useState(false);
+  const [requestSuccess, setRequestSuccess] = useState(false);
+  const [requestError, setRequestError] = useState('');
+
+  // Fetch editor-only data
+  const fetchEditorData = async () => {
+    if (!isEditor) return;
+    try {
+      setLoading(true);
+      setError(null);
+      const [projRes, clientRes] = await Promise.all([
+        api.get('/projects'),
+        api.get('/projects/clients'),
+      ]);
+      setProjects(projRes.data);
+      setClients(clientRes.data);
+    } catch (e) {
+      console.error(e);
+      setError('Failed to load data. Please check your connection and try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (isEditor) {
+      fetchEditorData();
+    }
+  }, [isEditor]);
+
+  const handleCreate = async (e) => {
+    e.preventDefault();
+    if (!form.title.trim()) {
+      setFormError('Project title is required.');
+      return;
+    }
+    if (!form.clientId) {
+      setFormError('Please select a client.');
+      return;
+    }
+    setCreating(true);
+    setFormError('');
+    try {
+      await api.post('/projects', {
+        title: form.title.trim(),
+        description: form.description.trim(),
+        clientId: form.clientId,
+        price: parseFloat(form.price) || 0,
+      });
+      setModalOpen(false);
+      setForm({ title: '', description: '', clientId: '', price: '' });
+      await fetchEditorData();
+    } catch (err) {
+      setFormError(err.response?.data?.message || 'Failed to create project.');
+    } finally {
+      setCreating(false);
+    }
+  };
+
+  const filtered = projects.filter(p =>
+    p.title.toLowerCase().includes(search.toLowerCase()) ||
+    p.client?.name?.toLowerCase().includes(search.toLowerCase())
+  );
+
+  const stats = [
+    { icon: Film, label: 'Total Projects', value: projects.length, color: '#6366f1' },
+    { icon: Users, label: 'Active Clients', value: clients.length, color: '#22d3ee' },
+    { icon: Clock, label: 'In Review', value: projects.filter(p => p.status === 'in_review').length, color: '#c084fc' },
+    { icon: TrendingUp, label: 'Paid', value: projects.filter(p => p.status === 'paid').length, color: '#34d399' },
+  ];
+
+  // Handle public project request submission
+  const handleRequestSubmit = async (e) => {
+    e.preventDefault();
+    if (!requestForm.name.trim() || !requestForm.email.trim() || !requestForm.title.trim()) {
+      setRequestError('Name, email, and project title are required.');
+      return;
+    }
+    setRequestSubmitting(true);
+    setRequestError('');
+    try {
+      await api.post('/projects/request', requestForm);
+      setRequestSuccess(true);
+      setRequestForm({ name: '', email: '', title: '', description: '', assetLink: '' });
+    } catch (err) {
+      setRequestError(err.response?.data?.message || 'Failed to submit request. Please try again.');
+    } finally {
+      setRequestSubmitting(false);
+    }
+  };
+
+  const closeRequestModal = () => {
+    setRequestModalOpen(false);
+    setRequestSuccess(false);
+    setRequestError('');
+    setRequestForm({ name: '', email: '', title: '', description: '', assetLink: '' });
+  };
 
   return (
     <div style={{
@@ -550,6 +671,23 @@ export default function EditorProfile() {
               <Play size={15} /> View Portfolio
             </button>
             <button
+              onClick={() => setRequestModalOpen(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "12px 24px", borderRadius: 6,
+                background: dv.amber, color: "#111",
+                border: "none", cursor: "pointer",
+                fontSize: 14, fontWeight: 600,
+                fontFamily: "'Inter', system-ui",
+                transition: "all 0.2s ease",
+                boxShadow: "0 0 20px rgba(245,166,35,0.4)",
+              }}
+              onMouseEnter={e => { e.currentTarget.style.background = dv.amberL; e.currentTarget.style.boxShadow = "0 0 30px rgba(245,166,35,0.6)"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = dv.amber; e.currentTarget.style.boxShadow = "0 0 20px rgba(245,166,35,0.4)"; }}
+            >
+              <Zap size={15} /> Start a Project
+            </button>
+            <button
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "12px 24px", borderRadius: 6,
@@ -611,6 +749,438 @@ export default function EditorProfile() {
           ))}
         </div>
       </section>
+
+      {/* ═══ STUDIO WORKSPACE (Editor Only) ═══════════════════════════════════ */}
+      {isEditor && (
+        <section style={{
+          padding: "40px 24px",
+          background: dv.bg0,
+          borderBottom: `1px solid ${dv.border}`,
+        }}>
+          <div style={{ maxWidth: 1400, margin: "0 auto" }}>
+            {/* Workspace Toggle */}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+              <div>
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  style={{
+                    display: "inline-flex", alignItems: "center", gap: 8,
+                    padding: "6px 16px", borderRadius: 4,
+                    background: "rgba(245,166,35,0.12)",
+                    border: "1px solid rgba(245,166,35,0.3)",
+                    marginBottom: 12,
+                  }}
+                >
+                  <Zap size={12} color={dv.amber} />
+                  <span style={{ fontSize: 11, fontWeight: 600, color: dv.amber, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                    Studio Workspace
+                  </span>
+                </motion.div>
+                <h2 style={{ fontSize: 24, fontWeight: 700, color: dv.white, marginBottom: 4 }}>
+                  Manage Your Projects
+                </h2>
+                <p style={{ fontSize: 14, color: dv.gray2 }}>
+                  Create, track, and deliver client projects from one place.
+                </p>
+              </div>
+              <button
+                onClick={() => setModalOpen(true)}
+                style={{
+                  display: "flex", alignItems: "center", gap: 8,
+                  padding: "12px 24px", borderRadius: 8,
+                  background: dv.blue, color: "#fff",
+                  border: "none", cursor: "pointer",
+                  fontSize: 14, fontWeight: 600,
+                  transition: "all 0.2s ease",
+                }}
+                onMouseEnter={e => e.currentTarget.style.background = dv.blueL}
+                onMouseLeave={e => e.currentTarget.style.background = dv.blue}
+              >
+                <Plus size={16} /> New Project
+              </button>
+            </div>
+
+            {/* Stats Grid */}
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 36 }}>
+              {stats.map((s, i) => (
+                <motion.div
+                  key={s.label}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.08, duration: 0.45 }}
+                  style={{
+                    padding: "22px 24px",
+                    background: dv.bg1,
+                    border: `1px solid ${dv.border}`,
+                    borderRadius: 12,
+                    display: "flex", alignItems: "center", gap: 16,
+                  }}
+                >
+                  <div style={{
+                    width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                    background: `${s.color}18`, border: `1px solid ${s.color}30`,
+                    display: "flex", alignItems: "center", justifyContent: "center",
+                  }}>
+                    <s.icon size={22} color={s.color} />
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 12, color: dv.gray2, fontWeight: 500, marginBottom: 3 }}>{s.label}</p>
+                    <p style={{ fontSize: 26, fontWeight: 700, color: dv.white, letterSpacing: "-0.03em" }}>{s.value}</p>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Search + Projects */}
+            <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>
+              <div style={{ position: "relative", flex: 1, maxWidth: 400 }}>
+                <Search size={16} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)", color: dv.gray2 }} />
+                <input
+                  value={search}
+                  onChange={e => setSearch(e.target.value)}
+                  placeholder="Search projects or clients…"
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px 12px 40px",
+                    background: dv.bg1,
+                    border: `1px solid ${dv.border}`,
+                    borderRadius: 8,
+                    color: dv.white,
+                    fontSize: 14,
+                    outline: "none",
+                  }}
+                />
+              </div>
+              <p style={{ fontSize: 13, color: dv.gray2 }}>{filtered.length} project{filtered.length !== 1 ? 's' : ''}</p>
+            </div>
+
+            {/* Project Grid */}
+            {error ? (
+              <div style={{ textAlign: "center", padding: "60px 20px", background: dv.bg1, border: `1px solid ${dv.border}`, borderRadius: 12 }}>
+                <AlertCircle size={48} style={{ margin: "0 auto 16px", opacity: 0.3, display: "block", color: "#ef4444" }} />
+                <p style={{ color: dv.gray2, fontSize: 15, marginBottom: 16 }}>{error}</p>
+                <button onClick={fetchEditorData} style={{ padding: "10px 20px", background: dv.blue, color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13 }}>
+                  Try Again
+                </button>
+              </div>
+            ) : loading ? (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 16 }}>
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <SkeletonCard key={i} delay={i * 0.05} />
+                ))}
+              </div>
+            ) : filtered.length === 0 ? (
+              <div style={{ textAlign: "center", padding: "60px 20px", background: dv.bg1, border: `1px solid ${dv.border}`, borderRadius: 12 }}>
+                <motion.div
+                  initial={{ scale: 0.8, opacity: 0 }}
+                  animate={{ scale: 1, opacity: 1 }}
+                  transition={{ duration: 0.4 }}
+                >
+                  <Film size={40} style={{ margin: "0 auto 16px", opacity: 0.2, display: "block", color: dv.blue }} />
+                  <p style={{ color: dv.gray2, fontSize: 15, marginBottom: 16 }}>
+                    {search ? 'No projects match your search.' : 'No projects yet. Create your first one!'}
+                  </p>
+                  {!search && (
+                    <button
+                      onClick={() => setModalOpen(true)}
+                      style={{ padding: "10px 20px", background: dv.blue, color: "#fff", border: "none", borderRadius: 8, cursor: "pointer", fontSize: 13 }}
+                    >
+                      <Plus size={14} /> Create Project
+                    </button>
+                  )}
+                </motion.div>
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 16 }}>
+                {filtered.map((p, i) => (
+                  <ProjectCard key={p._id} project={p} index={i} basePath="/profile" />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Create Project Modal */}
+          <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setFormError(''); }} title="Create New Project">
+            <form onSubmit={handleCreate} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Project Title *
+                </label>
+                <input
+                  value={form.title}
+                  onChange={e => setForm(p => ({ ...p, title: e.target.value }))}
+                  placeholder="e.g. Brand Campaign Edit"
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    background: dv.bg1,
+                    border: `1px solid ${dv.border}`,
+                    borderRadius: 8,
+                    color: dv.white,
+                    fontSize: 14,
+                    outline: "none",
+                  }}
+                  required
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Description
+                </label>
+                <textarea
+                  value={form.description}
+                  onChange={e => setForm(p => ({ ...p, description: e.target.value }))}
+                  placeholder="Brief project description…"
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    background: dv.bg1,
+                    border: `1px solid ${dv.border}`,
+                    borderRadius: 8,
+                    color: dv.white,
+                    fontSize: 14,
+                    outline: "none",
+                    minHeight: 80,
+                  }}
+                  rows={3}
+                />
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Assign Client *
+                </label>
+                <select
+                  value={form.clientId}
+                  onChange={e => setForm(p => ({ ...p, clientId: e.target.value }))}
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    background: dv.bg1,
+                    border: `1px solid ${dv.border}`,
+                    borderRadius: 8,
+                    color: dv.white,
+                    fontSize: 14,
+                    outline: "none",
+                    appearance: "none",
+                    cursor: "pointer",
+                  }}
+                  required
+                >
+                  <option value="">Select a client…</option>
+                  {clients.map(c => (
+                    <option key={c._id} value={c._id}>{c.name} ({c.email})</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Invoice Price (USD)
+                </label>
+                <input
+                  type="number"
+                  value={form.price}
+                  onChange={e => setForm(p => ({ ...p, price: e.target.value }))}
+                  placeholder="0.00"
+                  style={{
+                    width: "100%",
+                    padding: "12px 16px",
+                    background: dv.bg1,
+                    border: `1px solid ${dv.border}`,
+                    borderRadius: 8,
+                    color: dv.white,
+                    fontSize: 14,
+                    outline: "none",
+                  }}
+                  min="0"
+                  step="0.01"
+                />
+              </div>
+
+              {formError && (
+                <div style={{ padding: "10px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, color: "#f87171", fontSize: 13 }}>
+                  {formError}
+                </div>
+              )}
+
+              <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
+                <button type="button" onClick={() => setModalOpen(false)} style={{ flex: 1, padding: "12px", background: "transparent", border: `1px solid ${dv.border}`, borderRadius: 8, color: dv.gray1, cursor: "pointer", fontSize: 14 }}>
+                  Cancel
+                </button>
+                <button type="submit" disabled={creating} style={{ flex: 2, padding: "12px", background: dv.blue, border: "none", borderRadius: 8, color: "#fff", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>
+                  {creating ? <><Loader2 size={16} style={{ animation: "spin 0.8s linear infinite" }} /> Creating…</> : <><Plus size={16} /> Create Project</>}
+                </button>
+              </div>
+            </form>
+          </Modal>
+        </section>
+      )}
+
+      {/* ═══ PUBLIC PROJECT REQUEST MODAL ═══════════════════════════════════ */}
+      <Modal isOpen={requestModalOpen} onClose={closeRequestModal} title="Start a Project">
+        {requestSuccess ? (
+          <div style={{ textAlign: "center", padding: "20px 0" }}>
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              style={{ marginBottom: 20 }}
+            >
+              <div style={{
+                width: 64, height: 64, borderRadius: "50%",
+                background: "rgba(52,211,153,0.15)", border: "2px solid #34d399",
+                display: "flex", alignItems: "center", justifyContent: "center",
+                margin: "0 auto 16px"
+              }}>
+                <Zap size={32} color="#34d399" />
+              </div>
+              <h3 style={{ fontSize: 18, fontWeight: 700, color: dv.white, marginBottom: 8 }}>
+                Request Sent!
+              </h3>
+              <p style={{ fontSize: 14, color: dv.gray2, lineHeight: 1.6 }}>
+                Yashvanth will review your project request and get back to you shortly.
+              </p>
+            </motion.div>
+            <button
+              onClick={closeRequestModal}
+              style={{
+                width: "100%", padding: "12px",
+                background: dv.blue, color: "#fff",
+                border: "none", borderRadius: 8,
+                cursor: "pointer", fontSize: 14, fontWeight: 600
+              }}
+            >
+              Close
+            </button>
+          </div>
+        ) : (
+          <form onSubmit={handleRequestSubmit} style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Your Name *
+              </label>
+              <input
+                value={requestForm.name}
+                onChange={e => setRequestForm(f => ({ ...f, name: e.target.value }))}
+                placeholder="John Doe"
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: dv.bg1,
+                  border: `1px solid ${dv.border}`,
+                  borderRadius: 8,
+                  color: dv.white,
+                  fontSize: 14,
+                  outline: "none",
+                }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Email Address *
+              </label>
+              <input
+                type="email"
+                value={requestForm.email}
+                onChange={e => setRequestForm(f => ({ ...f, email: e.target.value }))}
+                placeholder="john@example.com"
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: dv.bg1,
+                  border: `1px solid ${dv.border}`,
+                  borderRadius: 8,
+                  color: dv.white,
+                  fontSize: 14,
+                  outline: "none",
+                }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Project Title *
+              </label>
+              <input
+                value={requestForm.title}
+                onChange={e => setRequestForm(f => ({ ...f, title: e.target.value }))}
+                placeholder="e.g. Brand Campaign Edit"
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: dv.bg1,
+                  border: `1px solid ${dv.border}`,
+                  borderRadius: 8,
+                  color: dv.white,
+                  fontSize: 14,
+                  outline: "none",
+                }}
+                required
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Project Brief
+              </label>
+              <textarea
+                value={requestForm.description}
+                onChange={e => setRequestForm(f => ({ ...f, description: e.target.value }))}
+                placeholder="Describe your project, timeline, and vision…"
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: dv.bg1,
+                  border: `1px solid ${dv.border}`,
+                  borderRadius: 8,
+                  color: dv.white,
+                  fontSize: 14,
+                  outline: "none",
+                  minHeight: 100,
+                }}
+                rows={4}
+              />
+            </div>
+            <div>
+              <label style={{ display: "block", fontSize: 12, fontWeight: 600, color: dv.gray2, marginBottom: 6, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                Link to Raw Assets (Optional)
+              </label>
+              <input
+                type="url"
+                value={requestForm.assetLink}
+                onChange={e => setRequestForm(f => ({ ...f, assetLink: e.target.value }))}
+                placeholder="https://drive.google.com/..."
+                style={{
+                  width: "100%",
+                  padding: "12px 16px",
+                  background: dv.bg1,
+                  border: `1px solid ${dv.border}`,
+                  borderRadius: 8,
+                  color: dv.white,
+                  fontSize: 14,
+                  outline: "none",
+                }}
+              />
+            </div>
+
+            {requestError && (
+              <div style={{ padding: "10px 14px", background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.25)", borderRadius: 10, color: "#f87171", fontSize: 13 }}>
+                {requestError}
+              </div>
+            )}
+
+            <div style={{ display: "flex", gap: 10, paddingTop: 4 }}>
+              <button type="button" onClick={closeRequestModal} style={{ flex: 1, padding: "12px", background: "transparent", border: `1px solid ${dv.border}`, borderRadius: 8, color: dv.gray1, cursor: "pointer", fontSize: 14 }}>
+                Cancel
+              </button>
+              <button type="submit" disabled={requestSubmitting} style={{ flex: 2, padding: "12px", background: dv.amber, border: "none", borderRadius: 8, color: "#111", cursor: "pointer", fontSize: 14, fontWeight: 600 }}>
+                {requestSubmitting ? <><Loader2 size={16} style={{ animation: "spin 0.8s linear infinite" }} /> Sending…</> : <><Zap size={16} /> Submit Request</>}
+              </button>
+            </div>
+          </form>
+        )}
+      </Modal>
+
+      {/* ═══ PUBLIC SECTIONS ═══════════════════════════════════════════════════ */}
 
       {/* ═══ MAIN CONTENT ════════════════════════════════════════════════════ */}
       <div style={{ maxWidth: 1180, margin: "0 auto", padding: "0 24px 80px" }}>

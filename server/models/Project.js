@@ -4,12 +4,16 @@ const projectSchema = new mongoose.Schema(
     {
         title: { type: String, required: true, trim: true },
         description: { type: String, default: '' },
-        client: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
+        client: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: false },
         status: {
             type: String,
-            enum: ['awaiting_assets', 'in_progress', 'in_review', 'paid'],
-            default: 'awaiting_assets',
+            enum: ['pending', 'awaiting_assets', 'in_progress', 'in_review', 'paid', 'declined'],
+            default: 'pending',
         },
+        // For pending requests from non-authenticated users
+        requesterName: { type: String, default: '' },
+        requesterEmail: { type: String, default: '' },
+        assetLink: { type: String, default: '' },
         rawAssets: [
             {
                 url: { type: String, required: true },

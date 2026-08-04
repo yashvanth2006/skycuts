@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useAuth } from './context/AuthContext.jsx';
 import LoginPage from './pages/LoginPage.jsx';
-import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminProjectPage from './pages/admin/AdminProjectPage.jsx';
 import ClientDashboard from './pages/client/ClientDashboard.jsx';
 import ClientProjectPage from './pages/client/ClientProjectPage.jsx';
@@ -15,19 +14,11 @@ const ProtectedRoute = ({ children }) => {
   return user ? children : <Navigate to="/login" replace />;
 };
 
-const EditorRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  if (loading) return <FullPageLoader />;
-  if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'admin') return <Navigate to="/dashboard" replace />;
-  return children;
-};
-
 const ClientRoute = ({ children }) => {
   const { user, loading } = useAuth();
   if (loading) return <FullPageLoader />;
   if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'client') return <Navigate to="/editor" replace />;
+  if (user.role !== 'client') return <Navigate to="/profile" replace />;
   return children;
 };
 
@@ -52,7 +43,7 @@ const RootRedirect = () => {
   if (loading) return <FullPageLoader />;
   if (!user) return <Navigate to="/login" replace />;
   return user.role === 'admin'
-    ? <Navigate to="/editor" replace />
+    ? <Navigate to="/profile" replace />
     : <Navigate to="/dashboard" replace />;
 };
 
@@ -64,12 +55,11 @@ export default function App() {
         <Route path="/" element={<RootRedirect />} />
         <Route path="/login" element={<LoginPage />} />
 
-        {/* Public Route */}
+        {/* Public Route (now includes editor dashboard when logged in) */}
         <Route path="/profile" element={<EditorProfile />} />
 
-        {/* Editor Routes */}
-        <Route path="/editor" element={<EditorRoute><AdminDashboard /></EditorRoute>} />
-        <Route path="/editor/project/:id" element={<EditorRoute><AdminProjectPage /></EditorRoute>} />
+        {/* Editor Project Detail Route */}
+        <Route path="/profile/project/:id" element={<ProtectedRoute><AdminProjectPage /></ProtectedRoute>} />
 
         {/* Client Routes */}
         <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
