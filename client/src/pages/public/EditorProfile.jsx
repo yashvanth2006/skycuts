@@ -493,6 +493,19 @@ export default function EditorProfile() {
     setRequestForm({ name: '', email: '', title: '', description: '', assetLink: '' });
   };
 
+  // Handle accepting/declining pending requests
+  const handleRequestAction = async (projectId, action) => {
+    try {
+      const newStatus = action === 'accept' ? 'awaiting_assets' : 'declined';
+      await api.patch(`/projects/${projectId}/status`, { status: newStatus });
+      await fetchEditorData();
+    } catch (err) {
+      console.error('Failed to update project status:', err);
+    }
+  };
+
+  const pendingRequests = projects.filter(p => p.status === 'pending');
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -831,6 +844,101 @@ export default function EditorProfile() {
                 </motion.div>
               ))}
             </div>
+
+            {/* Incoming Requests Section */}
+            {pendingRequests.length > 0 && (
+              <div style={{ marginBottom: 36 }}>
+                <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 16 }}>
+                  <motion.div
+                    initial={{ opacity: 0, x: -10 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    style={{
+                      display: "inline-flex", alignItems: "center", gap: 8,
+                      padding: "6px 16px", borderRadius: 4,
+                      background: "rgba(245,166,35,0.12)",
+                      border: "1px solid rgba(245,166,35,0.3)",
+                    }}
+                  >
+                    <Zap size={12} color={dv.amber} />
+                    <span style={{ fontSize: 11, fontWeight: 600, color: dv.amber, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+                      New Leads
+                    </span>
+                  </motion.div>
+                  <p style={{ fontSize: 13, color: dv.gray2 }}>{pendingRequests.length} request{pendingRequests.length !== 1 ? 's' : ''} pending</p>
+                </div>
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 16 }}>
+                  {pendingRequests.map((request, i) => (
+                    <motion.div
+                      key={request._id}
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ delay: i * 0.05 }}
+                      style={{
+                        padding: "20px",
+                        background: dv.bg1,
+                        border: `1px solid ${dv.amber}40`,
+                        borderRadius: 12,
+                        boxShadow: "0 0 20px rgba(245,166,35,0.1)",
+                      }}
+                    >
+                      <div style={{ marginBottom: 12 }}>
+                        <h4 style={{ fontSize: 15, fontWeight: 600, color: dv.white, marginBottom: 4 }}>{request.title}</h4>
+                        <p style={{ fontSize: 13, color: dv.gray2, marginBottom: 8 }}>{request.description || 'No description provided'}</p>
+                        <div style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 12, color: dv.gray1 }}>
+                          <span style={{ fontWeight: 500 }}>{request.requesterName}</span>
+                          <span style={{ opacity: 0.5 }}>•</span>
+                          <span>{request.requesterEmail}</span>
+                        </div>
+                        {request.assetLink && (
+                          <a
+                            href={request.assetLink}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            style={{
+                              display: "inline-flex", alignItems: "center", gap: 4,
+                              fontSize: 12, color: dv.blue, marginTop: 8,
+                              textDecoration: "none",
+                            }}
+                          >
+                            <Download size={12} /> View Assets
+                          </a>
+                        )}
+                      </div>
+                      <div style={{ display: "flex", gap: 8 }}>
+                        <button
+                          onClick={() => handleRequestAction(request._id, 'accept')}
+                          style={{
+                            flex: 1, padding: "10px", borderRadius: 6,
+                            background: dv.blue, color: "#fff",
+                            border: "none", cursor: "pointer",
+                            fontSize: 13, fontWeight: 600,
+                            transition: "all 0.2s ease",
+                          }}
+                          onMouseEnter={e => e.currentTarget.style.background = dv.blueL}
+                          onMouseLeave={e => e.currentTarget.style.background = dv.blue}
+                        >
+                          Accept
+                        </button>
+                        <button
+                          onClick={() => handleRequestAction(request._id, 'decline')}
+                          style={{
+                            flex: 1, padding: "10px", borderRadius: 6,
+                            background: "transparent", color: dv.gray1,
+                            border: `1px solid ${dv.border}`, cursor: "pointer",
+                            fontSize: 13, fontWeight: 500,
+                            transition: "all 0.2s ease",
+                          }}
+                          onMouseEnter={e => { e.currentTarget.style.borderColor = "#ef4444"; e.currentTarget.style.color = "#ef4444"; }}
+                          onMouseLeave={e => { e.currentTarget.style.borderColor = dv.border; e.currentTarget.style.color = dv.gray1; }}
+                        >
+                          Decline
+                        </button>
+                      </div>
+                    </motion.div>
+                  ))}
+                </div>
+              </div>
+            )}
 
             {/* Search + Projects */}
             <div style={{ marginBottom: 20, display: "flex", alignItems: "center", gap: 12 }}>

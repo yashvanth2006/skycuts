@@ -1,10 +1,12 @@
 import { motion } from 'framer-motion';
 
 const statusConfig = {
-  awaiting_assets: { label: 'Awaiting Assets', cls: 'badge-awaiting', dot: '#fbbf24' },
-  in_progress:     { label: 'In Progress',      cls: 'badge-progress', dot: '#818cf8' },
-  in_review:       { label: 'In Review',         cls: 'badge-review',   dot: '#c084fc' },
-  paid:            { label: 'Paid ✓',            cls: 'badge-paid',     dot: '#34d399' },
+  pending:          { label: 'Pending Review',  cls: 'badge-pending',   dot: '#f59e0b' },
+  awaiting_assets:  { label: 'Awaiting Assets', cls: 'badge-awaiting', dot: '#fbbf24' },
+  in_progress:      { label: 'In Progress',      cls: 'badge-progress', dot: '#818cf8' },
+  in_review:        { label: 'In Review',        cls: 'badge-review',   dot: '#c084fc' },
+  paid:             { label: 'Paid ✓',           cls: 'badge-paid',     dot: '#34d399' },
+  declined:         { label: 'Declined',         cls: 'badge-declined', dot: '#ef4444' },
 };
 
 export default function StatusBadge({ status }) {

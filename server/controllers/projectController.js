@@ -75,7 +75,7 @@ export const submitRawAssets = async (req, res) => {
 // @route  PATCH /api/projects/:id/status
 export const updateProjectStatus = async (req, res) => {
     const { status } = req.body;
-    const validStatuses = ['awaiting_assets', 'in_progress', 'in_review', 'paid'];
+    const validStatuses = ['pending', 'awaiting_assets', 'in_progress', 'in_review', 'paid', 'declined'];
 
     if (!validStatuses.includes(status)) {
         return res.status(400).json({ message: 'Invalid status value' });
@@ -89,6 +89,37 @@ export const updateProjectStatus = async (req, res) => {
 
     if (!project) return res.status(404).json({ message: 'Project not found' });
     res.json(project);
+};
+
+// @desc   Create a public project request (no auth required)
+// @route  POST /api/projects/request
+export const createProjectRequest = async (req, res) => {
+    const { name, email, title, description, assetLink } = req.body;
+
+    if (!name || !email || !title) {
+        return res.status(400).json({ message: 'Name, email, and project title are required' });
+    }
+
+    // Check if a user with this email already exists (potential client)
+    let existingUser = await User.findOne({ email });
+    
+    const project = await Project.create({
+        title,
+        description: description || '',
+        client: existingUser?._id || null,
+        status: 'pending',
+        requesterName: name,
+        requesterEmail: email,
+        assetLink: assetLink || '',
+        price: 0,
+    });
+
+    // If we populated client, include it in response
+    if (existingUser) {
+        await project.populate('client', 'name email');
+    }
+
+    res.status(201).json(project);
 };
 
 // @desc   Get all client users (Admin only, for project creation dropdown)
