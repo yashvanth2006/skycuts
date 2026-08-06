@@ -64,3 +64,52 @@ export const sendWelcomeEmail = async (email, name, tempPassword) => {
     return false;
   }
 };
+
+// Send password reset email
+export const sendPasswordResetEmail = async (email, name, resetUrl) => {
+  try {
+    const transporter = createTransporter();
+    
+    const mailOptions = {
+      from: `"SkyCuts Studio" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+      to: email,
+      subject: 'Reset Your Password — SkyCuts Studio',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #6366f1, #c084fc); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0;">Reset Your Password</h1>
+          </div>
+          <div style="background: #1a1a2e; padding: 30px; border-radius: 0 0 10px 10px; color: #e0e0e0;">
+            <p style="font-size: 16px; line-height: 1.6;">
+              Hi ${name},
+            </p>
+            <p style="font-size: 16px; line-height: 1.6;">
+              We received a request to reset your password for your SkyCuts Studio account.
+            </p>
+            <p style="font-size: 16px; line-height: 1.6;">
+              Click the button below to set a new password. This link will expire in 1 hour.
+            </p>
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${resetUrl}" 
+                 style="background: linear-gradient(135deg, #6366f1, #c084fc); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                Reset Password
+              </a>
+            </div>
+            <p style="font-size: 14px; color: #888; margin-top: 30px;">
+              If you didn't request this password reset, you can safely ignore this email.
+            </p>
+            <p style="font-size: 14px; color: #888;">
+              If you have any questions, feel free to reach out to yashvanth@skycuts.io
+            </p>
+          </div>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error('Email sending failed:', error);
+    return false;
+  }
+};
