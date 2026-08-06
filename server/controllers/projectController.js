@@ -141,9 +141,7 @@ export const updateProjectStatus = async (req, res) => {
                 `Project Status Updated: ${status.replace('_', ' ')}`,
                 statusMessages[status],
                 project._id,
-                project.client.role === 'client' 
-                    ? `${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard/project/${project._id}`
-                    : `${process.env.CLIENT_URL || 'http://localhost:5173'}/profile/project/${project._id}`
+                `${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard/project/${project._id}`
             );
         }
     }

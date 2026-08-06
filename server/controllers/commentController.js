@@ -1,5 +1,6 @@
 import Comment from '../models/Comment.js';
 import Project from '../models/Project.js';
+import User from '../models/User.js';
 import { createNotification } from './notificationController.js';
 
 // @desc   Get all comments for a project
@@ -43,8 +44,17 @@ export const addComment = async (req, res) => {
 
     const populated = await comment.populate('author', 'name role');
 
-    // Send notification to the other party (client if admin commented, admin if client commented)
-    const recipientId = req.user.role === 'admin' ? project.client : (await Project.findById(projectId).populate('client')).client;
+    // Send notification to the other party
+    let recipientId = null;
+    if (req.user.role === 'admin' && project.client) {
+        // Admin commented - notify client
+        recipientId = project.client;
+    } else if (req.user.role === 'client') {
+        // Client commented - notify admin (Yashvanth)
+        const admin = await User.findOne({ role: 'admin' });
+        if (admin) recipientId = admin._id;
+    }
+
     if (recipientId && recipientId.toString() !== req.user._id.toString()) {
         await createNotification(
             recipientId,

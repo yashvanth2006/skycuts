@@ -64,7 +64,6 @@ export default function AdminDashboard() {
 
   const handleCreate = async (e) => {
     e.preventDefault();
-    setTouched({ title: true, clientId: true, price: true });
     
     if (!form.title.trim()) {
       setFormError('Project title is required.');
@@ -90,7 +89,6 @@ export default function AdminDashboard() {
       });
       setModalOpen(false);
       setForm({ title: '', description: '', clientId: '', price: '' });
-      setTouched({ title: false, clientId: false, price: false });
       await fetchAll();
     } catch (err) {
       setFormError(err.response?.data?.message || 'Failed to create project.');
@@ -195,7 +193,7 @@ export default function AdminDashboard() {
         ) : (
           <div className="grid-auto">
             {filtered.map((p, i) => (
-              <ProjectCard key={p._id} project={p} index={i} basePath="/editor" />
+              <ProjectCard key={p._id} project={p} index={i} basePath="/profile" />
             ))}
           </div>
         )}

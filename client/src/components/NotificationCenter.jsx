@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Bell, X, Check, ExternalLink, Loader2 } from 'lucide-react';
+import { Bell, ExternalLink, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../api/axiosInstance.js';
 
