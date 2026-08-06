@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Zap, LogOut, ChevronLeft } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
+import NotificationCenter from './NotificationCenter.jsx';
 
 export default function Navbar({ showBack = false }) {
   const { user, logout } = useAuth();
@@ -67,13 +68,16 @@ export default function Navbar({ showBack = false }) {
         </button>
       </div>
 
-      {/* Right — Theme Toggle + User + Logout */}
+      {/* Right — Theme Toggle + Notifications + User + Logout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
         {/* Theme Toggle — always visible */}
         <ThemeToggle />
 
         {user && (
           <>
+            {/* Notifications */}
+            <NotificationCenter />
+
             {/* Separator */}
             <div style={{ width: 1, height: 28, background: 'var(--border-subtle)' }} />
 

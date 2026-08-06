@@ -113,3 +113,48 @@ export const sendPasswordResetEmail = async (email, name, resetUrl) => {
     return false;
   }
 };
+
+// Send general notification email
+export const sendNotificationEmail = async (email, name, title, message, link = null) => {
+  try {
+    const transporter = createTransporter();
+    
+    const mailOptions = {
+      from: `"SkyCuts Studio" <${process.env.EMAIL_FROM || process.env.EMAIL_USER}>`,
+      to: email,
+      subject: title,
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+          <div style="background: linear-gradient(135deg, #6366f1, #c084fc); padding: 30px; border-radius: 10px 10px 0 0; text-align: center;">
+            <h1 style="color: white; margin: 0;">SkyCuts Studio</h1>
+          </div>
+          <div style="background: #1a1a2e; padding: 30px; border-radius: 0 0 10px 10px; color: #e0e0e0;">
+            <p style="font-size: 16px; line-height: 1.6;">
+              Hi ${name},
+            </p>
+            <p style="font-size: 16px; line-height: 1.6;">
+              ${message}
+            </p>
+            ${link ? `
+            <div style="text-align: center; margin: 30px 0;">
+              <a href="${link}" 
+                 style="background: linear-gradient(135deg, #6366f1, #c084fc); color: white; padding: 15px 30px; text-decoration: none; border-radius: 8px; font-weight: bold; display: inline-block;">
+                View Details
+              </a>
+            </div>
+            ` : ''}
+            <p style="font-size: 14px; color: #888; margin-top: 30px;">
+              If you have any questions, feel free to reach out to yashvanth@skycuts.io
+            </p>
+          </div>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+    return true;
+  } catch (error) {
+    console.error('Email sending failed:', error);
+    return false;
+  }
+};

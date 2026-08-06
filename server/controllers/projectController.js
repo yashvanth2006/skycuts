@@ -2,7 +2,8 @@ import Project from '../models/Project.js';
 import User from '../models/User.js';
 import bcrypt from 'bcryptjs';
 import crypto from 'crypto';
-import { sendWelcomeEmail } from '../utils/emailHelper.js';
+import { sendWelcomeEmail, sendNotificationEmail } from '../utils/emailHelper.js';
+import { createNotification } from './notificationController.js';
 
 // @desc   Create a new project (Admin only)
 // @route  POST /api/projects
@@ -123,6 +124,30 @@ export const updateProjectStatus = async (req, res) => {
     await project.save();
     
     await project.populate('client', 'name email');
+    
+    // Send notification to client when status changes
+    if (project.client) {
+        const statusMessages = {
+            awaiting_assets: 'Your project is now awaiting raw assets.',
+            in_progress: 'Your project is now in progress.',
+            in_review: 'Your deliverable is ready for review!',
+            paid: 'Payment received. Thank you!',
+        };
+        
+        if (statusMessages[status]) {
+            await createNotification(
+                project.client._id,
+                'project_status',
+                `Project Status Updated: ${status.replace('_', ' ')}`,
+                statusMessages[status],
+                project._id,
+                project.client.role === 'client' 
+                    ? `${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard/project/${project._id}`
+                    : `${process.env.CLIENT_URL || 'http://localhost:5173'}/profile/project/${project._id}`
+            );
+        }
+    }
+    
     res.json(project);
 };
 

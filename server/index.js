@@ -14,7 +14,9 @@ import messageRoutes from './routes/messageRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import deliverableRoutes from './routes/deliverableRoutes.js';
 import stripeRoutes from './routes/stripeRoutes.js';
+import notificationRoutes from './routes/notificationRoutes.js';
 import Message from './models/Message.js';
+import Notification from './models/Notification.js';
 
 dotenv.config();
 
@@ -58,6 +60,7 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/deliverables', deliverableRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/notifications', notificationRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'active', app: 'SkyCuts API', timestamp: new Date().toISOString() });

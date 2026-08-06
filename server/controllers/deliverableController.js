@@ -5,6 +5,7 @@ import VideoDeliverable from '../models/VideoDeliverable.js';
 import Project from '../models/Project.js';
 import { transcodeToHLS } from '../utils/ffmpegHelper.js';
 import { uploadFileToS3, getHlsPublicUrl, generatePresignedUrl } from '../utils/s3Helper.js';
+import { createNotification } from './notificationController.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -71,7 +72,19 @@ export const uploadDeliverable = async (req, res) => {
         project.status = 'in_review';
         await project.save();
 
-        // 7. Cleanup local temp files
+        // 7. Send notification to client about new deliverable
+        if (project.client) {
+            await createNotification(
+                project.client._id,
+                'new_deliverable',
+                'New Deliverable Available',
+                `Your video deliverable for "${project.title}" is ready for review.`,
+                project._id,
+                `${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard/project/${project._id}`
+            );
+        }
+
+        // 8. Cleanup local temp files
         fs.unlinkSync(inputPath);
         fs.rmSync(hlsOutputDir, { recursive: true, force: true });
 
