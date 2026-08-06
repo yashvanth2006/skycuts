@@ -39,7 +39,7 @@ export default function LoginPage() {
       const { data } = await api.post('/auth/login', { email: form.email, password: form.password });
       const { token, ...userData } = data;
       login(userData, token);
-      navigate(userData.role === 'admin' ? '/editor' : '/dashboard', { replace: true });
+      navigate(userData.role === 'admin' ? '/profile' : '/dashboard', { replace: true });
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong. Try again.');
     } finally {
