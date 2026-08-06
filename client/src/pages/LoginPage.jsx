@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, Zap, LogIn, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Eye, EyeOff, Zap, LogIn, Loader2, ArrowLeft } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import AmbientBackground from '../components/three/AmbientBackground.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import api from '../api/axiosInstance.js';
@@ -19,12 +19,17 @@ const fadeUp = {
 export default function LoginPage() {
   const { login } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
 
   const [showPw, setShowPw]   = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
+  const [mode, setMode]       = useState('login'); // 'login' or 'forgot'
 
   const [form, setForm] = useState({ email: '', password: '' });
+  const [resetForm, setResetForm] = useState({ email: '', password: '' });
+  const [resetLoading, setResetLoading] = useState(false);
+  const [resetSuccess, setResetSuccess] = useState(false);
 
   const handleChange = (e) => {
     setForm(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -44,6 +49,20 @@ export default function LoginPage() {
       setError(err.response?.data?.message || 'Something went wrong. Try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleForgotPassword = async (e) => {
+    e.preventDefault();
+    setResetLoading(true);
+    setError('');
+    try {
+      await api.post('/auth/forgot-password', { email: resetForm.email });
+      setResetSuccess(true);
+    } catch (err) {
+      setError(err.response?.data?.message || 'Something went wrong. Try again.');
+    } finally {
+      setResetLoading(false);
     }
   };
 
@@ -85,89 +104,200 @@ export default function LoginPage() {
           </MotionDiv>
 
           {/* Form */}
-          <form onSubmit={handleSubmit}>
-            <MotionDiv custom={1} variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: 16 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                Email
-              </label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                value={form.email}
-                onChange={handleChange}
-                placeholder="you@example.com"
-                required
-                className="input-field"
-                autoComplete="email"
-              />
-            </MotionDiv>
+          <AnimatePresence mode="wait">
+            {mode === 'login' ? (
+              <motion.form
+                key="login"
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 20 }}
+                transition={{ duration: 0.3 }}
+                onSubmit={handleSubmit}
+              >
+                <MotionDiv custom={1} variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    Email
+                  </label>
+                  <input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={form.email}
+                    onChange={handleChange}
+                    placeholder="you@example.com"
+                    required
+                    className="input-field"
+                    autoComplete="email"
+                  />
+                </MotionDiv>
 
-            <MotionDiv custom={2} variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: 28 }}>
-              <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
-                Password
-              </label>
-              <div style={{ position: 'relative' }}>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPw ? 'text' : 'password'}
-                  value={form.password}
-                  onChange={handleChange}
-                  placeholder="••••••••"
-                  required
-                  className="input-field"
-                  style={{ paddingRight: 48 }}
-                  autoComplete="current-password"
-                />
+                <MotionDiv custom={2} variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: 28 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    Password
+                  </label>
+                  <div style={{ position: 'relative' }}>
+                    <input
+                      id="password"
+                      name="password"
+                      type={showPw ? 'text' : 'password'}
+                      value={form.password}
+                      onChange={handleChange}
+                      placeholder="••••••••"
+                      required
+                      className="input-field"
+                      style={{ paddingRight: 48 }}
+                      autoComplete="current-password"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPw(p => !p)}
+                      style={{
+                        position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
+                        background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
+                        display: 'flex', padding: 0
+                      }}
+                      aria-label="Toggle password visibility"
+                    >
+                      {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                    </button>
+                  </div>
+                </MotionDiv>
+
+                {/* Error */}
+                <AnimatePresence>
+                  {error && (
+                    <MotionDiv
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      style={{
+                        marginBottom: 20, padding: '12px 16px',
+                        background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
+                        borderRadius: 10, color: '#f87171', fontSize: 13
+                      }}
+                    >
+                      {error}
+                    </MotionDiv>
+                  )}
+                </AnimatePresence>
+
+                <MotionDiv custom={3} variants={fadeUp} initial="hidden" animate="visible">
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    className="btn-primary"
+                    style={{ width: '100%', padding: '14px 0', fontSize: 15 }}
+                  >
+                    {loading ? (
+                      <><Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> Processing…</>
+                    ) : (
+                      <><LogIn size={18} /> Sign In to Studio</>
+                    )}
+                  </button>
+                </MotionDiv>
+
+                <div style={{ textAlign: 'center', marginTop: 16 }}>
+                  <button
+                    type="button"
+                    onClick={() => { setMode('forgot'); setError(''); }}
+                    style={{
+                      background: 'none', border: 'none', cursor: 'pointer',
+                      color: 'var(--text-muted)', fontSize: 13, textDecoration: 'underline'
+                    }}
+                  >
+                    Forgot your password?
+                  </button>
+                </div>
+              </motion.form>
+            ) : (
+              <motion.form
+                key="forgot"
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: -20 }}
+                transition={{ duration: 0.3 }}
+                onSubmit={handleForgotPassword}
+              >
                 <button
                   type="button"
-                  onClick={() => setShowPw(p => !p)}
+                  onClick={() => { setMode('login'); setError(''); setResetSuccess(false); }}
                   style={{
-                    position: 'absolute', right: 14, top: '50%', transform: 'translateY(-50%)',
-                    background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)',
-                    display: 'flex', padding: 0
+                    display: 'flex', alignItems: 'center', gap: 8,
+                    background: 'none', border: 'none', cursor: 'pointer',
+                    color: 'var(--text-muted)', fontSize: 13, marginBottom: 20
                   }}
-                  aria-label="Toggle password visibility"
                 >
-                  {showPw ? <EyeOff size={18} /> : <Eye size={18} />}
+                  <ArrowLeft size={14} /> Back to login
                 </button>
-              </div>
-            </MotionDiv>
 
-            {/* Error */}
-            <AnimatePresence>
-              {error && (
-                <MotionDiv
-                  initial={{ opacity: 0, y: -8 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -8 }}
-                  style={{
-                    marginBottom: 20, padding: '12px 16px',
-                    background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
-                    borderRadius: 10, color: '#f87171', fontSize: 13
-                  }}
-                >
-                  {error}
+                <MotionDiv custom={1} variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: 16 }}>
+                  <label style={{ display: 'block', fontSize: 12, fontWeight: 600, color: 'var(--text-secondary)', marginBottom: 6, letterSpacing: '0.06em', textTransform: 'uppercase' }}>
+                    Email
+                  </label>
+                  <input
+                    name="email"
+                    type="email"
+                    value={resetForm.email}
+                    onChange={e => setResetForm(p => ({ ...p, email: e.target.value }))}
+                    placeholder="you@example.com"
+                    required
+                    className="input-field"
+                    autoComplete="email"
+                  />
                 </MotionDiv>
-              )}
-            </AnimatePresence>
 
-            <MotionDiv custom={3} variants={fadeUp} initial="hidden" animate="visible">
-              <button
-                type="submit"
-                disabled={loading}
-                className="btn-primary"
-                style={{ width: '100%', padding: '14px 0', fontSize: 15 }}
-              >
-                {loading ? (
-                  <><Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> Processing…</>
-                ) : (
-                  <><LogIn size={18} /> Sign In to Studio</>
+                {/* Success Message */}
+                {resetSuccess && (
+                  <MotionDiv
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    style={{
+                      marginBottom: 20, padding: '12px 16px',
+                      background: 'rgba(52,211,153,0.1)', border: '1px solid rgba(52,211,153,0.25)',
+                      borderRadius: 10, color: '#34d399', fontSize: 13
+                    }}
+                  >
+                    Password reset email sent! Check your inbox.
+                  </MotionDiv>
                 )}
-              </button>
-            </MotionDiv>
-          </form>
+
+                {/* Error */}
+                <AnimatePresence>
+                  {error && (
+                    <MotionDiv
+                      initial={{ opacity: 0, y: -8 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -8 }}
+                      style={{
+                        marginBottom: 20, padding: '12px 16px',
+                        background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.25)',
+                        borderRadius: 10, color: '#f87171', fontSize: 13
+                      }}
+                    >
+                      {error}
+                    </MotionDiv>
+                  )}
+                </AnimatePresence>
+
+                <MotionDiv custom={2} variants={fadeUp} initial="hidden" animate="visible">
+                  <button
+                    type="submit"
+                    disabled={resetLoading || resetSuccess}
+                    className="btn-primary"
+                    style={{ width: '100%', padding: '14px 0', fontSize: 15 }}
+                  >
+                    {resetLoading ? (
+                      <><Loader2 size={18} style={{ animation: 'spin 0.8s linear infinite' }} /> Sending…</>
+                    ) : resetSuccess ? (
+                      'Email Sent'
+                    ) : (
+                      'Send Reset Link'
+                    )}
+                  </button>
+                </MotionDiv>
+              </motion.form>
+            )}
+          </AnimatePresence>
         </div>
       </MotionDiv>
 

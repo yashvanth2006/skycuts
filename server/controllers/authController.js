@@ -1,5 +1,7 @@
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
+import crypto from 'crypto';
+import { sendPasswordResetEmail } from '../utils/emailHelper.js';
 
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
@@ -56,4 +58,48 @@ export const seedEditor = async (req, res) => {
     });
 
     res.status(201).json({ message: 'Editor user successfully created!', editor });
+};
+
+export const forgotPassword = async (req, res) => {
+    const { email } = req.body;
+    const user = await User.findOne({ email });
+
+    if (!user) {
+        return res.status(404).json({ message: 'No user found with that email' });
+    }
+
+    // Generate reset token
+    const resetToken = crypto.randomBytes(32).toString('hex');
+    const resetTokenExpiry = Date.now() + 3600000; // 1 hour
+
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpiry = resetTokenExpiry;
+    await user.save();
+
+    // Send reset email
+    const resetUrl = `${process.env.CLIENT_URL || 'http://localhost:5173'}/reset-password/${resetToken}`;
+    await sendPasswordResetEmail(user.email, user.name, resetUrl);
+
+    res.json({ message: 'Password reset email sent' });
+};
+
+export const resetPassword = async (req, res) => {
+    const { token } = req.params;
+    const { password } = req.body;
+
+    const user = await User.findOne({
+        resetPasswordToken: token,
+        resetPasswordExpiry: { $gt: Date.now() }
+    });
+
+    if (!user) {
+        return res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+
+    user.password = password;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpiry = undefined;
+    await user.save();
+
+    res.json({ message: 'Password reset successful' });
 };
