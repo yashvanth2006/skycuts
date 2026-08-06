@@ -1,5 +1,6 @@
 import Comment from '../models/Comment.js';
 import Project from '../models/Project.js';
+import { createNotification } from './notificationController.js';
 
 // @desc   Get all comments for a project
 // @route  GET /api/comments/:projectId
@@ -41,6 +42,22 @@ export const addComment = async (req, res) => {
     });
 
     const populated = await comment.populate('author', 'name role');
+
+    // Send notification to the other party (client if admin commented, admin if client commented)
+    const recipientId = req.user.role === 'admin' ? project.client : (await Project.findById(projectId).populate('client')).client;
+    if (recipientId && recipientId.toString() !== req.user._id.toString()) {
+        await createNotification(
+            recipientId,
+            'new_comment',
+            'New Comment Added',
+            `${req.user.name} added a comment on "${project.title}"`,
+            projectId,
+            req.user.role === 'admin' 
+                ? `${process.env.CLIENT_URL || 'http://localhost:5173'}/dashboard/project/${projectId}`
+                : `${process.env.CLIENT_URL || 'http://localhost:5173'}/profile/project/${projectId}`
+        );
+    }
+
     res.status(201).json(populated);
 };
 
