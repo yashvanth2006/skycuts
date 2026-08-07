@@ -11,6 +11,7 @@ const userSchema = new mongoose.Schema(
             enum: ['admin', 'client'],
             default: 'client',
         },
+        onboardingCompleted: { type: Boolean, default: false },
         resetPasswordToken: { type: String },
         resetPasswordExpiry: { type: Date },
     },
