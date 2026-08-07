@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Film, Loader2, Zap, AlertCircle } from 'lucide-react';
+import { Film, Loader2, Zap, AlertCircle, BookOpen } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
 import ProjectCard from '../../components/ProjectCard.jsx';
 import SkeletonCard from '../../components/SkeletonCard.jsx';
+import OnboardingTour from '../../components/OnboardingTour.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import api from '../../api/axiosInstance.js';
 
@@ -12,6 +13,8 @@ export default function ClientDashboard() {
   const [projects, setProjects] = useState([]);
   const [loading,  setLoading]  = useState(true);
   const [error,    setError]    = useState(null);
+  const [showTour, setShowTour] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -26,7 +29,23 @@ export default function ClientDashboard() {
       finally { setLoading(false); }
     };
     fetch();
-  }, []);
+
+    // Show onboarding tour for new clients
+    if (user && !user.onboardingCompleted) {
+      setShowTour(true);
+    }
+  }, [user]);
+
+  const handleCompleteOnboarding = async () => {
+    setShowTour(false);
+    try {
+      await api.post('/auth/complete-onboarding');
+      // Update user in auth context
+      // This would require updating the auth context to handle onboardingCompleted
+    } catch (err) {
+      console.error('Failed to complete onboarding:', err);
+    }
+  };
 
   return (
     <div className="page-container">
@@ -62,8 +81,27 @@ export default function ClientDashboard() {
               {user?.name?.split(' ')[0]}
             </span>
           </h1>
-          <p style={{ fontSize: 16, color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto' }}>
+          <p style={{ fontSize: 16, color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
             Review your video deliverables, leave time-stamped feedback, and download your final files.
+            {!showTour && (
+              <button
+                onClick={() => setShowTour(true)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  cursor: 'pointer',
+                  color: 'var(--accent-blue)',
+                  fontSize: 14,
+                  fontWeight: 500,
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: 4,
+                  textDecoration: 'underline',
+                }}
+              >
+                <BookOpen size={14} /> View Tutorial
+              </button>
+            )}
           </p>
         </motion.div>
 
@@ -110,6 +148,8 @@ export default function ClientDashboard() {
           </div>
         )}
       </main>
+
+      <OnboardingTour isOpen={showTour} onComplete={handleCompleteOnboarding} />
 
       <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
     </div>

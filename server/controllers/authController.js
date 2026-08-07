@@ -103,3 +103,15 @@ export const resetPassword = async (req, res) => {
 
     res.json({ message: 'Password reset successful' });
 };
+
+export const completeOnboarding = async (req, res) => {
+    const user = await User.findById(req.user._id);
+    if (!user) {
+        return res.status(404).json({ message: 'User not found' });
+    }
+
+    user.onboardingCompleted = true;
+    await user.save();
+
+    res.json({ message: 'Onboarding completed successfully' });
+};
