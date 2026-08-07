@@ -1,7 +1,8 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
-import { ArrowRight, Film, DollarSign, Clock } from 'lucide-react';
+import { ArrowRight, Film, DollarSign, Clock, Archive, RotateCcw } from 'lucide-react';
 import StatusBadge from './StatusBadge.jsx';
+import api from '../api/axiosInstance.js';
 
 const cardVariants = {
   hidden: { opacity: 0, y: 20 },
@@ -11,7 +12,7 @@ const cardVariants = {
   }),
 };
 
-export default function ProjectCard({ project, index = 0, basePath = '/dashboard' }) {
+export default function ProjectCard({ project, index = 0, basePath = '/dashboard', onArchive, onRestore }) {
   const navigate = useNavigate();
 
   const timeAgo = (dateStr) => {
@@ -20,6 +21,26 @@ export default function ProjectCard({ project, index = 0, basePath = '/dashboard
     if (days === 0) return 'Today';
     if (days === 1) return 'Yesterday';
     return `${days}d ago`;
+  };
+
+  const handleArchive = async (e) => {
+    e.stopPropagation();
+    try {
+      await api.patch(`/projects/${project._id}/archive`);
+      if (onArchive) onArchive(project._id);
+    } catch (err) {
+      console.error('Failed to archive project:', err);
+    }
+  };
+
+  const handleRestore = async (e) => {
+    e.stopPropagation();
+    try {
+      await api.patch(`/projects/${project._id}/restore`);
+      if (onRestore) onRestore(project._id);
+    } catch (err) {
+      console.error('Failed to restore project:', err);
+    }
   };
 
   return (
@@ -44,7 +65,26 @@ export default function ProjectCard({ project, index = 0, basePath = '/dashboard
         }}>
           <Film size={20} color="var(--accent-indigo)" />
         </div>
-        <StatusBadge status={project.status} />
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          <StatusBadge status={project.status} />
+          {(onArchive || onRestore) && (
+            <button
+              onClick={project.isArchived ? handleRestore : handleArchive}
+              style={{
+                padding: 6,
+                borderRadius: 6,
+                background: 'var(--bg-glass)',
+                border: '1px solid var(--border-subtle)',
+                cursor: 'pointer',
+                color: project.isArchived ? 'var(--accent-green)' : 'var(--text-muted)',
+                transition: 'all 0.2s',
+              }}
+              title={project.isArchived ? 'Restore project' : 'Archive project'}
+            >
+              {project.isArchived ? <RotateCcw size={14} /> : <Archive size={14} />}
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Title */}

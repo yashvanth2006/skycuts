@@ -23,6 +23,8 @@ const projectSchema = new mongoose.Schema(
         ],
         price: { type: Number, required: true, default: 0 },
         stripeSessionId: { type: String, default: null },
+        isArchived: { type: Boolean, default: false },
+        archivedAt: { type: Date },
     },
     { timestamps: true }
 );

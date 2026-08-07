@@ -2,6 +2,7 @@ import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
 import crypto from 'crypto';
 import { sendPasswordResetEmail } from '../utils/emailHelper.js';
+import { parseCSV, validateClientData } from '../utils/csvParser.js';
 
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
@@ -114,4 +115,48 @@ export const completeOnboarding = async (req, res) => {
     await user.save();
 
     res.json({ message: 'Onboarding completed successfully' });
+};
+
+export const bulkCreateClients = async (req, res) => {
+    const { csvData } = req.body;
+
+    if (!csvData) {
+        return res.status(400).json({ message: 'CSV data is required' });
+    }
+
+    try {
+        const parsedData = parseCSV(csvData);
+        const { valid, invalid, errors } = validateClientData(parsedData);
+
+        if (invalid.length > 0) {
+            return res.status(400).json({
+                message: 'Some rows have validation errors',
+                errors,
+                invalid,
+                validCount: valid.length,
+                invalidCount: invalid.length,
+            });
+        }
+
+        // Check for existing emails
+        const emails = valid.map(c => c.email);
+        const existingUsers = await User.find({ email: { $in: emails } });
+        const existingEmails = new Set(existingUsers.map(u => u.email));
+
+        const toCreate = valid.filter(c => !existingEmails.has(c.email));
+        const skipped = valid.filter(c => existingEmails.has(c.email));
+
+        // Create clients
+        const created = await User.create(toCreate);
+
+        res.json({
+            message: `Created ${created.length} clients successfully`,
+            created: created.length,
+            skipped: skipped.length,
+            skippedEmails: skipped.map(c => c.email),
+        });
+    } catch (error) {
+        console.error('Bulk client creation error:', error);
+        res.status(400).json({ message: error.message });
+    }
 };

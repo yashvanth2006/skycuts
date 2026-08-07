@@ -1492,7 +1492,7 @@ export default function EditorProfile() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[
-                { icon: <Mail size={14} />, label: "marcus@skycuts.studio" },
+                { icon: <Mail size={14} />, label: "yashvanth2006k@gmail.com" },
                 
               ].map((c, i) => (
                 <div key={i} style={{
