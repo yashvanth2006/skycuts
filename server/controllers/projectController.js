@@ -276,3 +276,50 @@ export const getProjectAnalytics = async (req, res) => {
         totalRevenue: totalRevenue[0]?.total || 0,
     });
 };
+
+// @desc   Bulk update project status
+// @route  PATCH /api/projects/bulk/status
+export const bulkUpdateStatus = async (req, res) => {
+    const { projectIds, status } = req.body;
+    const validStatuses = ['pending', 'awaiting_assets', 'in_progress', 'in_review', 'paid', 'declined'];
+
+    if (!validStatuses.includes(status)) {
+        return res.status(400).json({ message: 'Invalid status value' });
+    }
+
+    if (!Array.isArray(projectIds) || projectIds.length === 0) {
+        return res.status(400).json({ message: 'Project IDs array is required' });
+    }
+
+    const result = await Project.updateMany(
+        { _id: { $in: projectIds } },
+        { status }
+    );
+
+    const updatedProjects = await Project.find({ _id: { $in: projectIds } })
+        .populate('client', 'name email');
+
+    res.json({
+        message: `Updated ${result.modifiedCount} projects`,
+        projects: updatedProjects,
+    });
+};
+
+// @desc   Bulk archive projects
+// @route  PATCH /api/projects/bulk/archive
+export const bulkArchiveProjects = async (req, res) => {
+    const { projectIds } = req.body;
+
+    if (!Array.isArray(projectIds) || projectIds.length === 0) {
+        return res.status(400).json({ message: 'Project IDs array is required' });
+    }
+
+    const result = await Project.updateMany(
+        { _id: { $in: projectIds } },
+        { isArchived: true, archivedAt: new Date() }
+    );
+
+    res.json({
+        message: `Archived ${result.modifiedCount} projects`,
+    });
+};

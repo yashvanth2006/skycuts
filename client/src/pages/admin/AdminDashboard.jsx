@@ -2,12 +2,13 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus, Film, Users, Clock, TrendingUp,
-  Loader2, ChevronRight, Search, AlertCircle, Archive, RotateCcw
+  Loader2, ChevronRight, Search, AlertCircle, Archive, RotateCcw, CheckSquare, Square, Trash2, DollarSign, Upload, FileText
 } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
 import ProjectCard from '../../components/ProjectCard.jsx';
 import SkeletonCard from '../../components/SkeletonCard.jsx';
 import Modal from '../../components/Modal.jsx';
+import BulkClientUpload from '../../components/BulkClientUpload.jsx';
 import api from '../../api/axiosInstance.js';
 
 const StatCard = ({ icon: Icon, label, value, color, index }) => (
@@ -41,6 +42,10 @@ export default function AdminDashboard() {
   const [modalOpen, setModalOpen] = useState(false);
   const [creating,  setCreating]  = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+  const [selectedProjects, setSelectedProjects] = useState(new Set());
+  const [bulkActionOpen, setBulkActionOpen] = useState(false);
+  const [bulkUpdating, setBulkUpdating] = useState(false);
+  const [bulkClientUploadOpen, setBulkClientUploadOpen] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', clientId: '', price: '' });
   const [formError, setFormError] = useState('');
 
@@ -69,6 +74,65 @@ export default function AdminDashboard() {
 
   const handleRestore = async (projectId) => {
     await fetchAll();
+  };
+
+  const toggleProjectSelection = (projectId) => {
+    setSelectedProjects(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(projectId)) {
+        newSet.delete(projectId);
+      } else {
+        newSet.add(projectId);
+      }
+      return newSet;
+    });
+  };
+
+  const selectAllProjects = () => {
+    if (selectedProjects.size === filtered.length) {
+      setSelectedProjects(new Set());
+    } else {
+      setSelectedProjects(new Set(filtered.map(p => p._id)));
+    }
+  };
+
+  const handleBulkStatusUpdate = async (status) => {
+    if (selectedProjects.size === 0) return;
+    
+    setBulkUpdating(true);
+    try {
+      await api.patch('/projects/bulk/status', {
+        projectIds: Array.from(selectedProjects),
+        status,
+      });
+      setSelectedProjects(new Set());
+      setBulkActionOpen(false);
+      await fetchAll();
+    } catch (err) {
+      console.error('Bulk update failed:', err);
+      setError('Failed to update projects');
+    } finally {
+      setBulkUpdating(false);
+    }
+  };
+
+  const handleBulkArchive = async () => {
+    if (selectedProjects.size === 0) return;
+    
+    setBulkUpdating(true);
+    try {
+      await api.patch('/projects/bulk/archive', {
+        projectIds: Array.from(selectedProjects),
+      });
+      setSelectedProjects(new Set());
+      setBulkActionOpen(false);
+      await fetchAll();
+    } catch (err) {
+      console.error('Bulk archive failed:', err);
+      setError('Failed to archive projects');
+    } finally {
+      setBulkUpdating(false);
+    }
   };
 
   const handleCreate = async (e) => {
@@ -140,6 +204,24 @@ export default function AdminDashboard() {
           >
             <Plus size={18} /> New Project
           </button>
+          <button
+            onClick={() => setBulkClientUploadOpen(true)}
+            style={{
+              padding: '10px 16px',
+              borderRadius: 8,
+              background: 'var(--bg-glass)',
+              border: '1px solid var(--border-subtle)',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: 14,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+            }}
+          >
+            <Upload size={16} /> Bulk Import Clients
+          </button>
         </motion.div>
 
         {/* Stats Grid */}
@@ -149,36 +231,19 @@ export default function AdminDashboard() {
 
         {/* Search + Projects */}
         <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
+          <button onClick={selectAllProjects} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: selectedProjects.size > 0 ? 'var(--accent-blue)' : 'var(--bg-glass)', border: '1px solid var(--border-subtle)', color: selectedProjects.size > 0 ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
+            {selectedProjects.size === filtered.length ? <CheckSquare size={14} /> : <Square size={14} />}
+            {selectedProjects.size > 0 ? `${selectedProjects.size} selected` : 'Select All'}
+          </button>
           <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
             <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-            <input
-              value={search}
-              onChange={e => setSearch(e.target.value)}
-              placeholder="Search projects or clients…"
-              className="input-field"
-              style={{ paddingLeft: 40 }}
-            />
+            <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects or clients…" className="input-field" style={{ paddingLeft: 40 }} />
           </div>
-          <button
-            onClick={() => setShowArchived(!showArchived)}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-              padding: '8px 14px',
-              borderRadius: 8,
-              background: showArchived ? 'var(--accent-purple)' : 'var(--bg-glass)',
-              border: '1px solid var(--border-subtle)',
-              color: showArchived ? 'white' : 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontSize: 13,
-              fontWeight: 500,
-              transition: 'all 0.2s',
-            }}
-          >
+          <button onClick={() => setShowArchived(!showArchived)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: showArchived ? 'var(--accent-purple)' : 'var(--bg-glass)', border: '1px solid var(--border-subtle)', color: showArchived ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
             {showArchived ? <RotateCcw size={14} /> : <Archive size={14} />}
             {showArchived ? 'Show Active' : 'Show Archived'}
           </button>
+          {selectedProjects.size > 0 && <button onClick={() => setBulkActionOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: 'var(--accent-green)', border: '1px solid var(--accent-green)', color: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>Bulk Actions</button>}
           <p style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{filtered.length} project{filtered.length !== 1 ? 's' : ''}</p>
         </div>
 
@@ -234,6 +299,96 @@ export default function AdminDashboard() {
           </div>
         )}
       </main>
+
+      {/* Bulk Client Upload Modal */}
+      <BulkClientUpload
+        isOpen={bulkClientUploadOpen}
+        onClose={() => setBulkClientUploadOpen(false)}
+        onSuccess={fetchAll}
+      />
+
+      {/* Bulk Actions Modal */}
+      <Modal isOpen={bulkActionOpen} onClose={() => setBulkActionOpen(false)} title={`Bulk Actions (${selectedProjects.size} projects)`}>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <button
+            onClick={() => handleBulkStatusUpdate('in_progress')}
+            disabled={bulkUpdating}
+            style={{
+              padding: '12px 16px',
+              borderRadius: 8,
+              background: 'var(--bg-glass)',
+              border: '1px solid var(--border-subtle)',
+              cursor: bulkUpdating ? 'not-allowed' : 'pointer',
+              color: 'var(--text-primary)',
+              fontSize: 14,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <Clock size={16} /> Mark as In Progress
+          </button>
+          <button
+            onClick={() => handleBulkStatusUpdate('in_review')}
+            disabled={bulkUpdating}
+            style={{
+              padding: '12px 16px',
+              borderRadius: 8,
+              background: 'var(--bg-glass)',
+              border: '1px solid var(--border-subtle)',
+              cursor: bulkUpdating ? 'not-allowed' : 'pointer',
+              color: 'var(--text-primary)',
+              fontSize: 14,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <CheckSquare size={16} /> Mark as In Review
+          </button>
+          <button
+            onClick={() => handleBulkStatusUpdate('paid')}
+            disabled={bulkUpdating}
+            style={{
+              padding: '12px 16px',
+              borderRadius: 8,
+              background: 'var(--bg-glass)',
+              border: '1px solid var(--border-subtle)',
+              cursor: bulkUpdating ? 'not-allowed' : 'pointer',
+              color: 'var(--text-primary)',
+              fontSize: 14,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <DollarSign size={16} /> Mark as Paid
+          </button>
+          <hr className="divider" />
+          <button
+            onClick={handleBulkArchive}
+            disabled={bulkUpdating}
+            style={{
+              padding: '12px 16px',
+              borderRadius: 8,
+              background: 'rgba(239,68,68,0.1)',
+              border: '1px solid rgba(239,68,68,0.3)',
+              cursor: bulkUpdating ? 'not-allowed' : 'pointer',
+              color: '#ef4444',
+              fontSize: 14,
+              fontWeight: 500,
+              display: 'flex',
+              alignItems: 'center',
+              gap: 8,
+            }}
+          >
+            <Archive size={16} /> Archive Selected
+          </button>
+        </div>
+      </Modal>
 
       {/* Create Project Modal */}
       <Modal isOpen={modalOpen} onClose={() => { setModalOpen(false); setFormError(''); }} title="Create New Project">

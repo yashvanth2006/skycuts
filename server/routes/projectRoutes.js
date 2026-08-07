@@ -11,6 +11,8 @@ import {
     restoreProject,
     getArchivedProjects,
     getProjectAnalytics,
+    bulkUpdateStatus,
+    bulkArchiveProjects,
 } from '../controllers/projectController.js';
 import { protect, adminOnly } from '../middleware/auth.js';
 
@@ -22,6 +24,8 @@ router.post('/request', createProjectRequest);
 router.get('/clients', protect, adminOnly, getAllClients);
 router.get('/archived', protect, adminOnly, getArchivedProjects);
 router.get('/analytics', protect, adminOnly, getProjectAnalytics);
+router.patch('/bulk/status', protect, adminOnly, bulkUpdateStatus);
+router.patch('/bulk/archive', protect, adminOnly, bulkArchiveProjects);
 router.route('/').get(protect, getProjects).post(protect, adminOnly, createProject);
 router.route('/:id').get(protect, getProjectById);
 router.post('/:id/assets', protect, submitRawAssets);
