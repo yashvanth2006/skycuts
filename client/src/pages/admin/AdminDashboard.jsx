@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
   Plus, Film, Users, Clock, TrendingUp,
-  Loader2, ChevronRight, Search, AlertCircle
+  Loader2, ChevronRight, Search, AlertCircle, Archive, RotateCcw
 } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
 import ProjectCard from '../../components/ProjectCard.jsx';
@@ -40,6 +40,7 @@ export default function AdminDashboard() {
   const [search,   setSearch]   = useState('');
   const [modalOpen, setModalOpen] = useState(false);
   const [creating,  setCreating]  = useState(false);
+  const [showArchived, setShowArchived] = useState(false);
   const [form, setForm] = useState({ title: '', description: '', clientId: '', price: '' });
   const [formError, setFormError] = useState('');
 
@@ -47,7 +48,7 @@ export default function AdminDashboard() {
     try {
       setError(null);
       const [projRes, clientRes] = await Promise.all([
-        api.get('/projects'),
+        api.get(`/projects?includeArchived=${showArchived}`),
         api.get('/projects/clients'),
       ]);
       setProjects(projRes.data);
@@ -60,7 +61,15 @@ export default function AdminDashboard() {
     }
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [showArchived]);
+
+  const handleArchive = async (projectId) => {
+    setProjects(prev => prev.filter(p => p._id !== projectId));
+  };
+
+  const handleRestore = async (projectId) => {
+    await fetchAll();
+  };
 
   const handleCreate = async (e) => {
     e.preventDefault();
@@ -150,6 +159,26 @@ export default function AdminDashboard() {
               style={{ paddingLeft: 40 }}
             />
           </div>
+          <button
+            onClick={() => setShowArchived(!showArchived)}
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: 6,
+              padding: '8px 14px',
+              borderRadius: 8,
+              background: showArchived ? 'var(--accent-purple)' : 'var(--bg-glass)',
+              border: '1px solid var(--border-subtle)',
+              color: showArchived ? 'white' : 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: 13,
+              fontWeight: 500,
+              transition: 'all 0.2s',
+            }}
+          >
+            {showArchived ? <RotateCcw size={14} /> : <Archive size={14} />}
+            {showArchived ? 'Show Active' : 'Show Archived'}
+          </button>
           <p style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{filtered.length} project{filtered.length !== 1 ? 's' : ''}</p>
         </div>
 
@@ -193,7 +222,14 @@ export default function AdminDashboard() {
         ) : (
           <div className="grid-auto">
             {filtered.map((p, i) => (
-              <ProjectCard key={p._id} project={p} index={i} basePath="/profile" />
+              <ProjectCard 
+                key={p._id} 
+                project={p} 
+                index={i} 
+                basePath="/profile"
+                onArchive={handleArchive}
+                onRestore={handleRestore}
+              />
             ))}
           </div>
         )}

@@ -30,10 +30,15 @@ export const createProject = async (req, res) => {
 // @route  GET /api/projects
 export const getProjects = async (req, res) => {
     let projects;
+    const { includeArchived } = req.query;
+    
     if (req.user.role === 'admin') {
-        projects = await Project.find({}).populate('client', 'name email').sort({ createdAt: -1 });
+        // Admin can optionally see archived projects
+        const filter = includeArchived === 'true' ? {} : { isArchived: false };
+        projects = await Project.find(filter).populate('client', 'name email').sort({ createdAt: -1 });
     } else {
-        projects = await Project.find({ client: req.user._id }).populate('client', 'name email').sort({ createdAt: -1 });
+        // Clients never see archived projects
+        projects = await Project.find({ client: req.user._id, isArchived: false }).populate('client', 'name email').sort({ createdAt: -1 });
     }
     res.json(projects);
 };
@@ -185,4 +190,89 @@ export const createProjectRequest = async (req, res) => {
 export const getAllClients = async (req, res) => {
     const clients = await User.find({ role: 'client' }).select('-password').sort({ name: 1 });
     res.json(clients);
+};
+
+// @desc   Archive a project (soft delete)
+// @route  PATCH /api/projects/:id/archive
+export const archiveProject = async (req, res) => {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+    }
+
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    project.isArchived = true;
+    project.archivedAt = new Date();
+    await project.save();
+
+    await project.populate('client', 'name email');
+    res.json(project);
+};
+
+// @desc   Restore an archived project
+// @route  PATCH /api/projects/:id/restore
+export const restoreProject = async (req, res) => {
+    const project = await Project.findById(req.params.id);
+
+    if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+    }
+
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    project.isArchived = false;
+    project.archivedAt = null;
+    await project.save();
+
+    await project.populate('client', 'name email');
+    res.json(project);
+};
+
+// @desc   Get archived projects (Admin only)
+// @route  GET /api/projects/archived
+export const getArchivedProjects = async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const projects = await Project.find({ isArchived: true })
+        .populate('client', 'name email')
+        .sort({ archivedAt: -1 });
+    res.json(projects);
+};
+
+// @desc   Get project analytics (Admin only)
+// @route  GET /api/projects/analytics
+export const getProjectAnalytics = async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Access denied' });
+    }
+
+    const totalProjects = await Project.countDocuments();
+    const activeProjects = await Project.countDocuments({ isArchived: false });
+    const archivedProjects = await Project.countDocuments({ isArchived: true });
+    
+    const statusBreakdown = await Project.aggregate([
+        { $match: { isArchived: false } },
+        { $group: { _id: '$status', count: { $sum: 1 } } }
+    ]);
+
+    const totalRevenue = await Project.aggregate([
+        { $match: { isArchived: false, status: 'paid' } },
+        { $group: { _id: null, total: { $sum: '$price' } } }
+    ]);
+
+    res.json({
+        totalProjects,
+        activeProjects,
+        archivedProjects,
+        statusBreakdown,
+        totalRevenue: totalRevenue[0]?.total || 0,
+    });
 };
