@@ -47,12 +47,12 @@ html.light {
   --bg-glass-hover: rgba(255, 255, 255, 0.75);
   --nav-bg:         rgba(248, 250, 252, 0.88);
 
-  --border-subtle:  rgba(0, 0, 0, 0.08);
+  --border-subtle:  rgba(0, 0, 0, 0.12);
   --border-glow:    rgba(99, 102, 241, 0.35);
 
-  --text-primary:   #1e1e2e;
-  --text-secondary: #4a4a6e;
-  --text-muted:     #9090aa;
+  --text-primary:   #0f172a;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
 
   --shadow-glow-sm: 0 0 20px rgba(99, 102, 241, 0.12);
   --shadow-glow-md: 0 0 40px rgba(99, 102, 241, 0.16);
