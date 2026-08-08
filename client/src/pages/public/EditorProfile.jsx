@@ -22,16 +22,16 @@ const getDaVinciColors = (isDark) => ({
   bg2:    isDark ? "#202020" : "#e8edf5",
   bg3:    isDark ? "#272727" : "#e2e8f0",
   panel:  isDark ? "#1c1c1c" : "#ffffff",
-  border: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.08)",
+  border: isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.12)",
   borderHover: "rgba(47,116,208,0.5)",
   blue:   "#2F74D0",
   blueL:  "#4A9EFF",
   amber:  "#F5A623",
   amberL: "#FFB74D",
-  white:  isDark ? "#E8E8E8" : "#1e1e2e",
-  gray1:  isDark ? "#9A9A9A" : "#4a4a6e",
-  gray2:  isDark ? "#5A5A5A" : "#9090aa",
-  gray3:  isDark ? "#3A3A3A" : "#cbd5e1",
+  white:  isDark ? "#E8E8E8" : "#0f172a",
+  gray1:  isDark ? "#9A9A9A" : "#334155",
+  gray2:  isDark ? "#5A5A5A" : "#64748b",
+  gray3:  isDark ? "#3A3A3A" : "#94a3b8",
 });
 
 // ─── Mock Data ──────────────────────────────────────────────────────────────
@@ -570,8 +570,8 @@ export default function EditorProfile() {
         overflow: "hidden",
         background: `linear-gradient(to bottom, ${dv.bg0} 0%, ${isDark ? '#0d1520' : '#e2e8f0'} 60%, ${dv.bg0} 100%)`,
       }}>
-        {/* 3D Node Canvas — fills hero */}
-        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+        {/* 3D Node Canvas — fills hero with reduced opacity in light theme */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 0, opacity: isDark ? 1 : 0.4 }}>
           <DaVinciNodeTree />
         </div>
 
@@ -625,7 +625,7 @@ export default function EditorProfile() {
             style={{
               fontSize: "clamp(40px, 8vw, 88px)",
               fontWeight: 900,
-              color: "#FFFFFF",
+              color: isDark ? "#FFFFFF" : "#1e1e2e",
               letterSpacing: "-0.04em",
               lineHeight: 1.0,
               marginBottom: 16,
