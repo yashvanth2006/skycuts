@@ -12,18 +12,8 @@ function getInitialTheme() {
   return 'dark';
 }
 
-// Resolve initial custom cursor preference
-function getInitialCustomCursor() {
-  try {
-    const saved = localStorage.getItem('skycuts_custom_cursor');
-    return saved === 'true';
-  } catch { /* ignore */ }
-  return false;
-}
-
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(getInitialTheme);
-  const [customCursor, setCustomCursor] = useState(getInitialCustomCursor);
 
   // Apply class to <html> and persist whenever theme changes
   useEffect(() => {
@@ -40,23 +30,12 @@ export const ThemeProvider = ({ children }) => {
     } catch { /* ignore */ }
   }, [theme]);
 
-  // Persist custom cursor preference
-  useEffect(() => {
-    try {
-      localStorage.setItem('skycuts_custom_cursor', customCursor.toString());
-    } catch { /* ignore */ }
-  }, [customCursor]);
-
   const toggleTheme = useCallback(() => {
     setTheme(prev => (prev === 'dark' ? 'light' : 'dark'));
   }, []);
 
-  const toggleCustomCursor = useCallback(() => {
-    setCustomCursor(prev => !prev);
-  }, []);
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme, customCursor, toggleCustomCursor }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme }}>
       {children}
     </ThemeContext.Provider>
   );

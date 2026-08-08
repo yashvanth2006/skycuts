@@ -1,7 +1,6 @@
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { lazy, Suspense } from 'react';
 import { useAuth } from './context/AuthContext.jsx';
-import CustomCursor from './components/CustomCursor.jsx';
 
 // Lazy load components for code splitting
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
@@ -53,28 +52,25 @@ const RootRedirect = () => {
 
 export default function App() {
   return (
-    <>
-      <CustomCursor />
-      <Suspense fallback={<FullPageLoader />}>
-        <Routes>
-          <Route path="/" element={<RootRedirect />} />
-          <Route path="/login" element={<LoginPage />} />
-          <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+    <Suspense fallback={<FullPageLoader />}>
+      <Routes>
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="/login" element={<LoginPage />} />
+        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
 
-          {/* Public Route (now includes editor dashboard when logged in) */}
-          <Route path="/profile" element={<EditorProfile />} />
+        {/* Public Route (now includes editor dashboard when logged in) */}
+        <Route path="/profile" element={<EditorProfile />} />
 
-          {/* Editor Project Detail Route */}
-          <Route path="/profile/project/:id" element={<ProtectedRoute><AdminProjectPage /></ProtectedRoute>} />
+        {/* Editor Project Detail Route */}
+        <Route path="/profile/project/:id" element={<ProtectedRoute><AdminProjectPage /></ProtectedRoute>} />
 
-          {/* Client Routes */}
-          <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
-          <Route path="/dashboard/project/:id" element={<ClientRoute><ClientProjectPage /></ClientRoute>} />
+        {/* Client Routes */}
+        <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
+        <Route path="/dashboard/project/:id" element={<ClientRoute><ClientProjectPage /></ClientRoute>} />
 
-          {/* Fallback */}
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-      </Suspense>
-    </>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Suspense>
   );
 }
