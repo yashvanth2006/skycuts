@@ -15,11 +15,12 @@ import {
     bulkArchiveProjects,
 } from '../controllers/projectController.js';
 import { protect, adminOnly } from '../middleware/auth.js';
+import { moderateLimiter } from '../middleware/rateLimiter.js';
 
 const router = express.Router();
 
-// Public route for project requests (no auth required)
-router.post('/request', createProjectRequest);
+// Public route for project requests (no auth required) - rate limited
+router.post('/request', moderateLimiter, createProjectRequest);
 
 router.get('/clients', protect, adminOnly, getAllClients);
 router.get('/archived', protect, adminOnly, getArchivedProjects);
