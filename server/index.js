@@ -14,6 +14,8 @@ import messageRoutes from './routes/messageRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import deliverableRoutes from './routes/deliverableRoutes.js';
 import stripeRoutes from './routes/stripeRoutes.js';
+import projectRequestRoutes from './routes/projectRequestRoutes.js';
+import portfolioRoutes from './routes/portfolioRoutes.js';
 import Message from './models/Message.js';
 
 dotenv.config();
@@ -33,10 +35,14 @@ connectDB();
 const app = express();
 const httpServer = createServer(app);
 
+const allowedOrigins = process.env.MULTI_ORIGIN_CORS 
+    ? process.env.MULTI_ORIGIN_CORS.split(',') 
+    : [process.env.CLIENT_URL || 'http://localhost:5173'];
+
 // ─── Socket.io ──────────────────────────────────────────────────────────────
 const io = new Server(httpServer, {
     cors: {
-        origin: process.env.CLIENT_URL || 'http://localhost:5173',
+        origin: allowedOrigins,
         methods: ['GET', 'POST'],
     },
 });
@@ -46,7 +52,7 @@ const io = new Server(httpServer, {
 app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
 
 app.use(cors({
-    origin: process.env.CLIENT_URL || 'http://localhost:5173',
+    origin: allowedOrigins,
     credentials: true,
 }));
 app.use(express.json());
@@ -58,6 +64,8 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/deliverables', deliverableRoutes);
 app.use('/api/stripe', stripeRoutes);
+app.use('/api/project-requests', projectRequestRoutes);
+app.use('/api/portfolio', portfolioRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'active', app: 'SkyCuts API', timestamp: new Date().toISOString() });

@@ -37,17 +37,8 @@ export const getProjects = async (req, res) => {
 // @desc   Get single project by ID (scoped)
 // @route  GET /api/projects/:id
 export const getProjectById = async (req, res) => {
+    // req.project is provided by projectParticipant middleware
     const project = await Project.findById(req.params.id).populate('client', 'name email');
-
-    if (!project) {
-        return res.status(404).json({ message: 'Project not found' });
-    }
-
-    // Multi-tenancy: clients can only access their own projects
-    if (req.user.role === 'client' && project.client._id.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: 'Access denied' });
-    }
-
     res.json(project);
 };
 
@@ -56,12 +47,8 @@ export const getProjectById = async (req, res) => {
 export const submitRawAssets = async (req, res) => {
     const { assets } = req.body; // [{ url, label }]
 
-    const project = await Project.findById(req.params.id);
-    if (!project) return res.status(404).json({ message: 'Project not found' });
-
-    if (project.client.toString() !== req.user._id.toString()) {
-        return res.status(403).json({ message: 'Access denied' });
-    }
+    // req.project is provided by projectParticipant middleware
+    const project = req.project;
 
     project.rawAssets.push(...assets);
     if (project.status === 'awaiting_assets') {

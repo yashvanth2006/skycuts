@@ -3,7 +3,7 @@ import multer from 'multer';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { uploadDeliverable, getDeliverable, getDownloadUrl } from '../controllers/deliverableController.js';
-import { protect, adminOnly } from '../middleware/auth.js';
+import { protect, adminOnly, projectParticipant } from '../middleware/auth.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -29,8 +29,8 @@ const upload = multer({
 
 const router = express.Router();
 
-router.post('/:projectId', protect, adminOnly, upload.single('video'), uploadDeliverable);
-router.get('/:projectId', protect, getDeliverable);
-router.get('/:projectId/download', protect, getDownloadUrl);
+router.post('/:projectId', protect, projectParticipant, adminOnly, upload.single('video'), uploadDeliverable);
+router.get('/:projectId', protect, projectParticipant, getDeliverable);
+router.get('/:projectId/download', protect, projectParticipant, getDownloadUrl);
 
 export default router;
