@@ -28,15 +28,6 @@ const dv = {
   gray3:  "#3A3A3A",
 };
 
-// ─── Mock Data (Fallback when no live portfolio items) ─────────────────────
-const PORTFOLIO_FALLBACK = [
-  { _id: '1', title: "AURORA — Fashion Campaign",   category: "Commercial",   duration: "2:34", year: 2024, views: "2.4M", grade: "Bleach Bypass",    accent: dv.blue  },
-  { _id: '2', title: "ECHOES — Music Video",         category: "Music Video",  duration: "4:12", year: 2024, views: "8.1M", grade: "Desaturated Teal", accent: dv.amber },
-  { _id: '3', title: "THRESHOLD — Short Film",       category: "Narrative",    duration: "18:45", year: 2023, views: "340K", grade: "Warm Cinematic",  accent: dv.blue  },
-  { _id: '4', title: "KINETIC — Sports Promo",       category: "Commercial",   duration: "0:30", year: 2024, views: "5.7M", grade: "High Contrast",   accent: dv.amber },
-  { _id: '5', title: "SOLSTICE — Documentary",       category: "Documentary",  duration: "52:00", year: 2023, views: "120K", grade: "Filmic Grain",   accent: dv.blue  },
-  { _id: '6', title: "REVERIE — Brand Identity",     category: "Commercial",   duration: "1:00", year: 2025, views: "1.2M", grade: "Matte Orange",    accent: dv.amber },
-];
 
 const TOOLKIT = [
   { name: "DaVinci Resolve Studio",  version: "19.1",  icon: <Cpu size={16} />,     role: "Color Grading · Editing · Fusion",  level: 98 },
@@ -372,6 +363,7 @@ export default function EditorProfile() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [portfolio, setPortfolio] = useState([]);
   const [portfolioLoading, setPortfolioLoading] = useState(true);
+  const [portfolioError, setPortfolioError] = useState(false);
 
   useEffect(() => {
     const fetchPortfolio = async () => {
@@ -379,13 +371,12 @@ export default function EditorProfile() {
         const res = await fetch(`${import.meta.env.VITE_API_URL}/portfolio/public`);
         if (res.ok) {
           const data = await res.json();
-          // If API returns items, use them; otherwise fall back to mock data
-          setPortfolio(data.length > 0 ? data : PORTFOLIO_FALLBACK);
+          setPortfolio(data);
         } else {
-          setPortfolio(PORTFOLIO_FALLBACK);
+          setPortfolioError(true);
         }
       } catch {
-        setPortfolio(PORTFOLIO_FALLBACK);
+        setPortfolioError(true);
       } finally {
         setPortfolioLoading(false);
       }
@@ -729,6 +720,35 @@ export default function EditorProfile() {
             {portfolioLoading ? (
               <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: dv.gray1, fontSize: 14 }}>
                 Loading portfolio...
+              </div>
+            ) : portfolioError ? (
+              <div style={{
+                gridColumn: '1/-1', textAlign: 'center', padding: '60px 0',
+                color: dv.gray1, fontSize: 14,
+              }}>
+                <div style={{
+                  display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                  padding: '28px 36px', borderRadius: 8,
+                  background: 'rgba(239,68,68,0.06)', border: '1px solid rgba(239,68,68,0.18)',
+                }}>
+                  <span style={{ fontSize: 22, lineHeight: 1 }}>&#9888;</span>
+                  <span style={{ fontWeight: 600, color: '#f87171' }}>Unable to load portfolio.</span>
+                  <span style={{ fontSize: 13, color: dv.gray2 }}>Please try again later.</span>
+                </div>
+              </div>
+            ) : portfolio.length === 0 ? (
+              <div style={{
+                gridColumn: '1/-1', textAlign: 'center', padding: '60px 0',
+                color: dv.gray2, fontSize: 14,
+              }}>
+                <div style={{
+                  display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 10,
+                  padding: '28px 36px', borderRadius: 8,
+                  background: dv.bg2, border: `1px solid ${dv.border}`,
+                }}>
+                  <span style={{ fontSize: 22, lineHeight: 1, opacity: 0.5 }}>&#127916;</span>
+                  <span style={{ fontWeight: 600, color: dv.gray1 }}>No portfolio projects available yet.</span>
+                </div>
               </div>
             ) : portfolio.map((item, i) => (
               <motion.div
