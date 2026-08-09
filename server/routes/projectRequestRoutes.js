@@ -1,21 +1,26 @@
 import express from 'express';
+import {
+    submitRequest,
+    getRequests,
+    getRequestById,
+    acceptRequest,
+    rejectRequest,
+} from '../controllers/projectRequestController.js';
+import { protect, adminOnly, clientOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.post('/', (req, res) => {
-    res.status(501).json({ message: 'Not Implemented - Project Request routes are planned for a future module.' });
-});
+// Client submits a new request
+router.post('/', protect, clientOnly, submitRequest);
 
-router.get('/', (req, res) => {
-    res.status(501).json({ message: 'Not Implemented - Project Request routes are planned for a future module.' });
-});
+// Admin: all requests — Client: own requests only
+router.get('/', protect, getRequests);
 
-router.patch('/:id/accept', (req, res) => {
-    res.status(501).json({ message: 'Not Implemented - Project Request routes are planned for a future module.' });
-});
+// Single request (owner or admin)
+router.get('/:id', protect, getRequestById);
 
-router.patch('/:id/reject', (req, res) => {
-    res.status(501).json({ message: 'Not Implemented - Project Request routes are planned for a future module.' });
-});
+// Admin actions
+router.patch('/:id/accept', protect, adminOnly, acceptRequest);
+router.patch('/:id/reject', protect, adminOnly, rejectRequest);
 
 export default router;
