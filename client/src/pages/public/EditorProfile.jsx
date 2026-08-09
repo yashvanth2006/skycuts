@@ -1,9 +1,8 @@
-﻿import { useState, useRef } from "react";
+import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Monitor, Film, Layers, Cpu, Star, Award, Clock,
-  Play, ChevronRight, Globe, Mail, Instagram, Youtube,
-  Zap, Eye, Download
+  Play, ChevronRight, Globe, Mail, Zap, Eye, Download
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
 import DaVinciNodeTree from "../../components/three/DaVinciNodeTree.jsx";
