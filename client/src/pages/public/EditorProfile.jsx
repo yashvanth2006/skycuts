@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Monitor, Film, Layers, Cpu, Star, Award, Clock,
@@ -28,14 +28,14 @@ const dv = {
   gray3:  "#3A3A3A",
 };
 
-// ─── Mock Data ──────────────────────────────────────────────────────────────
-const PORTFOLIO = [
-  { id: 1, title: "AURORA — Fashion Campaign",   category: "Commercial",   duration: "2:34", year: 2024, views: "2.4M", grade: "Bleach Bypass",  accent: dv.blue  },
-  { id: 2, title: "ECHOES — Music Video",         category: "Music Video",  duration: "4:12", year: 2024, views: "8.1M", grade: "Desaturated Teal", accent: dv.amber },
-  { id: 3, title: "THRESHOLD — Short Film",       category: "Narrative",    duration: "18:45", year: 2023, views: "340K", grade: "Warm Cinematic",  accent: dv.blue  },
-  { id: 4, title: "KINETIC — Sports Promo",       category: "Commercial",   duration: "0:30", year: 2024, views: "5.7M", grade: "High Contrast",   accent: dv.amber },
-  { id: 5, title: "SOLSTICE — Documentary",       category: "Documentary",  duration: "52:00", year: 2023, views: "120K", grade: "Filmic Grain",    accent: dv.blue  },
-  { id: 6, title: "REVERIE — Brand Identity",    category: "Commercial",   duration: "1:00", year: 2025, views: "1.2M", grade: "Matte Orange",    accent: dv.amber },
+// ─── Mock Data (Fallback when no live portfolio items) ─────────────────────
+const PORTFOLIO_FALLBACK = [
+  { _id: '1', title: "AURORA — Fashion Campaign",   category: "Commercial",   duration: "2:34", year: 2024, views: "2.4M", grade: "Bleach Bypass",    accent: dv.blue  },
+  { _id: '2', title: "ECHOES — Music Video",         category: "Music Video",  duration: "4:12", year: 2024, views: "8.1M", grade: "Desaturated Teal", accent: dv.amber },
+  { _id: '3', title: "THRESHOLD — Short Film",       category: "Narrative",    duration: "18:45", year: 2023, views: "340K", grade: "Warm Cinematic",  accent: dv.blue  },
+  { _id: '4', title: "KINETIC — Sports Promo",       category: "Commercial",   duration: "0:30", year: 2024, views: "5.7M", grade: "High Contrast",   accent: dv.amber },
+  { _id: '5', title: "SOLSTICE — Documentary",       category: "Documentary",  duration: "52:00", year: 2023, views: "120K", grade: "Filmic Grain",   accent: dv.blue  },
+  { _id: '6', title: "REVERIE — Brand Identity",     category: "Commercial",   duration: "1:00", year: 2025, views: "1.2M", grade: "Matte Orange",    accent: dv.amber },
 ];
 
 const TOOLKIT = [
@@ -127,9 +127,11 @@ function DVDivider({ label }) {
 }
 
 // ─── Portfolio Clip Card ──────────────────────────────────────────────────────
+// Accepts both API items (from MongoDB) and fallback mock items
 function ClipCard({ item }) {
   const [hovered, setHovered] = useState(false);
   const cat = CATEGORY_COLORS[item.category] || CATEGORY_COLORS["Documentary"];
+  const accentColor = item.accent || dv.blue;
 
   return (
     <motion.div
@@ -142,7 +144,7 @@ function ClipCard({ item }) {
       transition={{ duration: 0.25, ease: "easeOut" }}
       style={{
         background: dv.bg2,
-        border: `1px solid ${hovered ? item.accent : dv.border}`,
+        border: `1px solid ${hovered ? accentColor : dv.border}`,
         borderRadius: 6,
         overflow: "hidden",
         cursor: "pointer",
@@ -368,6 +370,28 @@ function StatTile({ stat, delay }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function EditorProfile() {
   const [authModalOpen, setAuthModalOpen] = useState(false);
+  const [portfolio, setPortfolio] = useState([]);
+  const [portfolioLoading, setPortfolioLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPortfolio = async () => {
+      try {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/portfolio/public`);
+        if (res.ok) {
+          const data = await res.json();
+          // If API returns items, use them; otherwise fall back to mock data
+          setPortfolio(data.length > 0 ? data : PORTFOLIO_FALLBACK);
+        } else {
+          setPortfolio(PORTFOLIO_FALLBACK);
+        }
+      } catch {
+        setPortfolio(PORTFOLIO_FALLBACK);
+      } finally {
+        setPortfolioLoading(false);
+      }
+    };
+    fetchPortfolio();
+  }, []);
 
   return (
     <div style={{
@@ -702,9 +726,13 @@ export default function EditorProfile() {
               gap: 16,
             }}
           >
-            {PORTFOLIO.map((item, i) => (
+            {portfolioLoading ? (
+              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: dv.gray1, fontSize: 14 }}>
+                Loading portfolio...
+              </div>
+            ) : portfolio.map((item, i) => (
               <motion.div
-                key={item.id}
+                key={item._id}
                 initial={{ opacity: 0, y: 24 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07, duration: 0.5, ease: "easeOut" }}

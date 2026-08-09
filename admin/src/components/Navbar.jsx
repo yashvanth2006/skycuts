@@ -1,6 +1,6 @@
 import { useNavigate, useLocation } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, LogOut, ChevronLeft } from 'lucide-react';
+import { Zap, LogOut, ChevronLeft, Film, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 
@@ -60,6 +60,32 @@ export default function Navbar({ showBack = false }) {
           </span>
         </button>
       </div>
+
+      {/* Center — Nav Links */}
+      {user && (
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+          {[
+            { path: '/dashboard', icon: <LayoutDashboard size={14} />, label: 'Dashboard' },
+            { path: '/portfolio', icon: <Film size={14} />, label: 'Portfolio' },
+          ].map(({ path, icon, label }) => (
+            <button
+              key={path}
+              onClick={() => navigate(path)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: 6,
+                padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
+                fontSize: 13, fontWeight: 500,
+                background: location.pathname === path ? 'var(--bg-glass)' : 'none',
+                color: location.pathname === path ? 'var(--text-primary)' : 'var(--text-muted)',
+                borderBottom: location.pathname === path ? '2px solid var(--accent-blue)' : '2px solid transparent',
+                transition: 'all 0.15s ease',
+              }}
+            >
+              {icon} {label}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* Right — Theme Toggle + User + Logout */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

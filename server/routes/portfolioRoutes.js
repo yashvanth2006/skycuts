@@ -1,9 +1,22 @@
 import express from 'express';
+import {
+    getPublicPortfolio,
+    getAllPortfolio,
+    createPortfolioItem,
+    updatePortfolioItem,
+    deletePortfolioItem,
+} from '../controllers/portfolioController.js';
+import { protect, adminOnly } from '../middleware/auth.js';
 
 const router = express.Router();
 
-router.get('/public', (req, res) => {
-    res.status(501).json({ message: 'Not Implemented - Portfolio routes are planned for a future module.' });
-});
+// Public — no auth required
+router.get('/public', getPublicPortfolio);
+
+// Admin — all require authentication + admin role
+router.get('/', protect, adminOnly, getAllPortfolio);
+router.post('/', protect, adminOnly, createPortfolioItem);
+router.put('/:id', protect, adminOnly, updatePortfolioItem);
+router.delete('/:id', protect, adminOnly, deletePortfolioItem);
 
 export default router;

@@ -3,6 +3,7 @@ import { useAuth } from './context/AuthContext.jsx';
 import LoginPage from './pages/LoginPage.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminProjectPage from './pages/admin/AdminProjectPage.jsx';
+import AdminPortfolioPage from './pages/admin/AdminPortfolioPage.jsx';
 
 // ─── Route Guards ──────────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -51,6 +52,7 @@ export default function App() {
       {/* Admin Routes */}
       <Route path="/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
       <Route path="/project/:id" element={<AdminRoute><AdminProjectPage /></AdminRoute>} />
+      <Route path="/portfolio" element={<AdminRoute><AdminPortfolioPage /></AdminRoute>} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
