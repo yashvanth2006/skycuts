@@ -30,6 +30,33 @@ export const AuthProvider = ({ children }) => {
         localStorage.setItem('skycuts_token', jwtToken);
     }, []);
 
+    const loginWithGoogle = async (credential) => {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ credential }),
+        });
+        if (!res.ok) throw new Error('Google login failed');
+        const data = await res.json();
+        login(data, data.token);
+        return data; // contains requiresOnboarding flag
+    };
+
+    const completeOnboarding = async (name, mobileNumber) => {
+        const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/complete-profile`, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                Authorization: `Bearer ${token}`
+            },
+            body: JSON.stringify({ name, mobileNumber }),
+        });
+        if (!res.ok) throw new Error('Profile update failed');
+        const data = await res.json();
+        login(data, data.token);
+        return data;
+    };
+
     const logout = useCallback(() => {
         setUser(null);
         setToken(null);
@@ -38,7 +65,7 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     return (
-        <AuthContext.Provider value={{ user, token, login, logout, loading }}>
+        <AuthContext.Provider value={{ user, token, login, loginWithGoogle, completeOnboarding, logout, loading }}>
             {children}
         </AuthContext.Provider>
     );

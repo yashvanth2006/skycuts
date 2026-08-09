@@ -1,5 +1,8 @@
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
+import { OAuth2Client } from 'google-auth-library';
+
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
@@ -56,4 +59,76 @@ export const seedAdmin = async (req, res) => {
     });
 
     res.status(201).json({ message: 'Admin user successfully created!', admin });
+};
+
+export const googleLogin = async (req, res) => {
+    const { credential } = req.body;
+    try {
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { sub: googleId, email, name } = payload;
+
+        let user = await User.findOne({ email });
+
+        if (!user) {
+            user = await User.create({
+                googleId,
+                email,
+                name,
+                role: 'client',
+            });
+        } else if (!user.googleId) {
+            user.googleId = googleId;
+            await user.save();
+        }
+
+        const requiresOnboarding = !user.mobileNumber || !user.name;
+
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            mobileNumber: user.mobileNumber,
+            role: user.role,
+            token: generateToken(user._id),
+            requiresOnboarding,
+        });
+    } catch (err) {
+        console.error('Google login error:', err);
+        res.status(401).json({ message: 'Google authentication failed' });
+    }
+};
+
+export const completeProfile = async (req, res) => {
+    const { name, mobileNumber } = req.body;
+    
+    if (!name || !mobileNumber) {
+        return res.status(400).json({ message: 'Name and Mobile Number are required' });
+    }
+
+    try {
+        const user = await User.findById(req.user._id);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        user.name = name;
+        user.mobileNumber = mobileNumber;
+        await user.save();
+
+        res.json({
+            _id: user._id,
+            name: user.name,
+            email: user.email,
+            mobileNumber: user.mobileNumber,
+            role: user.role,
+            token: generateToken(user._id),
+            requiresOnboarding: false,
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Error updating profile' });
+    }
 };

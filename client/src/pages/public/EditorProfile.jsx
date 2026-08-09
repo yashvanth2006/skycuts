@@ -2,10 +2,12 @@ import { useState, useRef } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Monitor, Film, Layers, Cpu, Star, Award, Clock,
-  Play, ChevronRight, Globe, Mail, Zap, Eye, Download
+  Play, ChevronRight, Globe, Mail, Zap, Eye, Download,
+  Shield, Video, MonitorPlay, ArrowRight
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
 import DaVinciNodeTree from "../../components/three/DaVinciNodeTree.jsx";
+import GoogleAuthModal from "../../components/GoogleAuthModal.jsx";
 
 // ─── DaVinci Resolve-inspired color palette (locked dark) ──────────────────
 const dv = {
@@ -365,6 +367,8 @@ function StatTile({ stat, delay }) {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function EditorProfile() {
+  const [authModalOpen, setAuthModalOpen] = useState(false);
+
   return (
     <div style={{
       minHeight: "100vh",
@@ -741,8 +745,8 @@ export default function EditorProfile() {
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[
                 { icon: <Mail size={14} />, label: "marcus@skycuts.studio" },
-                { icon: <Instagram size={14} />, label: "@marcusreid_color" },
-                { icon: <Youtube size={14} />, label: "youtube.com/marcusreid" },
+                { icon: <Video size={14} />, label: "@marcusreid_color" },
+                { icon: <MonitorPlay size={14} />, label: "youtube.com/marcusreid" },
               ].map((c, i) => (
                 <div key={i} style={{
                   display: "flex", alignItems: "center", gap: 10,
@@ -754,6 +758,7 @@ export default function EditorProfile() {
               ))}
             </div>
             <button
+              onClick={() => setAuthModalOpen(true)}
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "14px 28px", borderRadius: 6,
@@ -768,7 +773,7 @@ export default function EditorProfile() {
               onMouseEnter={e => e.currentTarget.style.background = dv.amberL}
               onMouseLeave={e => e.currentTarget.style.background = dv.amber}
             >
-              Get in Touch <ChevronRight size={16} />
+              START PROJECT <ArrowRight size={16} />
             </button>
           </div>
         </SectionReveal>
@@ -789,6 +794,11 @@ export default function EditorProfile() {
           </p>
         </div>
       </div>
+
+      <GoogleAuthModal 
+        isOpen={authModalOpen} 
+        onClose={() => setAuthModalOpen(false)} 
+      />
     </div>
   );
 }
