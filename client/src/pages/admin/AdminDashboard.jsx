@@ -16,19 +16,19 @@ const StatCard = ({ icon: Icon, label, value, color, index }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ delay: index * 0.08, duration: 0.45 }}
-    className="glass-card"
-    style={{ padding: '22px 24px', display: 'flex', alignItems: 'center', gap: 16 }}
+    className="glass-card admin-stat-card"
+    style={{ padding: '16px', display: 'flex', alignItems: 'center', gap: 12 }}
   >
-    <div style={{
-      width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+    <div className="admin-stat-icon" style={{
+      width: 40, height: 40, borderRadius: 10, flexShrink: 0,
       background: `${color}18`, border: `1px solid ${color}30`,
       display: 'flex', alignItems: 'center', justifyContent: 'center',
     }}>
-      <Icon size={22} color={color} />
+      <Icon size={18} color={color} />
     </div>
     <div>
-      <p style={{ fontSize: 12, color: 'var(--text-muted)', fontWeight: 500, marginBottom: 3 }}>{label}</p>
-      <p style={{ fontSize: 26, fontWeight: 700, fontFamily: 'var(--font-display)', letterSpacing: '-0.03em' }}>{value}</p>
+      <p style={{ fontSize: 11, color: 'var(--text-muted)', fontWeight: 500, marginBottom: 2 }}>{label}</p>
+      <p className="admin-stat-value" style={{ fontSize: 20, fontWeight: 700, fontFamily: 'var(--font-display)', letterSpacing: '-0.03em' }}>{value}</p>
     </div>
   </motion.div>
 );
@@ -191,60 +191,68 @@ export default function AdminDashboard() {
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}
+          className="admin-header"
+          style={{ display: 'flex', flexDirection: 'column', gap: 16, marginBottom: 24 }}
         >
           <div>
-            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>Editor Dashboard</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Manage all your client projects from one place.</p>
+            <h1 style={{ fontSize: 24, fontWeight: 700, marginBottom: 4 }}>Editor Dashboard</h1>
+            <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Manage all your client projects from one place.</p>
           </div>
-          <button
-            id="create-project-btn"
-            onClick={() => setModalOpen(true)}
-            className="btn-primary"
-          >
-            <Plus size={18} /> New Project
-          </button>
-          <button
-            onClick={() => setBulkClientUploadOpen(true)}
-            style={{
-              padding: '10px 16px',
-              borderRadius: 8,
-              background: 'var(--bg-glass)',
-              border: '1px solid var(--border-subtle)',
-              color: 'var(--text-secondary)',
-              cursor: 'pointer',
-              fontSize: 14,
-              fontWeight: 500,
-              display: 'flex',
-              alignItems: 'center',
-              gap: 6,
-            }}
-          >
-            <Upload size={16} /> Bulk Import Clients
-          </button>
+          <div className="admin-header-actions" style={{ display: 'flex', gap: 10, flexWrap: 'wrap' }}>
+            <button
+              id="create-project-btn"
+              onClick={() => setModalOpen(true)}
+              className="btn-primary"
+              style={{ flex: 1, minWidth: '140px' }}
+            >
+              <Plus size={18} /> New Project
+            </button>
+            <button
+              onClick={() => setBulkClientUploadOpen(true)}
+              style={{
+                padding: '10px 16px',
+                borderRadius: 8,
+                background: 'var(--bg-glass)',
+                border: '1px solid var(--border-subtle)',
+                color: 'var(--text-secondary)',
+                cursor: 'pointer',
+                fontSize: 14,
+                fontWeight: 500,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 6,
+                flex: 1,
+                minWidth: '140px',
+              }}
+            >
+              <Upload size={16} /> Bulk Import Clients
+            </button>
+          </div>
         </motion.div>
 
         {/* Stats Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16, marginBottom: 36 }}>
+        <div className="admin-stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: 12, marginBottom: 24 }}>
           {stats.map((s, i) => <StatCard key={s.label} {...s} index={i} />)}
         </div>
 
         {/* Search + Projects */}
-        <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-          <button onClick={selectAllProjects} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: selectedProjects.size > 0 ? 'var(--accent-blue)' : 'var(--bg-glass)', border: '1px solid var(--border-subtle)', color: selectedProjects.size > 0 ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
+        <div className="admin-search-bar" style={{ marginBottom: 20, display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="admin-search-row" style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <button onClick={selectAllProjects} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 8, background: selectedProjects.size > 0 ? 'var(--accent-blue)' : 'var(--bg-glass)', border: '1px solid var(--border-subtle)', color: selectedProjects.size > 0 ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
             {selectedProjects.size === filtered.length ? <CheckSquare size={14} /> : <Square size={14} />}
             {selectedProjects.size > 0 ? `${selectedProjects.size} selected` : 'Select All'}
           </button>
-          <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: 0 }}>
             <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
             <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects or clients…" className="input-field" style={{ paddingLeft: 40 }} />
           </div>
-          <button onClick={() => setShowArchived(!showArchived)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: showArchived ? 'var(--accent-purple)' : 'var(--bg-glass)', border: '1px solid var(--border-subtle)', color: showArchived ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>
+          <button onClick={() => setShowArchived(!showArchived)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 8, background: showArchived ? 'var(--accent-purple)' : 'var(--bg-glass)', border: '1px solid var(--border-subtle)', color: showArchived ? 'white' : 'var(--text-secondary)', cursor: 'pointer', fontSize: 13, fontWeight: 500, flexShrink: 0 }}>
             {showArchived ? <RotateCcw size={14} /> : <Archive size={14} />}
             {showArchived ? 'Show Active' : 'Show Archived'}
           </button>
-          {selectedProjects.size > 0 && <button onClick={() => setBulkActionOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 14px', borderRadius: 8, background: 'var(--accent-green)', border: '1px solid var(--accent-green)', color: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 500 }}>Bulk Actions</button>}
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{filtered.length} project{filtered.length !== 1 ? 's' : ''}</p>
+          {selectedProjects.size > 0 && <button onClick={() => setBulkActionOpen(true)} style={{ display: 'flex', alignItems: 'center', gap: 6, padding: '8px 12px', borderRadius: 8, background: 'var(--accent-green)', border: '1px solid var(--accent-green)', color: 'white', cursor: 'pointer', fontSize: 13, fontWeight: 500, flexShrink: 0 }}>Bulk Actions</button>}
+          <p style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap', flexShrink: 0 }}>{filtered.length} project{filtered.length !== 1 ? 's' : ''}</p>
+          </div>
         </div>
 
         {/* Project Grid */}

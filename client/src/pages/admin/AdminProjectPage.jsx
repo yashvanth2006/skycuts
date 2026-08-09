@@ -121,7 +121,8 @@ export default function AdminProjectPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}
+          className="project-header"
+          style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -135,7 +136,7 @@ export default function AdminProjectPage() {
           </div>
 
           {/* Status Control */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div className="project-status-control" style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
             <Settings size={13} color="var(--text-muted)" />
             <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Status:</span>
             <div style={{ position: 'relative' }}>
@@ -155,7 +156,7 @@ export default function AdminProjectPage() {
           </div>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16, alignItems: 'start' }}>
+        <div className="project-layout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16, alignItems: 'start' }}>
 
           {/* Left Column */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
@@ -278,7 +279,8 @@ export default function AdminProjectPage() {
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            style={{ height: 660, position: 'sticky', top: 80, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}
+            className="project-comments-sidebar"
+            style={{ height: 500, position: 'relative', borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}
           >
             <CommentSidebar
               projectId={id}

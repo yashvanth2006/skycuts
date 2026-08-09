@@ -73,8 +73,8 @@ export default function LoginPage() {
       <AmbientBackground />
 
       {/* Static glow orbs */}
-      <div className="glow-orb" style={{ width: 600, height: 600, background: 'var(--accent-blue)', top: -200, left: -200 }} />
-      <div className="glow-orb" style={{ width: 400, height: 400, background: 'var(--accent-purple)', bottom: -150, right: -100 }} />
+      <div className="glow-orb login-glow-left" style={{ width: 600, height: 600, background: 'var(--accent-blue)', top: -200, left: -200 }} />
+      <div className="glow-orb login-glow-right" style={{ width: 400, height: 400, background: 'var(--accent-purple)', bottom: -150, right: -100 }} />
 
       {/* Login Card */}
       <MotionDiv
@@ -83,7 +83,7 @@ export default function LoginPage() {
         transition={{ duration: 0.7, ease: [0.25, 0.46, 0.45, 0.94] }}
         style={{ position: 'relative', zIndex: 10, width: '100%', maxWidth: 440, margin: '0 auto', padding: '0 20px' }}
       >
-        <div className="glass-card" style={{ padding: '48px 40px' }}>
+        <div className="glass-card login-card" style={{ padding: '32px 24px' }}>
 
           {/* Logo */}
           <MotionDiv custom={0} variants={fadeUp} initial="hidden" animate="visible" style={{ textAlign: 'center', marginBottom: 36 }}>

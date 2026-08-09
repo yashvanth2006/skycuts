@@ -201,9 +201,9 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
       )}
 
       {/* Controls Bar */}
-      <div style={{
+      <div className="video-player-controls" style={{
         position: 'absolute', bottom: 0, left: 0, right: 0,
-        padding: '48px 16px 14px',
+        padding: '32px 16px 12px',
         background: 'linear-gradient(transparent, rgba(0,0,0,0.85))',
         transition: 'opacity 0.3s ease',
         opacity: showControls ? 1 : 0,
@@ -212,8 +212,9 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
         <div
           ref={progressRef}
           onClick={handleSeek}
+          className="video-progress-bar"
           style={{
-            height: 4, background: 'rgba(255,255,255,0.15)',
+            height: 6, background: 'rgba(255,255,255,0.15)',
             borderRadius: 4, cursor: 'pointer', marginBottom: 12,
             position: 'relative', overflow: 'hidden',
           }}
@@ -232,43 +233,44 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
             borderRadius: 4, transition: 'width 0.1s',
           }} />
           {/* Thumb */}
-          <div style={{
+          <div className="video-progress-thumb" style={{
             position: 'absolute', top: '50%', left: `${progressPct}%`,
             transform: 'translate(-50%,-50%)',
-            width: 12, height: 12, borderRadius: '50%',
+            width: 14, height: 14, borderRadius: '50%',
             background: '#fff', boxShadow: '0 0 8px rgba(99,102,241,0.8)',
             transition: 'left 0.1s',
           }} />
         </div>
 
         {/* Controls Row */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+        <div className="video-controls-row" style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
           {/* Play/Pause */}
-          <button onClick={togglePlay} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', padding: 4 }}>
-            {playing ? <Pause size={22} /> : <Play size={22} />}
+          <button onClick={togglePlay} className="video-control-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', padding: 8, minWidth: 44, minHeight: 44 }}>
+            {playing ? <Pause size={24} /> : <Play size={24} />}
           </button>
 
           {/* Volume */}
-          <button onClick={toggleMute} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', padding: 4 }}>
-            {muted || volume === 0 ? <VolumeX size={18} /> : <Volume2 size={18} />}
+          <button onClick={toggleMute} className="video-control-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', padding: 8, minWidth: 44, minHeight: 44 }}>
+            {muted || volume === 0 ? <VolumeX size={20} /> : <Volume2 size={20} />}
           </button>
           <input
             type="range" min={0} max={1} step={0.05}
             value={muted ? 0 : volume}
             onChange={handleVolume}
-            style={{ width: 72, accentColor: 'var(--accent-blue)', cursor: 'pointer' }}
+            className="video-volume-slider"
+            style={{ width: 80, accentColor: 'var(--accent-blue)', cursor: 'pointer' }}
           />
 
           {/* Time */}
-          <span style={{ fontSize: 12, color: 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums', marginLeft: 4 }}>
+          <span className="video-time-display" style={{ fontSize: 13, color: 'rgba(255,255,255,0.7)', fontVariantNumeric: 'tabular-nums', marginLeft: 4 }}>
             {formatTime(currentTime)} / {formatTime(duration)}
           </span>
 
           <div style={{ flex: 1 }} />
 
           {/* Fullscreen */}
-          <button onClick={toggleFullscreen} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', padding: 4 }}>
-            {fullscreen ? <Minimize size={18} /> : <Maximize size={18} />}
+          <button onClick={toggleFullscreen} className="video-control-btn" style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#fff', display: 'flex', padding: 8, minWidth: 44, minHeight: 44 }}>
+            {fullscreen ? <Minimize size={20} /> : <Maximize size={20} />}
           </button>
         </div>
       </div>

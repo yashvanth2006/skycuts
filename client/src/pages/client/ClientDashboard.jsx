@@ -52,8 +52,8 @@ export default function ClientDashboard() {
       <Navbar />
 
       {/* Ambient glow orbs */}
-      <div className="glow-orb" style={{ width: 500, height: 500, background: 'var(--accent-blue)', top: -200, right: -150 }} />
-      <div className="glow-orb" style={{ width: 300, height: 300, background: 'var(--accent-purple)', bottom: 100, left: -100 }} />
+      <div className="glow-orb client-glow-left" style={{ width: 500, height: 500, background: 'var(--accent-blue)', top: -200, right: -150 }} />
+      <div className="glow-orb client-glow-right" style={{ width: 300, height: 300, background: 'var(--accent-purple)', bottom: 100, left: -100 }} />
 
       <main className="content-area" style={{ position: 'relative', zIndex: 1, paddingTop: 40 }}>
         {/* Welcome Hero */}
@@ -61,7 +61,8 @@ export default function ClientDashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.6 }}
-          style={{ marginBottom: 48, textAlign: 'center' }}
+          className="client-hero"
+          style={{ marginBottom: 32, textAlign: 'center' }}
         >
           <div style={{
             display: 'inline-flex', alignItems: 'center', gap: 8,
@@ -72,7 +73,7 @@ export default function ClientDashboard() {
             <span style={{ fontSize: 13, color: 'var(--accent-indigo)', fontWeight: 500 }}>Your Studio Portal</span>
           </div>
 
-          <h1 style={{ fontSize: 36, fontWeight: 700, marginBottom: 12, letterSpacing: '-0.03em' }}>
+          <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 12, letterSpacing: '-0.03em' }}>
             Welcome back,{' '}
             <span style={{
               background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-luma))',
@@ -81,7 +82,7 @@ export default function ClientDashboard() {
               {user?.name?.split(' ')[0]}
             </span>
           </h1>
-          <p style={{ fontSize: 16, color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8 }}>
+          <p className="client-hero-desc" style={{ fontSize: 14, color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 8, flexDirection: 'column' }}>
             Review your video deliverables, leave time-stamped feedback, and download your final files.
             {!showTour && (
               <button

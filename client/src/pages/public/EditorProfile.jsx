@@ -681,18 +681,21 @@ export default function EditorProfile() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.8 }}
-            style={{ display: "flex", gap: 12, pointerEvents: "all", flexWrap: "wrap", justifyContent: "center" }}
+            className="hero-cta-buttons"
+            style={{ display: "flex", flexDirection: "column", gap: 10, pointerEvents: "all", alignItems: "stretch" }}
           >
             <button
               onClick={() => document.getElementById("portfolio-grid").scrollIntoView({ behavior: "smooth" })}
+              className="hero-cta-button"
               style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "12px 24px", borderRadius: 6,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                padding: "14px 20px", borderRadius: 8,
                 background: dv.blue, color: "#fff",
                 border: "none", cursor: "pointer",
-                fontSize: 14, fontWeight: 600,
+                fontSize: 15, fontWeight: 600,
                 fontFamily: "'Inter', system-ui",
                 transition: "all 0.2s ease",
+                width: "100%",
               }}
               onMouseEnter={e => e.currentTarget.style.background = dv.blueL}
               onMouseLeave={e => e.currentTarget.style.background = dv.blue}
@@ -702,15 +705,17 @@ export default function EditorProfile() {
             {!isEditor ? (
               <button
                 onClick={() => setRequestModalOpen(true)}
+                className="hero-cta-button"
                 style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "12px 24px", borderRadius: 6,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  padding: "14px 20px", borderRadius: 8,
                   background: dv.amber, color: "#111",
                   border: "none", cursor: "pointer",
-                  fontSize: 14, fontWeight: 600,
+                  fontSize: 15, fontWeight: 600,
                   fontFamily: "'Inter', system-ui",
                   transition: "all 0.2s ease",
                   boxShadow: "0 0 20px rgba(245,166,35,0.4)",
+                  width: "100%",
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = dv.amberL; e.currentTarget.style.boxShadow = "0 0 30px rgba(245,166,35,0.6)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = dv.amber; e.currentTarget.style.boxShadow = "0 0 20px rgba(245,166,35,0.4)"; }}
@@ -720,15 +725,17 @@ export default function EditorProfile() {
             ) : (
               <button
                 onClick={() => document.getElementById("studio-workspace")?.scrollIntoView({ behavior: "smooth" })}
+                className="hero-cta-button"
                 style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "12px 24px", borderRadius: 6,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  padding: "14px 20px", borderRadius: 8,
                   background: dv.amber, color: "#111",
                   border: "none", cursor: "pointer",
-                  fontSize: 14, fontWeight: 600,
+                  fontSize: 15, fontWeight: 600,
                   fontFamily: "'Inter', system-ui",
                   transition: "all 0.2s ease",
                   boxShadow: "0 0 20px rgba(245,166,35,0.4)",
+                  width: "100%",
                 }}
                 onMouseEnter={e => { e.currentTarget.style.background = dv.amberL; e.currentTarget.style.boxShadow = "0 0 30px rgba(245,166,35,0.6)"; }}
                 onMouseLeave={e => { e.currentTarget.style.background = dv.amber; e.currentTarget.style.boxShadow = "0 0 20px rgba(245,166,35,0.4)"; }}
@@ -737,14 +744,16 @@ export default function EditorProfile() {
               </button>
             )}
             <button
+              className="hero-cta-button"
               style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "12px 24px", borderRadius: 6,
+                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                padding: "14px 20px", borderRadius: 8,
                 background: "transparent", color: dv.gray1,
                 border: `1px solid ${dv.gray3}`, cursor: "pointer",
-                fontSize: 14, fontWeight: 500,
+                fontSize: 15, fontWeight: 500,
                 fontFamily: "'Inter', system-ui",
                 transition: "all 0.2s ease",
+                width: "100%",
               }}
               onMouseEnter={e => { e.currentTarget.style.borderColor = dv.amber; e.currentTarget.style.color = dv.amber; }}
               onMouseLeave={e => { e.currentTarget.style.borderColor = dv.gray3; e.currentTarget.style.color = dv.gray1; }}
@@ -755,9 +764,9 @@ export default function EditorProfile() {
         </div>
 
         {/* Corner technical decoration — top left */}
-        <div style={{
-          position: "absolute", top: 20, left: 24, zIndex: 2,
-          display: "flex", flexDirection: "column", gap: 4,
+        <div className="hero-tech-decoration-left" style={{
+          position: "absolute", top: 20, left: 16, zIndex: 2,
+          flexDirection: "column", gap: 4,
         }}>
           {["NODE / 17", "CONN / 19", "FPS  / 24"].map((t, i) => (
             <motion.p
@@ -777,9 +786,9 @@ export default function EditorProfile() {
         </div>
 
         {/* Corner technical decoration — bottom right */}
-        <div style={{
-          position: "absolute", bottom: 60, right: 24, zIndex: 2,
-          display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end",
+        <div className="hero-tech-decoration-right" style={{
+          position: "absolute", bottom: 60, right: 16, zIndex: 2,
+          flexDirection: "column", gap: 4, alignItems: "flex-end",
         }}>
           {["COLOR SCIENCE: DaVinci Wide Gamut", "GRADE: ACES AP0", "OUTPUT: P3-D65"].map((t, i) => (
             <motion.p
@@ -804,14 +813,14 @@ export default function EditorProfile() {
         <section
           id="studio-workspace"
           style={{
-            padding: "40px 24px",
+            padding: "32px 16px",
             background: dv.bg0,
             borderBottom: `1px solid ${dv.border}`,
           }}
         >
           <div style={{ maxWidth: 1400, margin: "0 auto" }}>
             {/* Workspace Toggle */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
+            <div className="workspace-header" style={{ display: "flex", flexDirection: "column", gap: 16, marginBottom: 24 }}>
               <div>
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
@@ -838,13 +847,15 @@ export default function EditorProfile() {
               </div>
               <button
                 onClick={() => setModalOpen(true)}
+                className="workspace-new-project-btn"
                 style={{
-                  display: "flex", alignItems: "center", gap: 8,
-                  padding: "12px 24px", borderRadius: 8,
+                  display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
+                  padding: "14px 20px", borderRadius: 8,
                   background: dv.blue, color: "#fff",
                   border: "none", cursor: "pointer",
-                  fontSize: 14, fontWeight: 600,
+                  fontSize: 15, fontWeight: 600,
                   transition: "all 0.2s ease",
+                  width: "100%",
                 }}
                 onMouseEnter={e => e.currentTarget.style.background = dv.blueL}
                 onMouseLeave={e => e.currentTarget.style.background = dv.blue}
@@ -854,31 +865,32 @@ export default function EditorProfile() {
             </div>
 
             {/* Stats Grid */}
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(200px,1fr))", gap: 16, marginBottom: 36 }}>
+            <div className="workspace-stats-grid" style={{ display: "grid", gridTemplateColumns: "repeat(2,1fr)", gap: 12, marginBottom: 24 }}>
               {stats.map((s, i) => (
                 <motion.div
                   key={s.label}
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: i * 0.08, duration: 0.45 }}
+                  className="workspace-stat-card"
                   style={{
-                    padding: "22px 24px",
+                    padding: "16px",
                     background: dv.bg1,
                     border: `1px solid ${dv.border}`,
-                    borderRadius: 12,
-                    display: "flex", alignItems: "center", gap: 16,
+                    borderRadius: 10,
+                    display: "flex", alignItems: "center", gap: 12,
                   }}
                 >
-                  <div style={{
-                    width: 48, height: 48, borderRadius: 14, flexShrink: 0,
+                  <div className="workspace-stat-icon" style={{
+                    width: 40, height: 40, borderRadius: 10, flexShrink: 0,
                     background: `${s.color}18`, border: `1px solid ${s.color}30`,
                     display: "flex", alignItems: "center", justifyContent: "center",
                   }}>
-                    <s.icon size={22} color={s.color} />
+                    <s.icon size={18} color={s.color} />
                   </div>
                   <div>
                     <p style={{ fontSize: 12, color: dv.gray2, fontWeight: 500, marginBottom: 3 }}>{s.label}</p>
-                    <p style={{ fontSize: 26, fontWeight: 700, color: dv.white, letterSpacing: "-0.03em" }}>{s.value}</p>
+                    <p className="workspace-stat-value" style={{ fontSize: 20, fontWeight: 700, color: dv.white, letterSpacing: "-0.03em" }}>{s.value}</p>
                   </div>
                 </motion.div>
               ))}
@@ -926,7 +938,7 @@ export default function EditorProfile() {
                   </motion.div>
                   <p style={{ fontSize: 13, color: dv.gray2 }}>{pendingRequests.length} request{pendingRequests.length !== 1 ? 's' : ''} pending</p>
                 </div>
-                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill,minmax(320px,1fr))", gap: 16 }}>
+                <div className="requests-grid" style={{ display: "grid", gridTemplateColumns: "1fr", gap: 12 }}>
                   {pendingRequests.map((request, i) => (
                     <motion.div
                       key={request._id}

@@ -189,12 +189,13 @@ function NodeGraphScene() {
 
 // --- Main export ---
 export default function DaVinciNodeTree() {
+  const isMobile = window.innerWidth < 768;
   return (
     <Canvas
-      camera={{ position: [0, 0, 7], fov: 55 }}
-      gl={{ antialias: true, alpha: true }}
+      camera={{ position: [0, 0, isMobile ? 9 : 7], fov: 55 }}
+      gl={{ antialias: !isMobile, alpha: true }}
       style={{ background: "transparent" }}
-      dpr={[1, 1.5]}
+      dpr={[1, isMobile ? 1 : 1.5]}
     >
       <ambientLight intensity={0.15} />
       <pointLight position={[0, 0, 5]}  intensity={2.5} color="#2F74D0" />
@@ -202,9 +203,13 @@ export default function DaVinciNodeTree() {
       <pointLight position={[4, -3, 2]} intensity={1.2} color="#4A9EFF" />
       <pointLight position={[0, 5, 0]}  intensity={0.8} color="#ffffff" />
 
-      <GradingWheelRing radius={4.8} tubeRadius={0.008} rotX={Math.PI / 2.5} rotZ={0}            color="#2F74D0" speed={0.04}  opacity={0.18} />
-      <GradingWheelRing radius={5.5} tubeRadius={0.006} rotX={Math.PI / 3}   rotZ={Math.PI / 5} color="#F5A623" speed={-0.03} opacity={0.12} />
-      <GradingWheelRing radius={6.2} tubeRadius={0.005} rotX={Math.PI / 4}   rotZ={Math.PI / 3} color="#2F74D0" speed={0.025} opacity={0.08} />
+      {!isMobile && (
+        <>
+          <GradingWheelRing radius={4.8} tubeRadius={0.008} rotX={Math.PI / 2.5} rotZ={0}            color="#2F74D0" speed={0.04}  opacity={0.18} />
+          <GradingWheelRing radius={5.5} tubeRadius={0.006} rotX={Math.PI / 3}   rotZ={Math.PI / 5} color="#F5A623" speed={-0.03} opacity={0.12} />
+          <GradingWheelRing radius={6.2} tubeRadius={0.005} rotX={Math.PI / 4}   rotZ={Math.PI / 3} color="#2F74D0" speed={0.025} opacity={0.08} />
+        </>
+      )}
 
       <NodeGraphScene />
       <GridFloor />

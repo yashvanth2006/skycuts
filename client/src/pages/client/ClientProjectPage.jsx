@@ -164,7 +164,8 @@ export default function ClientProjectPage() {
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}
+          className="project-header"
+          style={{ display: 'flex', flexDirection: 'column', gap: 12, marginBottom: 20 }}
         >
           <div>
             <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
@@ -177,7 +178,7 @@ export default function ClientProjectPage() {
           </div>
 
           {/* Action Buttons */}
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+          <div className="project-action-buttons" style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
             {['awaiting_assets', 'in_progress'].includes(project.status) && (
               <button onClick={() => setAssetModal(true)} className="btn-ghost" id="submit-assets-btn" style={{ padding: '8px 16px', fontSize: 13 }}>
                 <Link2 size={14} /> Submit Raw Assets
@@ -212,7 +213,7 @@ export default function ClientProjectPage() {
         )}
 
         {/* Main Grid */}
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16, alignItems: 'start' }}>
+        <div className="project-layout-grid" style={{ display: 'grid', gridTemplateColumns: '1fr', gap: 16, alignItems: 'start' }}>
 
           {/* Left — Player */}
           <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}>
@@ -287,7 +288,8 @@ export default function ClientProjectPage() {
             initial={{ opacity: 0, x: 16 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2 }}
-            style={{ height: 600, position: 'sticky', top: 80, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}
+            className="project-comments-sidebar"
+            style={{ height: 500, position: 'relative', borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}
           >
             {deliverable ? (
               <CommentSidebar

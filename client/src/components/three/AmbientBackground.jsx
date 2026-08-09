@@ -31,7 +31,7 @@ function AmbientSphere({ position, color, speed, distort, radius }) {
 }
 
 // ─── Floating Particles ──────────────────────────────────────────────────────
-function Particles({ count = 120 }) {
+function Particles({ count = 120, isMobile = false }) {
   const mesh = useRef();
   const positions = useMemo(() => {
     const arr = new Float32Array(count * 3);
@@ -56,7 +56,7 @@ function Particles({ count = 120 }) {
         <bufferAttribute attach="attributes-position" args={[positions, 3]} />
       </bufferGeometry>
       <pointsMaterial
-        size={0.04}
+        size={isMobile ? 0.06 : 0.04}
         color="#6366f1"
         transparent
         opacity={0.7}
@@ -70,6 +70,7 @@ function Particles({ count = 120 }) {
 export default function AmbientBackground() {
   const { theme } = useTheme();
   const isLight = theme === 'light';
+  const isMobile = window.innerWidth < 768;
 
   return (
     <div style={{
@@ -109,8 +110,8 @@ export default function AmbientBackground() {
           radius={1}
         />
 
-        <Particles count={150} />
-        <Stars radius={60} depth={30} count={800} factor={3} fade speed={0.5} />
+        <Particles count={isMobile ? 60 : 150} isMobile={isMobile} />
+        <Stars radius={isMobile ? 40 : 60} depth={isMobile ? 20 : 30} count={isMobile ? 400 : 800} factor={3} fade speed={0.5} />
       </Canvas>
     </div>
   );

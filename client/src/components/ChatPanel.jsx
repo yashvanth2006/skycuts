@@ -93,8 +93,9 @@ export default function ChatPanel({ projectId }) {
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setOpen(true)}
+        className="chat-fab"
         style={{
-          position: 'fixed', bottom: 28, right: 28, zIndex: 150,
+          position: 'fixed', bottom: 20, right: 20, zIndex: 150,
           width: 56, height: 56, borderRadius: '50%', border: 'none',
           background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
           color: '#fff', cursor: 'pointer',
@@ -125,9 +126,10 @@ export default function ChatPanel({ projectId }) {
             animate={{ x: 0, opacity: 1 }}
             exit={{ x: '100%', opacity: 0 }}
             transition={{ type: 'spring', damping: 28, stiffness: 280 }}
+            className="chat-panel"
             style={{
-              position: 'fixed', top: 64, right: 0, bottom: 0, zIndex: 150,
-              width: 360, display: 'flex', flexDirection: 'column',
+              position: 'fixed', top: 56, right: 0, bottom: 0, zIndex: 150,
+              width: '100%', display: 'flex', flexDirection: 'column',
               background: 'rgba(8,8,16,0.9)',
               backdropFilter: 'blur(24px)',
               WebkitBackdropFilter: 'blur(24px)',
@@ -136,9 +138,9 @@ export default function ChatPanel({ projectId }) {
             }}
           >
             {/* Header */}
-            <div style={{
+            <div className="chat-header" style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              padding: '16px 20px',
+              padding: '16px',
               borderBottom: '1px solid var(--border-subtle)',
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
@@ -156,15 +158,16 @@ export default function ChatPanel({ projectId }) {
               </div>
               <button
                 onClick={() => setOpen(false)}
-                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}
+                className="chat-close-btn"
+                style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 8, minWidth: 40, minHeight: 40 }}
                 aria-label="Close chat"
               >
-                <X size={20} />
+                <X size={22} />
               </button>
             </div>
 
             {/* Messages */}
-            <div style={{ flex: 1, overflowY: 'auto', padding: '16px 20px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+            <div className="chat-messages" style={{ flex: 1, overflowY: 'auto', padding: '16px', display: 'flex', flexDirection: 'column', gap: 12 }}>
               {loading && (
                 <div style={{ display: 'flex', justifyContent: 'center', padding: 20 }}>
                   <Loader2 size={20} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
@@ -231,8 +234,9 @@ export default function ChatPanel({ projectId }) {
             {/* Input */}
             <form
               onSubmit={handleSend}
+              className="chat-input-form"
               style={{
-                display: 'flex', gap: 10, padding: '14px 16px',
+                display: 'flex', gap: 10, padding: '12px 16px',
                 borderTop: '1px solid var(--border-subtle)',
               }}
             >
@@ -248,8 +252,9 @@ export default function ChatPanel({ projectId }) {
               <button
                 type="submit"
                 disabled={!text.trim() || sending}
+                className="chat-send-btn"
                 style={{
-                  width: 42, height: 42, borderRadius: '50%', border: 'none',
+                  width: 48, height: 48, borderRadius: '50%', border: 'none',
                   background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
                   color: '#fff', cursor: 'pointer', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',

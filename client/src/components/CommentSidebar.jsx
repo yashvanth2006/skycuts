@@ -59,8 +59,8 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
       WebkitBackdropFilter: 'blur(20px)',
     }}>
       {/* Header */}
-      <div style={{
-        padding: '14px 16px', borderBottom: '1px solid var(--border-subtle)',
+      <div className="comment-header" style={{
+        padding: '12px', borderBottom: '1px solid var(--border-subtle)',
         display: 'flex', alignItems: 'center', gap: 8,
       }}>
         <div style={{
@@ -78,7 +78,7 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
       </div>
 
       {/* Comment List */}
-      <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
+      <div className="comment-list" style={{ flex: 1, overflowY: 'auto', padding: '10px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'center', padding: 16 }}>
             <Loader2 size={18} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
@@ -101,8 +101,9 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: 10 }}
               transition={{ delay: i * 0.03, duration: 0.22 }}
+              className="comment-item"
               style={{
-                padding: '10px 11px', borderRadius: 10,
+                padding: '12px', borderRadius: 10,
                 background: 'rgba(255,255,255,0.03)',
                 border: '1px solid var(--border-subtle)',
                 cursor: 'pointer',
@@ -125,7 +126,7 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
                 </span>
               </div>
 
-              <p style={{ fontSize: 12, color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 6 }}>
+              <p className="comment-text" style={{ fontSize: 13, color: 'var(--text-primary)', lineHeight: 1.5, marginBottom: 6 }}>
                 {c.text}
               </p>
 
@@ -146,10 +147,11 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
                 {canDelete && (
                   <button
                     onClick={(e) => { e.stopPropagation(); handleDelete(c._id); }}
-                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 2 }}
+                    className="comment-delete-btn"
+                    style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)', padding: 6, minWidth: 32, minHeight: 32 }}
                     aria-label="Delete comment"
                   >
-                    <Trash2 size={11} />
+                    <Trash2 size={13} />
                   </button>
                 )}
               </div>
@@ -160,7 +162,7 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
       </div>
 
       {/* Add Comment Form */}
-      <div style={{ padding: '11px 12px', borderTop: '1px solid var(--border-subtle)' }}>
+      <div className="comment-form-container" style={{ padding: '12px', borderTop: '1px solid var(--border-subtle)' }}>
         <div style={{
           padding: '6px 10px', borderRadius: 8,
           background: 'rgba(99,102,241,0.07)',
@@ -177,14 +179,15 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
             value={text}
             onChange={e => setText(e.target.value)}
             placeholder="Add a note…"
-            className="input-field"
-            style={{ flex: 1, padding: '8px 12px', borderRadius: 8, fontSize: 12 }}
+            className="input-field comment-input"
+            style={{ flex: 1, padding: '10px 12px', borderRadius: 8, fontSize: 13 }}
           />
           <button
             type="submit"
             disabled={!text.trim() || submitting}
+            className="comment-submit-btn"
             style={{
-              width: 34, height: 34, borderRadius: 8, border: 'none',
+              width: 40, height: 40, borderRadius: 8, border: 'none',
               background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
               color: '#fff', cursor: 'pointer', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',

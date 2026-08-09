@@ -96,6 +96,7 @@ export default function NotificationCenter() {
     <div style={{ position: 'relative' }}>
       <button
         onClick={() => { setIsOpen(!isOpen); if (!isOpen) fetchNotifications(); }}
+        className="notification-bell-btn"
         style={{
           position: 'relative',
           background: 'none',
@@ -105,6 +106,8 @@ export default function NotificationCenter() {
           borderRadius: 8,
           color: 'var(--text-secondary)',
           transition: 'all 0.2s',
+          minWidth: 40,
+          minHeight: 40,
         }}
         onMouseEnter={e => e.currentTarget.style.background = 'var(--bg-glass)'}
         onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
@@ -148,12 +151,14 @@ export default function NotificationCenter() {
               animate={{ opacity: 1, y: 0, scale: 1 }}
               exit={{ opacity: 0, y: -10, scale: 0.95 }}
               transition={{ duration: 0.2 }}
+              className="notification-dropdown"
               style={{
                 position: 'absolute',
                 top: '100%',
                 right: 0,
                 marginTop: 8,
-                width: 380,
+                width: '100%',
+                maxWidth: 380,
                 maxHeight: 500,
                 background: 'var(--bg-card)',
                 backdropFilter: 'blur(20px)',
@@ -165,8 +170,8 @@ export default function NotificationCenter() {
                 boxShadow: '0 20px 40px rgba(0,0,0,0.3)',
               }}
             >
-              <div style={{
-                padding: '16px 20px',
+              <div className="notification-header" style={{
+                padding: '14px 16px',
                 borderBottom: '1px solid var(--border-subtle)',
                 display: 'flex',
                 alignItems: 'center',
@@ -209,8 +214,9 @@ export default function NotificationCenter() {
                       animate={{ opacity: 1, x: 0 }}
                       transition={{ delay: i * 0.05 }}
                       onClick={() => { if (!notif.read) handleMarkAsRead(notif._id); }}
+                      className="notification-item"
                       style={{
-                        padding: '14px 20px',
+                        padding: '14px 16px',
                         borderBottom: '1px solid var(--border-subtle)',
                         cursor: 'pointer',
                         background: notif.read ? 'transparent' : 'rgba(99,102,241,0.05)',
