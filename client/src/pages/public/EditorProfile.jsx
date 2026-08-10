@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
 import {
   Monitor, Film, Layers, Cpu, Star, Award, Clock,
-  Play, ChevronRight, Globe, Mail, Zap, Eye, Download,
+  Play, ChevronRight, Globe, Mail, Zap, Eye,
   Shield, Video, MonitorPlay, ArrowRight
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
@@ -562,21 +562,6 @@ export default function EditorProfile() {
               onMouseLeave={e => e.currentTarget.style.background = dv.blue}
             >
               <Play size={15} /> View Portfolio
-            </button>
-            <button
-              style={{
-                display: "flex", alignItems: "center", gap: 8,
-                padding: "12px 24px", borderRadius: 6,
-                background: "transparent", color: dv.gray1,
-                border: `1px solid ${dv.gray3}`, cursor: "pointer",
-                fontSize: 14, fontWeight: 500,
-                fontFamily: "'Inter', system-ui",
-                transition: "all 0.2s ease",
-              }}
-              onMouseEnter={e => { e.currentTarget.style.borderColor = dv.amber; e.currentTarget.style.color = dv.amber; }}
-              onMouseLeave={e => { e.currentTarget.style.borderColor = dv.gray3; e.currentTarget.style.color = dv.gray1; }}
-            >
-              <Download size={15} /> Download Reel
             </button>
           </motion.div>
         </div>
