@@ -14,15 +14,12 @@ api.interceptors.request.use((config) => {
     return config;
 });
 
-// Global error handling
+// Global error handling - do not auto-redirect on 401
+// Public APIs can legitimately return 401 for unauthenticated requests
+// Protected routes should handle 401 errors individually
 api.interceptors.response.use(
     (res) => res,
     (err) => {
-        if (err.response?.status === 401) {
-            localStorage.removeItem('skycuts_user');
-            localStorage.removeItem('skycuts_token');
-            window.location.href = '/login';
-        }
         return Promise.reject(err);
     }
 );

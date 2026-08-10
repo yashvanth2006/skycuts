@@ -48,7 +48,7 @@ const FullPageLoader = () => (
 const RootRedirect = () => {
   const { user, loading } = useAuth();
   if (loading) return <FullPageLoader />;
-  if (!user) return <Navigate to="/login" replace />;
+  if (!user) return <Navigate to="/profile" replace />;
   if (user.role === 'admin') return <Navigate to="/admin" replace />;
   return <Navigate to="/dashboard" replace />;
 };
