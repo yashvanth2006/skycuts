@@ -557,11 +557,30 @@ export default function EditorProfile() {
                 fontSize: 14, fontWeight: 600,
                 fontFamily: "'Inter', system-ui",
                 transition: "all 0.2s ease",
+                minHeight: 44,
               }}
               onMouseEnter={e => e.currentTarget.style.background = dv.blueL}
               onMouseLeave={e => e.currentTarget.style.background = dv.blue}
             >
               <Play size={15} /> View Portfolio
+            </button>
+            <button
+              onClick={() => setAuthModalOpen(true)}
+              style={{
+                display: "flex", alignItems: "center", gap: 8,
+                padding: "12px 24px", borderRadius: 6,
+                background: dv.amber, color: "#111",
+                border: "none", cursor: "pointer",
+                fontSize: 14, fontWeight: 700,
+                fontFamily: "'Inter', system-ui",
+                letterSpacing: "0.02em",
+                transition: "all 0.2s ease",
+                minHeight: 44,
+              }}
+              onMouseEnter={e => e.currentTarget.style.background = dv.amberL}
+              onMouseLeave={e => e.currentTarget.style.background = dv.amber}
+            >
+              START PROJECT <ArrowRight size={16} />
             </button>
           </motion.div>
         </div>
