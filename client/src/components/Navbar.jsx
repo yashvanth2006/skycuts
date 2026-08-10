@@ -44,7 +44,13 @@ export default function Navbar({ showBack = false }) {
           </button>
         )}
         <button
-          onClick={() => navigate(user?.role === 'admin' ? '/admin' : '/dashboard')}
+          onClick={() => {
+            if (user) {
+              navigate(user.role === 'admin' ? '/admin' : '/dashboard');
+            } else {
+              navigate('/profile');
+            }
+          }}
           style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}
         >
           <div style={{
