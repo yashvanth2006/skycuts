@@ -1,9 +1,11 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Zap, LogIn, UserPlus, Loader2 } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import AmbientBackground from '../components/three/AmbientBackground.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
+import { useTheme } from '../context/ThemeContext.jsx';
 import api from '../api/axiosInstance.js';
 
 const MotionDiv = motion.div;
@@ -17,15 +19,21 @@ const fadeUp = {
 };
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, loginWithGoogle, user } = useAuth();
+  const { isDark } = useTheme();
   const navigate = useNavigate();
+  const location = useLocation();
 
   const [mode, setMode]       = useState('login'); // 'login' | 'register'
   const [showPw, setShowPw]   = useState(false);
   const [loading, setLoading] = useState(false);
+  const [googleLoading, setGoogleLoading] = useState(false);
   const [error, setError]     = useState('');
 
   const [form, setForm] = useState({ name: '', email: '', password: '' });
+
+  // Check if user came from START PROJECT button
+  const fromStartProject = location.state?.from === 'start-project';
 
   const handleChange = (e) => {
     setForm(p => ({ ...p, [e.target.name]: e.target.value }));
@@ -45,11 +53,36 @@ export default function LoginPage() {
       const { data } = await api.post(endpoint, payload);
       const { token, ...userData } = data;
       login(userData, token);
-      navigate(userData.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+      
+      // Handle redirect after login
+      if (fromStartProject) {
+        navigate('/profile', { state: { openProjectRequest: true }, replace: true });
+      } else {
+        navigate(userData.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong. Try again.');
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleGoogleSuccess = async (credentialResponse) => {
+    try {
+      setGoogleLoading(true);
+      setError('');
+      const data = await loginWithGoogle(credentialResponse.credential);
+      
+      // Handle redirect after Google login
+      if (fromStartProject) {
+        navigate('/profile', { state: { openProjectRequest: true }, replace: true });
+      } else {
+        navigate(data.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+      }
+    } catch (err) {
+      setError('Google sign-in failed. Please try again.');
+    } finally {
+      setGoogleLoading(false);
     }
   };
 
@@ -233,6 +266,29 @@ export default function LoginPage() {
                   <><UserPlus size={18} /> Create Account</>
                 )}
               </button>
+            </MotionDiv>
+
+            {/* Google Sign In */}
+            <MotionDiv custom={4.5} variants={fadeUp} initial="hidden" animate="visible" style={{ marginTop: 16 }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
+                <span style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.08em' }}>Or continue with</span>
+                <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'center', minHeight: 44 }}>
+                {googleLoading ? (
+                  <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>Signing in...</span>
+                ) : (
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setError('Google sign-in failed.')}
+                    theme={isDark ? 'filled_black' : 'outline'}
+                    size="large"
+                    text="continue_with"
+                    shape="rectangular"
+                  />
+                )}
+              </div>
             </MotionDiv>
           </form>
 

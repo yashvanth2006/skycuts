@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { motion, useInView } from "framer-motion";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
   Monitor, Film, Layers, Cpu, Star, Award, Clock,
   Play, ChevronRight, Globe, Mail, Zap, Eye,
@@ -8,6 +9,7 @@ import {
 import Navbar from "../../components/Navbar.jsx";
 import DaVinciNodeTree from "../../components/three/DaVinciNodeTree.jsx";
 import GoogleAuthModal from "../../components/GoogleAuthModal.jsx";
+import { useAuth } from "../../context/AuthContext.jsx";
 
 // ─── DaVinci Resolve-inspired color palette (locked dark) ──────────────────
 const dv = {
@@ -360,10 +362,20 @@ function StatTile({ stat, delay }) {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function EditorProfile() {
+  const { user } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [portfolio, setPortfolio] = useState([]);
   const [portfolioLoading, setPortfolioLoading] = useState(true);
   const [portfolioError, setPortfolioError] = useState(false);
+
+  // Check if user should open project request modal after login
+  useEffect(() => {
+    if (location.state?.openProjectRequest) {
+      setAuthModalOpen(true);
+    }
+  }, [location.state]);
 
   useEffect(() => {
     const fetchPortfolio = async () => {
@@ -383,6 +395,16 @@ export default function EditorProfile() {
     };
     fetchPortfolio();
   }, []);
+
+  const handleStartProject = () => {
+    if (user) {
+      // Already authenticated - open project request modal directly
+      setAuthModalOpen(true);
+    } else {
+      // Not authenticated - navigate to login with redirect state
+      navigate('/login', { state: { from: 'start-project' } });
+    }
+  };
 
   return (
     <div style={{
@@ -565,7 +587,7 @@ export default function EditorProfile() {
               <Play size={15} /> View Portfolio
             </button>
             <button
-              onClick={() => setAuthModalOpen(true)}
+              onClick={handleStartProject}
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "12px 24px", borderRadius: 6,
@@ -810,7 +832,7 @@ export default function EditorProfile() {
               ))}
             </div>
             <button
-              onClick={() => setAuthModalOpen(true)}
+              onClick={handleStartProject}
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "14px 28px", borderRadius: 6,
