@@ -2,6 +2,7 @@ import express from 'express';
 import {
     submitRequest,
     getRequests,
+    getMyRequests,
     getRequestById,
     acceptRequest,
     rejectRequest,
@@ -12,6 +13,9 @@ const router = express.Router();
 
 // Client submits a new request
 router.post('/', protect, clientOnly, submitRequest);
+
+// Client: own requests only
+router.get('/my', protect, clientOnly, getMyRequests);
 
 // Admin: all requests — Client: own requests only
 router.get('/', protect, getRequests);

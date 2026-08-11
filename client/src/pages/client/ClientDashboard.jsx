@@ -90,7 +90,7 @@ export default function ClientDashboard() {
             .catch(() => {})
             .finally(() => setLoadingProjects(false));
 
-        api.get('/project-requests')
+        api.get('/project-requests/my')
             .then(r => setRequests(r.data))
             .catch(() => {})
             .finally(() => setLoadingRequests(false));

@@ -2,7 +2,8 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     CheckCircle, XCircle, Clock, Loader2, Send,
-    FolderOpen, User, Mail, Phone, Calendar, ChevronRight
+    FolderOpen, User, Mail, Phone, Calendar, ChevronRight,
+    AlertCircle
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar.jsx';
@@ -153,11 +154,15 @@ export default function AdminDashboard() {
     const { user } = useAuth();
     const navigate = useNavigate();
     const [requests, setRequests] = useState([]);
+    const [projects, setProjects] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [activeTab, setActiveTab] = useState('requests'); // requests | projects
     const [filter, setFilter] = useState('all'); // all, pending, accepted, rejected
+    const [message, setMessage] = useState(null); // { type: 'success'|'error', text: string }
 
     useEffect(() => {
         fetchRequests();
+        fetchProjects();
     }, []);
 
     const fetchRequests = async () => {
@@ -172,22 +177,46 @@ export default function AdminDashboard() {
         }
     };
 
-    const handleAccept = async (id) => {
+    const fetchProjects = async () => {
         try {
-            await api.patch(`/project-requests/${id}/accept`);
+            const res = await api.get('/projects');
+            setProjects(res.data);
+        } catch (err) {
+            console.error('Failed to fetch projects:', err);
+        }
+    };
+
+    const handleAccept = async (id) => {
+        if (!window.confirm('Accept this project request?')) return;
+
+        try {
+            const res = await api.patch(`/project-requests/${id}/accept`);
             await fetchRequests();
+            await fetchProjects();
+            setMessage({ type: 'success', text: 'Project request accepted. Project created successfully.' });
+            setTimeout(() => setMessage(null), 4000);
         } catch (err) {
             console.error('Failed to accept request:', err);
+            const errorMsg = err.response?.data?.message || 'Failed to accept request';
+            setMessage({ type: 'error', text: errorMsg });
+            setTimeout(() => setMessage(null), 4000);
             throw err;
         }
     };
 
     const handleReject = async (id) => {
+        if (!window.confirm('Reject this project request?')) return;
+
         try {
             await api.patch(`/project-requests/${id}/reject`);
             await fetchRequests();
+            setMessage({ type: 'success', text: 'Project request rejected.' });
+            setTimeout(() => setMessage(null), 4000);
         } catch (err) {
             console.error('Failed to reject request:', err);
+            const errorMsg = err.response?.data?.message || 'Failed to reject request';
+            setMessage({ type: 'error', text: errorMsg });
+            setTimeout(() => setMessage(null), 4000);
             throw err;
         }
     };
@@ -207,6 +236,26 @@ export default function AdminDashboard() {
             <div className="glow-orb" style={{ width: 500, height: 500, background: 'var(--accent-blue)', top: -200, right: -150 }} />
             <div className="glow-orb" style={{ width: 300, height: 300, background: 'var(--accent-purple)', bottom: 100, left: -100 }} />
 
+            {/* Toast message */}
+            {message && (
+                <motion.div
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    style={{
+                        position: 'fixed', top: 80, left: '50%', transform: 'translateX(-50%)',
+                        zIndex: 1000, padding: '12px 20px', borderRadius: 8,
+                        background: message.type === 'success' ? 'rgba(34,197,94,0.95)' : 'rgba(239,68,68,0.95)',
+                        color: '#fff', fontSize: 14, fontWeight: 500,
+                        display: 'flex', alignItems: 'center', gap: 8,
+                        boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+                    }}
+                >
+                    {message.type === 'success' ? <CheckCircle size={16} /> : <AlertCircle size={16} />}
+                    {message.text}
+                </motion.div>
+            )}
+
             <main className="content-area" style={{ position: 'relative', zIndex: 1, paddingTop: 40 }}>
 
                 {/* Welcome hero */}
@@ -224,23 +273,21 @@ export default function AdminDashboard() {
                     </p>
                 </motion.div>
 
-                {/* Filter tabs */}
+                {/* Main tabs */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 28, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 0 }}>
                     {[
-                        { id: 'all', label: 'All Requests', icon: Send, count: requests.length },
-                        { id: 'pending', label: 'Pending', icon: Clock, count: pendingCount, badge: pendingCount > 0 },
-                        { id: 'accepted', label: 'Accepted', icon: CheckCircle, count: requests.filter(r => r.status === 'accepted').length },
-                        { id: 'rejected', label: 'Rejected', icon: XCircle, count: requests.filter(r => r.status === 'rejected').length },
+                        { id: 'requests', label: 'Project Requests', icon: Send, count: requests.length, badge: pendingCount > 0 },
+                        { id: 'projects', label: 'Projects', icon: FolderOpen, count: projects.length },
                     ].map(({ id, label, icon: Icon, count, badge }) => (
                         <button
                             key={id}
-                            onClick={() => setFilter(id)}
+                            onClick={() => setActiveTab(id)}
                             style={{
                                 display: 'flex', alignItems: 'center', gap: 7,
                                 padding: '10px 18px', border: 'none', background: 'none',
-                                fontSize: 14, fontWeight: filter === id ? 600 : 500,
-                                color: filter === id ? 'var(--text-primary)' : 'var(--text-muted)',
-                                borderBottom: filter === id ? '2px solid var(--accent-blue)' : '2px solid transparent',
+                                fontSize: 14, fontWeight: activeTab === id ? 600 : 500,
+                                color: activeTab === id ? 'var(--text-primary)' : 'var(--text-muted)',
+                                borderBottom: activeTab === id ? '2px solid var(--accent-blue)' : '2px solid transparent',
                                 marginBottom: -1, cursor: 'pointer', transition: 'all 0.15s ease',
                                 position: 'relative',
                             }}
@@ -251,50 +298,146 @@ export default function AdminDashboard() {
                                     padding: '1px 7px', borderRadius: 10, fontSize: 11, fontWeight: 700,
                                     background: 'var(--accent-blue)', color: '#fff', marginLeft: 2,
                                 }}>
-                                    {count}
+                                    {pendingCount}
                                 </span>
                             )}
                         </button>
                     ))}
                 </div>
 
-                {/* Requests list */}
-                {loading ? (
-                    <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-                        <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
-                    </div>
-                ) : filteredRequests.length === 0 ? (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card" style={{ textAlign: 'center', padding: '80px 20px' }}>
-                        <Send size={48} style={{ margin: '0 auto 20px', opacity: 0.15, display: 'block', color: 'var(--accent-indigo)' }} />
-                        <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>No requests found</h3>
-                        <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 340, margin: '0 auto 20px' }}>
-                            {filter === 'pending' ? 'No pending requests to review.' : 'No requests match the current filter.'}
-                        </p>
-                        {filter !== 'all' && (
-                            <button
-                                onClick={() => setFilter('all')}
-                                style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                                    padding: '10px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600,
-                                    background: 'var(--accent-blue)', color: '#fff', border: 'none', cursor: 'pointer',
-                                }}
-                            >
-                                View All <ChevronRight size={15} />
-                            </button>
+                {/* Requests tab */}
+                {activeTab === 'requests' && (
+                    <>
+                        {/* Filter tabs */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 28, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 0 }}>
+                            {[
+                                { id: 'all', label: 'All', icon: Send, count: requests.length },
+                                { id: 'pending', label: 'Pending', icon: Clock, count: pendingCount, badge: pendingCount > 0 },
+                                { id: 'accepted', label: 'Accepted', icon: CheckCircle, count: requests.filter(r => r.status === 'accepted').length },
+                                { id: 'rejected', label: 'Rejected', icon: XCircle, count: requests.filter(r => r.status === 'rejected').length },
+                            ].map(({ id, label, icon: Icon, count, badge }) => (
+                                <button
+                                    key={id}
+                                    onClick={() => setFilter(id)}
+                                    style={{
+                                        display: 'flex', alignItems: 'center', gap: 7,
+                                        padding: '8px 16px', border: 'none', background: 'none',
+                                        fontSize: 13, fontWeight: filter === id ? 600 : 500,
+                                        color: filter === id ? 'var(--text-primary)' : 'var(--text-muted)',
+                                        borderBottom: filter === id ? '2px solid var(--accent-blue)' : '2px solid transparent',
+                                        marginBottom: -1, cursor: 'pointer', transition: 'all 0.15s ease',
+                                        position: 'relative',
+                                    }}
+                                >
+                                    <Icon size={14} /> {label}
+                                    {badge && (
+                                        <span style={{
+                                            padding: '1px 7px', borderRadius: 10, fontSize: 11, fontWeight: 700,
+                                            background: 'var(--accent-blue)', color: '#fff', marginLeft: 2,
+                                        }}>
+                                            {count}
+                                        </span>
+                                    )}
+                                </button>
+                            ))}
+                        </div>
+
+                        {/* Requests list */}
+                        {loading ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+                                <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
+                            </div>
+                        ) : filteredRequests.length === 0 ? (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card" style={{ textAlign: 'center', padding: '80px 20px' }}>
+                                <Send size={48} style={{ margin: '0 auto 20px', opacity: 0.15, display: 'block', color: 'var(--accent-indigo)' }} />
+                                <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>No requests found</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 340, margin: '0 auto 20px' }}>
+                                    {filter === 'pending' ? 'No pending requests to review.' : 'No requests match the current filter.'}
+                                </p>
+                                {filter !== 'all' && (
+                                    <button
+                                        onClick={() => setFilter('all')}
+                                        style={{
+                                            display: 'inline-flex', alignItems: 'center', gap: 6,
+                                            padding: '10px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600,
+                                            background: 'var(--accent-blue)', color: '#fff', border: 'none', cursor: 'pointer',
+                                        }}
+                                    >
+                                        View All <ChevronRight size={15} />
+                                    </button>
+                                )}
+                            </motion.div>
+                        ) : (
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                                {filteredRequests.map((req, i) => (
+                                    <RequestCard
+                                        key={req._id}
+                                        req={req}
+                                        index={i}
+                                        onAccept={handleAccept}
+                                        onReject={handleReject}
+                                    />
+                                ))}
+                            </div>
+                        )}
+                    </>
+                )}
+
+                {/* Projects tab */}
+                {activeTab === 'projects' && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+                    >
+                        {loading ? (
+                            <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
+                                <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
+                            </div>
+                        ) : projects.length === 0 ? (
+                            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card" style={{ textAlign: 'center', padding: '80px 20px' }}>
+                                <FolderOpen size={48} style={{ margin: '0 auto 20px', opacity: 0.15, display: 'block', color: 'var(--accent-indigo)' }} />
+                                <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>No projects yet</h3>
+                                <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 340, margin: '0 auto' }}>
+                                    Accepted project requests will appear here.
+                                </p>
+                            </motion.div>
+                        ) : (
+                            projects.map((project, i) => (
+                                <motion.div
+                                    key={project._id}
+                                    initial={{ opacity: 0, y: 16 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    transition={{ delay: i * 0.05 }}
+                                    className="glass-card"
+                                    style={{ padding: '20px 24px', cursor: 'pointer' }}
+                                    onClick={() => navigate(`/admin/project/${project._id}`)}
+                                >
+                                    <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: 16 }}>
+                                        <div style={{ flex: 1, minWidth: 0 }}>
+                                            <h3 style={{ fontSize: 16, fontWeight: 600, margin: 0, marginBottom: 8 }}>
+                                                {project.title}
+                                            </h3>
+                                            <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 12, lineHeight: 1.5 }}>
+                                                {project.description || 'No description'}
+                                            </p>
+                                            {project.client && (
+                                                <div style={{ display: 'flex', alignItems: 'center', gap: 4, fontSize: 12, color: 'var(--text-muted)' }}>
+                                                    <User size={12} /> {project.client.name || project.client.email}
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 8, flexShrink: 0 }}>
+                                            <span style={{ fontSize: 11, color: 'var(--text-muted)' }}>
+                                                {new Date(project.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                                            </span>
+                                            <ChevronRight size={16} color="var(--accent-blue)" />
+                                        </div>
+                                    </div>
+                                </motion.div>
+                            ))
                         )}
                     </motion.div>
-                ) : (
-                    <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
-                        {filteredRequests.map((req, i) => (
-                            <RequestCard 
-                                key={req._id} 
-                                req={req} 
-                                index={i} 
-                                onAccept={handleAccept}
-                                onReject={handleReject}
-                            />
-                        ))}
-                    </div>
                 )}
             </main>
             <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>

@@ -41,12 +41,25 @@ export const getRequests = async (req, res) => {
         if (req.user.role === 'admin') {
             requests = await ProjectRequest.find({})
                 .populate('client', 'name email mobileNumber')
-                .sort({ createdAt: -1 });
+                .sort({ status: 1, createdAt: -1 });
         } else {
             requests = await ProjectRequest.find({ client: req.user._id })
                 .populate('client', 'name email mobileNumber')
                 .sort({ createdAt: -1 });
         }
+        res.json(requests);
+    } catch (err) {
+        res.status(500).json({ message: 'Server error fetching requests' });
+    }
+};
+
+// @desc  Get authenticated client's own requests only
+// @route GET /api/project-requests/my
+export const getMyRequests = async (req, res) => {
+    try {
+        const requests = await ProjectRequest.find({ client: req.user._id })
+            .populate('client', 'name email mobileNumber')
+            .sort({ createdAt: -1 });
         res.json(requests);
     } catch (err) {
         res.status(500).json({ message: 'Server error fetching requests' });
@@ -88,6 +101,12 @@ export const acceptRequest = async (req, res) => {
         }
         if (request.status !== 'pending') {
             return res.status(400).json({ message: `Request is already ${request.status}` });
+        }
+
+        // Check if a project already exists for this request
+        const existingProject = await Project.findOne({ projectRequest: request._id });
+        if (existingProject) {
+            return res.status(409).json({ message: 'Project already exists for this request' });
         }
 
         // Mark request as accepted
