@@ -23,6 +23,7 @@ export default function ProjectCard({ project, index = 0, basePath = '/dashboard
   };
 
   return (
+    <>
     <motion.div
       custom={index}
       variants={cardVariants}
@@ -83,7 +84,7 @@ export default function ProjectCard({ project, index = 0, basePath = '/dashboard
 
       {/* Client chip (admin view) */}
       {project.client?.name && (
-        <div style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="project-client-chip" style={{ marginTop: 12, display: 'flex', alignItems: 'center', gap: 8 }}>
           <div style={{
             width: 22, height: 22, borderRadius: '50%',
             background: 'linear-gradient(135deg,var(--accent-cyan),var(--accent-blue))',
@@ -96,5 +97,23 @@ export default function ProjectCard({ project, index = 0, basePath = '/dashboard
         </div>
       )}
     </motion.div>
+
+    <style>{`
+      @media (max-width: 768px) {
+        .glass-card {
+          padding: 18px !important;
+        }
+        .project-client-chip {
+          flex-wrap: wrap;
+        }
+      }
+
+      @media (max-width: 480px) {
+        .glass-card {
+          padding: 16px !important;
+        }
+      }
+    `}</style>
+  </>
   );
 }

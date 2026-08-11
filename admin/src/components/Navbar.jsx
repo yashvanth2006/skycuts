@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { Zap, LogOut, ChevronLeft, Film, LayoutDashboard } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Zap, LogOut, ChevronLeft, Film, LayoutDashboard, Menu, X } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 
@@ -8,6 +9,7 @@ export default function Navbar({ showBack = false }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const handleLogout = () => {
     logout();
@@ -21,6 +23,7 @@ export default function Navbar({ showBack = false }) {
     : '?';
 
   return (
+    <>
     <motion.nav
       initial={{ opacity: 0, y: -20 }}
       animate={{ opacity: 1, y: 0 }}
@@ -61,9 +64,9 @@ export default function Navbar({ showBack = false }) {
         </button>
       </div>
 
-      {/* Center — Nav Links */}
+      {/* Center — Nav Links (Desktop) */}
       {user && (
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 4 }} className="desktop-nav">
           {[
             { path: '/dashboard', icon: <LayoutDashboard size={14} />, label: 'Dashboard' },
             { path: '/portfolio', icon: <Film size={14} />, label: 'Portfolio' },
@@ -87,8 +90,27 @@ export default function Navbar({ showBack = false }) {
         </div>
       )}
 
-      {/* Right — Theme Toggle + User + Logout */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+      {/* Mobile Hamburger Button */}
+      {user && (
+        <button
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          className="mobile-hamburger"
+          style={{
+            display: 'none',
+            background: 'none',
+            border: 'none',
+            cursor: 'pointer',
+            padding: '8px',
+            alignItems: 'center',
+            justifyContent: 'center',
+          }}
+        >
+          {mobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+        </button>
+      )}
+
+      {/* Right — Theme Toggle + User + Logout (Desktop) */}
+      <div style={{ display: 'flex', alignItems: 'center', gap: 12 }} className="desktop-nav">
         {/* Theme Toggle — always visible */}
         <ThemeToggle />
 
@@ -127,5 +149,108 @@ export default function Navbar({ showBack = false }) {
         )}
       </div>
     </motion.nav>
+
+    {/* Mobile Menu Dropdown */}
+    <AnimatePresence>
+      {mobileMenuOpen && (
+        <>
+          {/* Backdrop */}
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={() => setMobileMenuOpen(false)}
+            style={{
+              position: 'fixed', top: 64, left: 0, right: 0, bottom: 0,
+              background: 'rgba(0,0,0,0.5)', zIndex: 99,
+            }}
+          />
+          {/* Menu */}
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            style={{
+              position: 'fixed', top: 64, left: 0, right: 0,
+              background: 'var(--nav-bg)',
+              borderBottom: '1px solid var(--border-subtle)',
+              padding: '16px 20px',
+              zIndex: 100,
+            }}
+          >
+            {user && (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+                <button
+                  onClick={() => { navigate('/dashboard'); setMobileMenuOpen(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '12px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    fontSize: 15, fontWeight: 500,
+                    background: location.pathname === '/dashboard' ? 'var(--bg-glass)' : 'none',
+                    color: location.pathname === '/dashboard' ? 'var(--text-primary)' : 'var(--text-muted)',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <LayoutDashboard size={18} /> Dashboard
+                </button>
+                <button
+                  onClick={() => { navigate('/portfolio'); setMobileMenuOpen(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '12px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    fontSize: 15, fontWeight: 500,
+                    background: location.pathname === '/portfolio' ? 'var(--bg-glass)' : 'none',
+                    color: location.pathname === '/portfolio' ? 'var(--text-primary)' : 'var(--text-muted)',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <Film size={18} /> Portfolio
+                </button>
+                <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
+                  <ThemeToggle />
+                  <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>Theme</span>
+                </div>
+                <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px' }}>
+                  <div style={{
+                    width: 36, height: 36, borderRadius: '50%',
+                    background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-luma))',
+                    display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontSize: 14, fontWeight: 700, color: '#fff'
+                  }}>
+                    {initials}
+                  </div>
+                  <div>
+                    <p style={{ fontSize: 14, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2 }}>{user.name}</p>
+                    <p style={{ fontSize: 12, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{user.role}</p>
+                  </div>
+                </div>
+                <button
+                  onClick={() => { handleLogout(); setMobileMenuOpen(false); }}
+                  style={{
+                    display: 'flex', alignItems: 'center', gap: 12,
+                    padding: '12px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
+                    fontSize: 15, fontWeight: 500, color: '#ef4444',
+                    background: 'none',
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <LogOut size={18} /> Logout
+                </button>
+              </div>
+            )}
+          </motion.div>
+        </>
+      )}
+    </AnimatePresence>
+
+    <style>{`
+      @media (max-width: 768px) {
+        .desktop-nav { display: none !important; }
+        .mobile-hamburger { display: flex !important; }
+      }
+    `}</style>
+  </>
   );
 }

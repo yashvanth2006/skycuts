@@ -55,21 +55,21 @@ function RequestRow({ req, onAccept, onReject, processing }) {
       className="glass-card"
       style={{ padding: '16px 20px' }}
     >
-      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
+      <div className="request-row-content" style={{ display: 'flex', alignItems: 'flex-start', gap: 14, flexWrap: 'wrap' }}>
         {/* Info */}
-        <div style={{ flex: 1, minWidth: 200 }}>
+        <div className="request-info" style={{ flex: 1, minWidth: 200 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10, marginBottom: 4, flexWrap: 'wrap' }}>
             <p style={{ fontWeight: 600, fontSize: 15 }}>{req.title}</p>
             <ReqBadge status={req.status} />
           </div>
-          <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>
+          <p className="request-client-info" style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 4 }}>
             <strong style={{ color: 'var(--text-secondary)' }}>{req.client?.name}</strong>
             {' '}·{' '}{req.client?.email}
             {req.client?.mobileNumber && <>{' · '}{req.client.mobileNumber}</>}
           </p>
           <p style={{ fontSize: 12, color: 'var(--accent-blue)' }}>{req.type}</p>
           {req.description && (
-            <p style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 420 }}>
+            <p className="request-description" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 420 }}>
               {req.description}
             </p>
           )}
@@ -81,22 +81,24 @@ function RequestRow({ req, onAccept, onReject, processing }) {
         </div>
 
         {/* Actions */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-          <span style={{ fontSize: 11, color: 'var(--text-muted)', marginRight: 4 }}>
+        <div className="request-actions" style={{ display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
+          <span className="request-date" style={{ fontSize: 11, color: 'var(--text-muted)', marginRight: 4 }}>
             {new Date(req.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
           </span>
 
           {req.status === 'pending' && (
-            <>
+            <div className="request-buttons" style={{ display: 'flex', gap: 8 }}>
               <button
                 onClick={() => onAccept(req._id)}
                 disabled={processing === req._id}
+                className="btn-accept"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '8px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
                   background: 'rgba(34,197,94,0.15)', color: '#22c55e',
                   fontSize: 13, fontWeight: 600,
                   opacity: processing === req._id ? 0.6 : 1,
+                  minHeight: 44,
                 }}
               >
                 <CheckCircle size={14} />
@@ -105,18 +107,20 @@ function RequestRow({ req, onAccept, onReject, processing }) {
               <button
                 onClick={() => onReject(req._id)}
                 disabled={processing === req._id}
+                className="btn-reject"
                 style={{
                   display: 'flex', alignItems: 'center', gap: 6,
                   padding: '8px 16px', borderRadius: 8, border: '1px solid rgba(239,68,68,0.25)',
                   cursor: 'pointer', background: 'rgba(239,68,68,0.08)', color: '#ef4444',
                   fontSize: 13, fontWeight: 600,
                   opacity: processing === req._id ? 0.6 : 1,
+                  minHeight: 44,
                 }}
               >
                 <XCircle size={14} />
                 {processing === req._id ? '…' : 'Reject'}
               </button>
-            </>
+            </div>
           )}
         </div>
       </div>
@@ -227,24 +231,25 @@ export default function AdminDashboard() {
         <motion.div
           initial={{ opacity: 0, y: -12 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32 }}
+          className="dashboard-header"
+          style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 32, flexWrap: 'wrap', gap: 16 }}
         >
-          <div>
-            <h1 style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>Studio Dashboard</h1>
-            <p style={{ color: 'var(--text-muted)', fontSize: 14 }}>Manage projects and incoming client requests.</p>
+          <div style={{ flex: 1, minWidth: 200 }}>
+            <h1 className="dashboard-title" style={{ fontSize: 28, fontWeight: 700, marginBottom: 4 }}>Studio Dashboard</h1>
+            <p className="dashboard-subtitle" style={{ color: 'var(--text-muted)', fontSize: 14 }}>Manage projects and incoming client requests.</p>
           </div>
-          <button id="create-project-btn" onClick={() => setModalOpen(true)} className="btn-primary">
+          <button id="create-project-btn" onClick={() => setModalOpen(true)} className="btn-primary" style={{ flexShrink: 0, minHeight: 44 }}>
             <Plus size={18} /> New Project
           </button>
         </motion.div>
 
         {/* Stats */}
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16, marginBottom: 36 }}>
+        <div className="stats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit,minmax(200px,1fr))', gap: 16, marginBottom: 36 }}>
           {stats.map((s, i) => <StatCard key={s.label} {...s} index={i} />)}
         </div>
 
         {/* Tabs */}
-        <div style={{ display: 'flex', alignItems: 'center', gap: 4, borderBottom: '1px solid var(--border-subtle)', marginBottom: 24, paddingBottom: 0 }}>
+        <div className="tabs-container" style={{ display: 'flex', alignItems: 'center', gap: 4, borderBottom: '1px solid var(--border-subtle)', marginBottom: 24, paddingBottom: 0, overflowX: 'auto' }}>
           {[
             { id: 'projects', label: 'Projects',          icon: FolderOpen, count: null },
             { id: 'requests', label: 'Project Requests',  icon: Send, count: pendingRequests.length, badge: pendingRequests.length > 0 },
@@ -252,6 +257,7 @@ export default function AdminDashboard() {
             <button
               key={id}
               onClick={() => setActiveTab(id)}
+              className="tab-button"
               style={{
                 display: 'flex', alignItems: 'center', gap: 7,
                 padding: '10px 18px', border: 'none', background: 'none',
@@ -259,6 +265,7 @@ export default function AdminDashboard() {
                 color: activeTab === id ? 'var(--text-primary)' : 'var(--text-muted)',
                 borderBottom: activeTab === id ? '2px solid var(--accent-blue)' : '2px solid transparent',
                 marginBottom: -1, cursor: 'pointer', transition: 'all 0.15s ease',
+                whiteSpace: 'nowrap',
               }}
             >
               <Icon size={15} /> {label}
@@ -274,12 +281,12 @@ export default function AdminDashboard() {
         {/* ── Projects tab ── */}
         {activeTab === 'projects' && (
           <>
-            <div style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12 }}>
-              <div style={{ position: 'relative', flex: 1, maxWidth: 400 }}>
+            <div className="search-container" style={{ marginBottom: 20, display: 'flex', alignItems: 'center', gap: 12, flexWrap: 'wrap' }}>
+              <div className="search-wrapper" style={{ position: 'relative', flex: 1, minWidth: 200, maxWidth: 400 }}>
                 <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
-                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects or clients…" className="input-field" style={{ paddingLeft: 40 }} />
+                <input value={search} onChange={e => setSearch(e.target.value)} placeholder="Search projects or clients…" className="input-field" style={{ paddingLeft: 40, width: '100%' }} />
               </div>
-              <p style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{filtered.length} project{filtered.length !== 1 ? 's' : ''}</p>
+              <p className="search-count" style={{ fontSize: 13, color: 'var(--text-muted)', whiteSpace: 'nowrap' }}>{filtered.length} project{filtered.length !== 1 ? 's' : ''}</p>
             </div>
 
             {loading ? (
@@ -375,12 +382,79 @@ export default function AdminDashboard() {
           padding: '12px 18px', background: 'var(--bg-panel)',
           border: '1px solid var(--border-subtle)', borderRadius: 8,
           boxShadow: '0 8px 24px rgba(0,0,0,0.4)', fontSize: 14, fontWeight: 500,
+          maxWidth: 'calc(100% - 48px)',
         }}>
           {toast}
         </div>
       )}
 
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 768px) {
+          .dashboard-header {
+            flex-direction: column;
+            align-items: flex-start;
+          }
+          .dashboard-title {
+            font-size: 24px;
+          }
+          .dashboard-subtitle {
+            font-size: 13px;
+          }
+          .stats-grid {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12;
+          }
+          .tab-button {
+            padding: 10px 14px;
+            font-size: 13px;
+          }
+          .search-wrapper {
+            max-width: 100%;
+          }
+          .request-row-content {
+            flex-direction: column;
+            gap: 12;
+          }
+          .request-info {
+            min-width: 100%;
+          }
+          .request-client-info {
+            flex-wrap: wrap;
+          }
+          .request-description {
+            max-width: 100%;
+            white-space: normal;
+          }
+          .request-actions {
+            width: 100%;
+            justify-content: space-between;
+            align-items: center;
+          }
+          .request-buttons {
+            width: 100%;
+            justify-content: space-between;
+          }
+          .btn-accept,
+          .btn-reject {
+            flex: 1;
+            justify-content: center;
+          }
+          .request-date {
+            display: none;
+          }
+        }
+
+        @media (max-width: 480px) {
+          .stats-grid {
+            grid-template-columns: 1fr;
+          }
+          .dashboard-title {
+            font-size: 22px;
+          }
+        }
+      `}</style>
     </div>
   );
 }
