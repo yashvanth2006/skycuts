@@ -10,24 +10,47 @@ import Navbar from "../../components/Navbar.jsx";
 import DaVinciNodeTree from "../../components/three/DaVinciNodeTree.jsx";
 import GoogleAuthModal from "../../components/GoogleAuthModal.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
+import { useTheme } from "../../context/ThemeContext.jsx";
 
-// ─── DaVinci Resolve-inspired color palette (locked dark) ──────────────────
-const dv = {
-  bg0:    "#111111",
-  bg1:    "#181818",
-  bg2:    "#202020",
-  bg3:    "#272727",
-  panel:  "#1c1c1c",
-  border: "rgba(255,255,255,0.06)",
-  borderHover: "rgba(47,116,208,0.5)",
-  blue:   "#2F74D0",
-  blueL:  "#4A9EFF",
-  amber:  "#F5A623",
-  amberL: "#FFB74D",
-  white:  "#E8E8E8",
-  gray1:  "#9A9A9A",
-  gray2:  "#5A5A5A",
-  gray3:  "#3A3A3A",
+// ─── DaVinci Resolve-inspired color palette (theme-aware) ──────────────────
+const getThemeColors = (isDark) => {
+  if (isDark) {
+    return {
+      bg0:    "#111111",
+      bg1:    "#181818",
+      bg2:    "#202020",
+      bg3:    "#272727",
+      panel:  "#1c1c1c",
+      border: "rgba(255,255,255,0.06)",
+      borderHover: "rgba(47,116,208,0.5)",
+      blue:   "#2F74D0",
+      blueL:  "#4A9EFF",
+      amber:  "#F5A623",
+      amberL: "#FFB74D",
+      white:  "#E8E8E8",
+      gray1:  "#9A9A9A",
+      gray2:  "#5A5A5A",
+      gray3:  "#3A3A3A",
+    };
+  } else {
+    return {
+      bg0:    "#ffffff",
+      bg1:    "#f8f9fa",
+      bg2:    "#f1f3f5",
+      bg3:    "#e9ecef",
+      panel:  "#ffffff",
+      border: "rgba(0,0,0,0.08)",
+      borderHover: "rgba(47,116,208,0.3)",
+      blue:   "#2F74D0",
+      blueL:  "#4A9EFF",
+      amber:  "#F5A623",
+      amberL: "#FFB74D",
+      white:  "#1a1a1a",
+      gray1:  "#495057",
+      gray2:  "#6c757d",
+      gray3:  "#adb5bd",
+    };
+  }
 };
 
 
@@ -47,12 +70,12 @@ const AWARDS = [
   { label: "Awards Won",         value: "14",    icon: <Star size={18} /> },
 ];
 
-const CATEGORY_COLORS = {
-  "Commercial":  { bg: "rgba(47,116,208,0.12)",  border: "rgba(47,116,208,0.3)",  text: dv.blueL },
-  "Music Video": { bg: "rgba(245,166,35,0.12)",  border: "rgba(245,166,35,0.3)",  text: dv.amberL },
+const CATEGORY_COLORS = (isDark) => ({
+  "Commercial":  { bg: "rgba(47,116,208,0.12)",  border: "rgba(47,116,208,0.3)",  text: "#4A9EFF" },
+  "Music Video": { bg: "rgba(245,166,35,0.12)",  border: "rgba(245,166,35,0.3)",  text: "#FFB74D" },
   "Narrative":   { bg: "rgba(74,158,255,0.12)",  border: "rgba(74,158,255,0.3)",  text: "#7CBFFF" },
-  "Documentary": { bg: "rgba(155,155,155,0.10)", border: "rgba(155,155,155,0.25)",text: "#BBBBBB" },
-};
+  "Documentary": { bg: isDark ? "rgba(155,155,155,0.10)" : "rgba(0,0,0,0.05)", border: isDark ? "rgba(155,155,155,0.25)" : "rgba(0,0,0,0.15)", text: isDark ? "#BBBBBB" : "#495057" },
+});
 
 // ─── Section fade-in wrapper ─────────────────────────────────────────────────
 function SectionReveal({ children, delay = 0 }) {
@@ -71,7 +94,7 @@ function SectionReveal({ children, delay = 0 }) {
 }
 
 // ─── DaVinci-style section header ────────────────────────────────────────────
-function PanelHeader({ icon, title, subtitle }) {
+function PanelHeader({ icon, title, subtitle, colors }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
       <div style={{
@@ -79,19 +102,19 @@ function PanelHeader({ icon, title, subtitle }) {
         background: "rgba(47,116,208,0.15)",
         border: `1px solid rgba(47,116,208,0.3)`,
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: dv.blue,
+        color: colors.blue,
       }}>
         {icon}
       </div>
       <div>
         <p style={{
           fontSize: 11, letterSpacing: "0.12em", textTransform: "uppercase",
-          color: dv.blue, fontWeight: 600, marginBottom: 2,
+          color: colors.blue, fontWeight: 600, marginBottom: 2,
         }}>
           {subtitle}
         </p>
         <h2 style={{
-          fontSize: 20, fontWeight: 700, color: dv.white, letterSpacing: "-0.02em",
+          fontSize: 20, fontWeight: 700, color: colors.white, letterSpacing: "-0.02em",
           fontFamily: "'Inter', system-ui, sans-serif",
         }}>
           {title}
@@ -102,29 +125,29 @@ function PanelHeader({ icon, title, subtitle }) {
 }
 
 // ─── Horizontal rule with label ───────────────────────────────────────────────
-function DVDivider({ label }) {
+function DVDivider({ label, colors }) {
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 12, margin: "48px 0 36px" }}>
-      <div style={{ flex: 1, height: 1, background: dv.border }} />
+      <div style={{ flex: 1, height: 1, background: colors.border }} />
       {label && (
         <span style={{
           fontSize: 10, letterSpacing: "0.14em", textTransform: "uppercase",
-          color: dv.gray2, whiteSpace: "nowrap",
+          color: colors.gray2, whiteSpace: "nowrap",
         }}>
           {label}
         </span>
       )}
-      <div style={{ flex: 1, height: 1, background: dv.border }} />
+      <div style={{ flex: 1, height: 1, background: colors.border }} />
     </div>
   );
 }
 
 // ─── Portfolio Clip Card ──────────────────────────────────────────────────────
 // Accepts both API items (from MongoDB) and fallback mock items
-function ClipCard({ item }) {
+function ClipCard({ item, colors }) {
   const [hovered, setHovered] = useState(false);
-  const cat = CATEGORY_COLORS[item.category] || CATEGORY_COLORS["Documentary"];
-  const accentColor = item.accent || dv.blue;
+  const cat = CATEGORY_COLORS(colors.theme === 'dark')[item.category] || CATEGORY_COLORS(colors.theme === 'dark')["Documentary"];
+  const accentColor = item.accent || colors.blue;
 
   return (
     <motion.div
@@ -136,22 +159,22 @@ function ClipCard({ item }) {
       }}
       transition={{ duration: 0.25, ease: "easeOut" }}
       style={{
-        background: dv.bg2,
-        border: `1px solid ${hovered ? accentColor : dv.border}`,
+        background: colors.bg2,
+        border: `1px solid ${hovered ? accentColor : colors.border}`,
         borderRadius: 6,
         overflow: "hidden",
         cursor: "pointer",
         position: "relative",
         boxShadow: hovered
           ? `0 12px 40px rgba(0,0,0,0.5), 0 0 0 1px ${item.accent}55`
-          : "0 4px 16px rgba(0,0,0,0.3)",
+          : colors.theme === 'dark' ? "0 4px 16px rgba(0,0,0,0.3)" : "0 4px 16px rgba(0,0,0,0.1)",
         transition: "border-color 0.2s ease, box-shadow 0.2s ease",
       }}
     >
       {/* Cinematic thumbnail area */}
       <div style={{
         aspectRatio: "16/9",
-        background: `linear-gradient(135deg, ${dv.bg3} 0%, ${dv.bg1} 100%)`,
+        background: `linear-gradient(135deg, ${colors.bg3} 0%, ${colors.bg1} 100%)`,
         position: "relative",
         overflow: "hidden",
       }}>
@@ -160,7 +183,7 @@ function ClipCard({ item }) {
           position: "absolute", inset: 0,
           backgroundImage: `
             radial-gradient(ellipse at 30% 40%, ${item.accent}18 0%, transparent 60%),
-            radial-gradient(ellipse at 70% 60%, ${dv.blue}12 0%, transparent 55%)
+            radial-gradient(ellipse at 70% 60%, ${colors.blue}12 0%, transparent 55%)
           `,
         }} />
 
@@ -212,8 +235,8 @@ function ClipCard({ item }) {
         <div style={{
           position: "absolute", top: 10, right: 10,
           padding: "3px 8px", borderRadius: 4,
-          background: "rgba(0,0,0,0.7)",
-          fontSize: 11, fontWeight: 600, color: dv.white,
+          background: colors.theme === 'dark' ? "rgba(0,0,0,0.7)" : "rgba(0,0,0,0.6)",
+          fontSize: 11, fontWeight: 600, color: colors.white,
           fontFamily: "'JetBrains Mono', 'Courier New', monospace",
           letterSpacing: "0.04em",
         }}>
@@ -234,10 +257,10 @@ function ClipCard({ item }) {
       </div>
 
       {/* Card meta */}
-      <div style={{ padding: "14px 16px 16px", background: dv.panel }}>
+      <div style={{ padding: "14px 16px 16px", background: colors.panel }}>
         <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 8, marginBottom: 8 }}>
           <p style={{
-            fontSize: 13, fontWeight: 700, color: dv.white,
+            fontSize: 13, fontWeight: 700, color: colors.white,
             letterSpacing: "-0.01em", lineHeight: 1.3,
           }}>
             {item.title}
@@ -254,11 +277,11 @@ function ClipCard({ item }) {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: dv.gray1 }}>
+          <span style={{ display: "flex", alignItems: "center", gap: 4, fontSize: 11, color: colors.gray1 }}>
             <Eye size={11} /> {item.views}
           </span>
-          <span style={{ fontSize: 11, color: dv.gray2 }}>·</span>
-          <span style={{ fontSize: 11, color: dv.gray2 }}>{item.year}</span>
+          <span style={{ fontSize: 11, color: colors.gray2 }}>·</span>
+          <span style={{ fontSize: 11, color: colors.gray2 }}>{item.year}</span>
         </div>
       </div>
     </motion.div>
@@ -266,7 +289,7 @@ function ClipCard({ item }) {
 }
 
 // ─── Toolkit Row ─────────────────────────────────────────────────────────────
-function ToolkitRow({ tool, delay }) {
+function ToolkitRow({ tool, delay, colors }) {
   const [hovered, setHovered] = useState(false);
   return (
     <motion.div
@@ -280,7 +303,7 @@ function ToolkitRow({ tool, delay }) {
         alignItems: "center", gap: 16,
         padding: "14px 16px",
         background: hovered ? "rgba(47,116,208,0.06)" : "transparent",
-        borderBottom: `1px solid ${dv.border}`,
+        borderBottom: `1px solid ${colors.border}`,
         transition: "background 0.2s ease",
         cursor: "default",
       }}
@@ -289,36 +312,36 @@ function ToolkitRow({ tool, delay }) {
         <div style={{
           width: 30, height: 30, borderRadius: 6,
           background: hovered ? "rgba(47,116,208,0.2)" : "rgba(47,116,208,0.08)",
-          border: `1px solid ${hovered ? "rgba(47,116,208,0.5)" : dv.border}`,
+          border: `1px solid ${hovered ? "rgba(47,116,208,0.5)" : colors.border}`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: hovered ? dv.blue : dv.gray1,
+          color: hovered ? colors.blue : colors.gray1,
           transition: "all 0.2s ease",
           flexShrink: 0,
         }}>
           {tool.icon}
         </div>
         <div>
-          <p style={{ fontSize: 13, fontWeight: 600, color: dv.white, marginBottom: 2 }}>{tool.name}</p>
-          <p style={{ fontSize: 11, color: dv.gray2 }}>{tool.role}</p>
+          <p style={{ fontSize: 13, fontWeight: 600, color: colors.white, marginBottom: 2 }}>{tool.name}</p>
+          <p style={{ fontSize: 11, color: colors.gray2 }}>{tool.role}</p>
         </div>
       </div>
       <div style={{ display: "flex", alignItems: "center", gap: 12, flexShrink: 0 }}>
         {/* Level bar */}
-        <div style={{ width: 80, height: 3, background: dv.bg3, borderRadius: 2, overflow: "hidden" }}>
+        <div style={{ width: 80, height: 3, background: colors.bg3, borderRadius: 2, overflow: "hidden" }}>
           <motion.div
             initial={{ width: 0 }}
             animate={{ width: `${tool.level}%` }}
             transition={{ delay: delay + 0.2, duration: 0.8, ease: "easeOut" }}
             style={{
               height: "100%",
-              background: `linear-gradient(90deg, ${dv.blue}, ${dv.blueL})`,
+              background: `linear-gradient(90deg, ${colors.blue}, ${colors.blueL})`,
               borderRadius: 2,
             }}
           />
         </div>
         <span style={{
           fontSize: 10, fontWeight: 600,
-          color: dv.gray2, letterSpacing: "0.04em",
+          color: colors.gray2, letterSpacing: "0.04em",
           fontFamily: "'JetBrains Mono', monospace",
           minWidth: 32, textAlign: "right",
         }}>
@@ -330,7 +353,7 @@ function ToolkitRow({ tool, delay }) {
 }
 
 // ─── Stat tile ───────────────────────────────────────────────────────────────
-function StatTile({ stat, delay }) {
+function StatTile({ stat, delay, colors }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -338,22 +361,22 @@ function StatTile({ stat, delay }) {
       transition={{ delay, duration: 0.5, ease: "easeOut" }}
       style={{
         padding: "20px 24px",
-        background: dv.bg2,
-        border: `1px solid ${dv.border}`,
+        background: colors.bg2,
+        border: `1px solid ${colors.border}`,
         borderRadius: 6,
         display: "flex", flexDirection: "column", alignItems: "center",
         textAlign: "center", gap: 8,
       }}
     >
-      <div style={{ color: dv.blue, opacity: 0.8 }}>{stat.icon}</div>
+      <div style={{ color: colors.blue, opacity: 0.8 }}>{stat.icon}</div>
       <p style={{
-        fontSize: 32, fontWeight: 800, color: dv.white,
+        fontSize: 32, fontWeight: 800, color: colors.white,
         letterSpacing: "-0.03em", fontFamily: "'Inter', system-ui",
         lineHeight: 1,
       }}>
         {stat.value}
       </p>
-      <p style={{ fontSize: 11, color: dv.gray2, letterSpacing: "0.06em", textTransform: "uppercase" }}>
+      <p style={{ fontSize: 11, color: colors.gray2, letterSpacing: "0.06em", textTransform: "uppercase" }}>
         {stat.label}
       </p>
     </motion.div>
@@ -363,12 +386,16 @@ function StatTile({ stat, delay }) {
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function EditorProfile() {
   const { user } = useAuth();
+  const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const [authModalOpen, setAuthModalOpen] = useState(false);
   const [portfolio, setPortfolio] = useState([]);
   const [portfolioLoading, setPortfolioLoading] = useState(true);
   const [portfolioError, setPortfolioError] = useState(false);
+
+  const isDark = theme === 'dark';
+  const colors = { ...getThemeColors(isDark), theme };
 
   // Check if user should open project request modal after login
   useEffect(() => {
@@ -409,11 +436,10 @@ export default function EditorProfile() {
   return (
     <div style={{
       minHeight: "100vh",
-      background: dv.bg0,
-      color: dv.white,
+      background: colors.bg0,
+      color: colors.white,
       fontFamily: "'Inter', system-ui, sans-serif",
-      // Force dark mode regardless of user setting
-      colorScheme: "dark",
+      colorScheme: isDark ? "dark" : "light",
     }}>
 
       {/* Google Fonts */}
@@ -424,7 +450,7 @@ export default function EditorProfile() {
 
         /* Scrollbar */
         ::-webkit-scrollbar { width: 5px; }
-        ::-webkit-scrollbar-track { background: #111; }
+        ::-webkit-scrollbar-track { background: ${isDark ? '#111' : '#f1f3f5'}; }
         ::-webkit-scrollbar-thumb { background: #2F74D0; border-radius: 2px; }
 
         /* Timeline clip hover glow */
@@ -441,8 +467,8 @@ export default function EditorProfile() {
 
       {/* Navbar — always shown */}
       <div style={{
-        background: "#141414",
-        borderBottom: `1px solid ${dv.border}`,
+        background: isDark ? "#141414" : "#ffffff",
+        borderBottom: `1px solid ${colors.border}`,
       }}>
         <Navbar />
       </div>
@@ -454,24 +480,26 @@ export default function EditorProfile() {
         minHeight: 600,
         maxHeight: 900,
         overflow: "hidden",
-        background: `linear-gradient(to bottom, ${dv.bg0} 0%, #0d1520 60%, ${dv.bg0} 100%)`,
+        background: isDark 
+          ? `linear-gradient(to bottom, ${colors.bg0} 0%, #0d1520 60%, ${colors.bg0} 100%)`
+          : `linear-gradient(to bottom, ${colors.bg0} 0%, #e8f0fe 60%, ${colors.bg0} 100%)`,
       }}>
         {/* 3D Node Canvas — fills hero */}
         <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-          <DaVinciNodeTree />
+          <DaVinciNodeTree isDark={isDark} />
         </div>
 
         {/* Subtle top scan-line decor */}
         <div style={{
           position: "absolute", top: 0, left: 0, right: 0, height: 2,
-          background: `linear-gradient(90deg, transparent, ${dv.blue}, ${dv.amber}, transparent)`,
+          background: `linear-gradient(90deg, transparent, ${colors.blue}, ${colors.amber}, transparent)`,
           zIndex: 2, opacity: 0.6,
         }} />
 
         {/* Bottom fade */}
         <div style={{
           position: "absolute", bottom: 0, left: 0, right: 0, height: 200,
-          background: `linear-gradient(to bottom, transparent, ${dv.bg0})`,
+          background: `linear-gradient(to bottom, transparent, ${colors.bg0})`,
           zIndex: 1, pointerEvents: "none",
         }} />
 
@@ -497,8 +525,8 @@ export default function EditorProfile() {
               marginBottom: 20,
             }}
           >
-            <Zap size={12} color={dv.blue} />
-            <span style={{ fontSize: 11, fontWeight: 600, color: dv.blue, letterSpacing: "0.12em", textTransform: "uppercase" }}>
+            <Zap size={12} color={colors.blue} />
+            <span style={{ fontSize: 11, fontWeight: 600, color: colors.blue, letterSpacing: "0.12em", textTransform: "uppercase" }}>
               Editor Profile — SkyCuts
             </span>
           </motion.div>
@@ -511,7 +539,7 @@ export default function EditorProfile() {
             style={{
               fontSize: "clamp(40px, 8vw, 88px)",
               fontWeight: 900,
-              color: "#FFFFFF",
+              color: isDark ? "#FFFFFF" : "#1a1a1a",
               letterSpacing: "-0.04em",
               lineHeight: 1.0,
               marginBottom: 16,
@@ -520,7 +548,7 @@ export default function EditorProfile() {
           >
             Marcus
             <span style={{
-              background: `linear-gradient(135deg, ${dv.blue}, ${dv.blueL})`,
+              background: `linear-gradient(135deg, ${colors.blue}, ${colors.blueL})`,
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               backgroundClip: "text",
             }}> Reid</span>
@@ -534,7 +562,7 @@ export default function EditorProfile() {
             style={{
               fontSize: "clamp(14px, 2.5vw, 20px)",
               fontWeight: 500,
-              color: dv.amber,
+              color: colors.amber,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
               marginBottom: 20,
@@ -550,7 +578,7 @@ export default function EditorProfile() {
             transition={{ duration: 0.6, delay: 0.65 }}
             style={{
               fontSize: "clamp(13px, 1.8vw, 16px)",
-              color: dv.gray1,
+              color: colors.gray1,
               maxWidth: 560,
               lineHeight: 1.7,
               fontWeight: 400,
@@ -574,15 +602,15 @@ export default function EditorProfile() {
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "12px 24px", borderRadius: 6,
-                background: dv.blue, color: "#fff",
+                background: colors.blue, color: "#fff",
                 border: "none", cursor: "pointer",
                 fontSize: 14, fontWeight: 600,
                 fontFamily: "'Inter', system-ui",
                 transition: "all 0.2s ease",
                 minHeight: 44,
               }}
-              onMouseEnter={e => e.currentTarget.style.background = dv.blueL}
-              onMouseLeave={e => e.currentTarget.style.background = dv.blue}
+              onMouseEnter={e => e.currentTarget.style.background = colors.blueL}
+              onMouseLeave={e => e.currentTarget.style.background = colors.blue}
             >
               <Play size={15} /> View Portfolio
             </button>
@@ -591,7 +619,7 @@ export default function EditorProfile() {
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "12px 24px", borderRadius: 6,
-                background: dv.amber, color: "#111",
+                background: colors.amber, color: "#111",
                 border: "none", cursor: "pointer",
                 fontSize: 14, fontWeight: 700,
                 fontFamily: "'Inter', system-ui",
@@ -599,8 +627,8 @@ export default function EditorProfile() {
                 transition: "all 0.2s ease",
                 minHeight: 44,
               }}
-              onMouseEnter={e => e.currentTarget.style.background = dv.amberL}
-              onMouseLeave={e => e.currentTarget.style.background = dv.amber}
+              onMouseEnter={e => e.currentTarget.style.background = colors.amberL}
+              onMouseLeave={e => e.currentTarget.style.background = colors.amber}
             >
               START PROJECT <ArrowRight size={16} />
             </button>
@@ -619,7 +647,7 @@ export default function EditorProfile() {
               animate={{ opacity: 1 }}
               transition={{ delay: 1 + i * 0.1 }}
               style={{
-                fontSize: 9, color: dv.gray3,
+                fontSize: 9, color: colors.gray3,
                 fontFamily: "'Courier New', monospace",
                 letterSpacing: "0.08em",
               }}
@@ -641,7 +669,7 @@ export default function EditorProfile() {
               animate={{ opacity: 1 }}
               transition={{ delay: 1.2 + i * 0.1 }}
               style={{
-                fontSize: 9, color: dv.gray3,
+                fontSize: 9, color: colors.gray3,
                 fontFamily: "'Courier New', monospace",
                 letterSpacing: "0.05em",
               }}
@@ -661,25 +689,25 @@ export default function EditorProfile() {
             display: "grid",
             gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
             gap: 2,
-            background: dv.border,
-            border: `1px solid ${dv.border}`,
+            background: colors.border,
+            border: `1px solid ${colors.border}`,
             borderRadius: 8,
             overflow: "hidden",
             margin: "40px 0",
           }}>
             {AWARDS.map((s, i) => (
-              <StatTile key={i} stat={s} delay={i * 0.08} />
+              <StatTile key={i} stat={s} delay={i * 0.08} colors={colors} />
             ))}
           </div>
         </SectionReveal>
 
-        <DVDivider label="Software Arsenal" />
+        <DVDivider label="Software Arsenal" colors={colors} />
 
         {/* ── Toolkit Panel ───────────────────────────────────────────────── */}
         <SectionReveal>
           <div style={{
-            background: dv.bg1,
-            border: `1px solid ${dv.border}`,
+            background: colors.bg1,
+            border: `1px solid ${colors.border}`,
             borderRadius: 8,
             overflow: "hidden",
           }}>
@@ -688,45 +716,45 @@ export default function EditorProfile() {
               display: "flex", alignItems: "center", justifyContent: "space-between",
               padding: "0 16px",
               height: 40,
-              background: dv.bg3,
-              borderBottom: `1px solid ${dv.border}`,
+              background: colors.bg3,
+              borderBottom: `1px solid ${colors.border}`,
             }}>
               <div style={{ display: "flex", alignItems: "center", gap: 20 }}>
                 {["Color", "Edit", "Cut", "Fusion", "Deliver"].map((tab, i) => (
                   <span key={i} style={{
                     fontSize: 11, fontWeight: i === 0 ? 700 : 500,
-                    color: i === 0 ? dv.white : dv.gray2,
+                    color: i === 0 ? colors.white : colors.gray2,
                     letterSpacing: "0.04em",
                     paddingBottom: 2,
-                    borderBottom: i === 0 ? `2px solid ${dv.amber}` : "2px solid transparent",
+                    borderBottom: i === 0 ? `2px solid ${colors.amber}` : "2px solid transparent",
                     cursor: "pointer",
                   }}>
                     {tab}
                   </span>
                 ))}
               </div>
-              <span style={{ fontSize: 10, color: dv.gray2, letterSpacing: "0.06em" }}>INSPECTOR — TOOLKIT</span>
+              <span style={{ fontSize: 10, color: colors.gray2, letterSpacing: "0.06em" }}>INSPECTOR — TOOLKIT</span>
             </div>
 
             {/* Column headers */}
             <div style={{
               display: "grid", gridTemplateColumns: "1fr auto",
               padding: "8px 16px",
-              background: dv.bg2,
-              borderBottom: `1px solid ${dv.border}`,
+              background: colors.bg2,
+              borderBottom: `1px solid ${colors.border}`,
             }}>
-              <span style={{ fontSize: 10, color: dv.gray2, letterSpacing: "0.08em", textTransform: "uppercase" }}>Application</span>
-              <span style={{ fontSize: 10, color: dv.gray2, letterSpacing: "0.08em", textTransform: "uppercase" }}>Proficiency</span>
+              <span style={{ fontSize: 10, color: colors.gray2, letterSpacing: "0.08em", textTransform: "uppercase" }}>Application</span>
+              <span style={{ fontSize: 10, color: colors.gray2, letterSpacing: "0.08em", textTransform: "uppercase" }}>Proficiency</span>
             </div>
 
             {/* Tool rows */}
             {TOOLKIT.map((tool, i) => (
-              <ToolkitRow key={i} tool={tool} delay={i * 0.06} />
+              <ToolkitRow key={i} tool={tool} delay={i * 0.06} colors={colors} />
             ))}
           </div>
         </SectionReveal>
 
-        <DVDivider label="Selected Works" />
+        <DVDivider label="Selected Works" colors={colors} />
 
         {/* ── Portfolio Grid ───────────────────────────────────────────────── */}
         <SectionReveal>
@@ -734,6 +762,7 @@ export default function EditorProfile() {
             icon={<Film size={16} />}
             title="Portfolio"
             subtitle="Media Pool — Selected Works"
+            colors={colors}
           />
           <div
             id="portfolio-grid"
@@ -744,13 +773,13 @@ export default function EditorProfile() {
             }}
           >
             {portfolioLoading ? (
-              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: dv.gray1, fontSize: 14 }}>
+              <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: colors.gray1, fontSize: 14 }}>
                 Loading portfolio...
               </div>
             ) : portfolioError ? (
               <div style={{
                 gridColumn: '1/-1', textAlign: 'center', padding: '60px 0',
-                color: dv.gray1, fontSize: 14,
+                color: colors.gray1, fontSize: 14,
               }}>
                 <div style={{
                   display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 10,
@@ -759,21 +788,21 @@ export default function EditorProfile() {
                 }}>
                   <span style={{ fontSize: 22, lineHeight: 1 }}>&#9888;</span>
                   <span style={{ fontWeight: 600, color: '#f87171' }}>Unable to load portfolio.</span>
-                  <span style={{ fontSize: 13, color: dv.gray2 }}>Please try again later.</span>
+                  <span style={{ fontSize: 13, color: colors.gray2 }}>Please try again later.</span>
                 </div>
               </div>
             ) : portfolio.length === 0 ? (
               <div style={{
                 gridColumn: '1/-1', textAlign: 'center', padding: '60px 0',
-                color: dv.gray2, fontSize: 14,
+                color: colors.gray2, fontSize: 14,
               }}>
                 <div style={{
                   display: 'inline-flex', flexDirection: 'column', alignItems: 'center', gap: 10,
                   padding: '28px 36px', borderRadius: 8,
-                  background: dv.bg2, border: `1px solid ${dv.border}`,
+                  background: colors.bg2, border: `1px solid ${colors.border}`,
                 }}>
                   <span style={{ fontSize: 22, lineHeight: 1, opacity: 0.5 }}>&#127916;</span>
-                  <span style={{ fontWeight: 600, color: dv.gray1 }}>No portfolio projects available yet.</span>
+                  <span style={{ fontWeight: 600, color: colors.gray1 }}>No portfolio projects available yet.</span>
                 </div>
               </div>
             ) : portfolio.map((item, i) => (
@@ -783,19 +812,19 @@ export default function EditorProfile() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07, duration: 0.5, ease: "easeOut" }}
               >
-                <ClipCard item={item} />
+                <ClipCard item={item} colors={colors} />
               </motion.div>
             ))}
           </div>
         </SectionReveal>
 
-        <DVDivider label="Contact" />
+        <DVDivider label="Contact" colors={colors} />
 
         {/* ── Contact Footer ─────────────────────────────────────────────── */}
         <SectionReveal>
           <div style={{
-            background: dv.bg1,
-            border: `1px solid ${dv.border}`,
+            background: colors.bg1,
+            border: `1px solid ${colors.border}`,
             borderRadius: 8,
             padding: "36px 40px",
             display: "flex",
@@ -805,13 +834,13 @@ export default function EditorProfile() {
             gap: 24,
           }}>
             <div>
-              <p style={{ fontSize: 11, color: dv.blue, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6, fontWeight: 600 }}>
+              <p style={{ fontSize: 11, color: colors.blue, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6, fontWeight: 600 }}>
                 Available for Projects
               </p>
-              <h3 style={{ fontSize: 24, fontWeight: 800, color: dv.white, letterSpacing: "-0.02em", marginBottom: 8 }}>
+              <h3 style={{ fontSize: 24, fontWeight: 800, color: colors.white, letterSpacing: "-0.02em", marginBottom: 8 }}>
                 Let&apos;s Create Something Exceptional
               </h3>
-              <p style={{ fontSize: 14, color: dv.gray1, maxWidth: 420, lineHeight: 1.6 }}>
+              <p style={{ fontSize: 14, color: colors.gray1, maxWidth: 420, lineHeight: 1.6 }}>
                 Open to commercial projects, narrative work, and long-term studio partnerships.
                 Response within 24 hours.
               </p>
@@ -824,9 +853,9 @@ export default function EditorProfile() {
               ].map((c, i) => (
                 <div key={i} style={{
                   display: "flex", alignItems: "center", gap: 10,
-                  fontSize: 13, color: dv.gray1,
+                  fontSize: 13, color: colors.gray1,
                 }}>
-                  <span style={{ color: dv.blue }}>{c.icon}</span>
+                  <span style={{ color: colors.blue }}>{c.icon}</span>
                   {c.label}
                 </div>
               ))}
@@ -836,7 +865,7 @@ export default function EditorProfile() {
               style={{
                 display: "flex", alignItems: "center", gap: 8,
                 padding: "14px 28px", borderRadius: 6,
-                background: dv.amber, color: "#111",
+                background: colors.amber, color: "#111",
                 border: "none", cursor: "pointer",
                 fontSize: 14, fontWeight: 700,
                 fontFamily: "'Inter', system-ui",
@@ -844,8 +873,8 @@ export default function EditorProfile() {
                 transition: "all 0.2s ease",
                 whiteSpace: "nowrap",
               }}
-              onMouseEnter={e => e.currentTarget.style.background = dv.amberL}
-              onMouseLeave={e => e.currentTarget.style.background = dv.amber}
+              onMouseEnter={e => e.currentTarget.style.background = colors.amberL}
+              onMouseLeave={e => e.currentTarget.style.background = colors.amber}
             >
               START PROJECT <ArrowRight size={16} />
             </button>
@@ -855,15 +884,15 @@ export default function EditorProfile() {
         {/* Footer bar */}
         <div style={{
           marginTop: 48, paddingTop: 24,
-          borderTop: `1px solid ${dv.border}`,
+          borderTop: `1px solid ${colors.border}`,
           display: "flex", alignItems: "center", justifyContent: "space-between",
           flexWrap: "wrap", gap: 12,
         }}>
-          <p style={{ fontSize: 11, color: dv.gray2 }}>
+          <p style={{ fontSize: 11, color: colors.gray2 }}>
             © 2025 Marcus Reid · Powered by{" "}
-            <span style={{ color: dv.blue }}>SkyCuts</span>
+            <span style={{ color: colors.blue }}>SkyCuts</span>
           </p>
-          <p style={{ fontSize: 10, color: dv.gray3, fontFamily: "monospace" }}>
+          <p style={{ fontSize: 10, color: colors.gray3, fontFamily: "monospace" }}>
             DaVinci Resolve Studio 19.1 · ACES · P3-D65
           </p>
         </div>

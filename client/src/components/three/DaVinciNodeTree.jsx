@@ -85,11 +85,11 @@ function GradingWheelRing({ radius, tubeRadius, rotX, rotZ, color, speed, opacit
 }
 
 // --- Subtle grid floor ---
-function GridFloor() {
+function GridFloor({ isDark }) {
   const ref = useRef();
   useFrame(({ clock }) => {
     if (ref.current) {
-      ref.current.material.opacity = 0.06 + 0.02 * Math.sin(clock.getElapsedTime() * 0.5);
+      ref.current.material.opacity = isDark ? 0.06 + 0.02 * Math.sin(clock.getElapsedTime() * 0.5) : 0.03 + 0.01 * Math.sin(clock.getElapsedTime() * 0.5);
     }
   });
   const gridPositions = useMemo(() => {
@@ -109,7 +109,7 @@ function GridFloor() {
       <bufferGeometry>
         <bufferAttribute attach="attributes-position" args={[gridPositions, 3]} />
       </bufferGeometry>
-      <lineBasicMaterial color="#2F74D0" transparent opacity={0.08} />
+      <lineBasicMaterial color="#2F74D0" transparent opacity={isDark ? 0.08 : 0.04} />
     </lineSegments>
   );
 }
@@ -188,7 +188,7 @@ function NodeGraphScene() {
 }
 
 // --- Main export ---
-export default function DaVinciNodeTree() {
+export default function DaVinciNodeTree({ isDark = true }) {
   return (
     <Canvas
       camera={{ position: [0, 0, 7], fov: 55 }}
@@ -196,18 +196,18 @@ export default function DaVinciNodeTree() {
       style={{ background: "transparent" }}
       dpr={[1, 1.5]}
     >
-      <ambientLight intensity={0.15} />
-      <pointLight position={[0, 0, 5]}  intensity={2.5} color="#2F74D0" />
-      <pointLight position={[-4, 3, 2]} intensity={1.5} color="#F5A623" />
-      <pointLight position={[4, -3, 2]} intensity={1.2} color="#4A9EFF" />
-      <pointLight position={[0, 5, 0]}  intensity={0.8} color="#ffffff" />
+      <ambientLight intensity={isDark ? 0.15 : 0.3} />
+      <pointLight position={[0, 0, 5]}  intensity={isDark ? 2.5 : 1.8} color="#2F74D0" />
+      <pointLight position={[-4, 3, 2]} intensity={isDark ? 1.5 : 1.0} color="#F5A623" />
+      <pointLight position={[4, -3, 2]} intensity={isDark ? 1.2 : 0.8} color="#4A9EFF" />
+      <pointLight position={[0, 5, 0]}  intensity={isDark ? 0.8 : 0.5} color="#ffffff" />
 
-      <GradingWheelRing radius={4.8} tubeRadius={0.008} rotX={Math.PI / 2.5} rotZ={0}            color="#2F74D0" speed={0.04}  opacity={0.18} />
-      <GradingWheelRing radius={5.5} tubeRadius={0.006} rotX={Math.PI / 3}   rotZ={Math.PI / 5} color="#F5A623" speed={-0.03} opacity={0.12} />
-      <GradingWheelRing radius={6.2} tubeRadius={0.005} rotX={Math.PI / 4}   rotZ={Math.PI / 3} color="#2F74D0" speed={0.025} opacity={0.08} />
+      <GradingWheelRing radius={4.8} tubeRadius={0.008} rotX={Math.PI / 2.5} rotZ={0}            color="#2F74D0" speed={0.04}  opacity={isDark ? 0.18 : 0.1} />
+      <GradingWheelRing radius={5.5} tubeRadius={0.006} rotX={Math.PI / 3}   rotZ={Math.PI / 5} color="#F5A623" speed={-0.03} opacity={isDark ? 0.12 : 0.07} />
+      <GradingWheelRing radius={6.2} tubeRadius={0.005} rotX={Math.PI / 4}   rotZ={Math.PI / 3} color="#2F74D0" speed={0.025} opacity={isDark ? 0.08 : 0.05} />
 
       <NodeGraphScene />
-      <GridFloor />
+      <GridFloor isDark={isDark} />
     </Canvas>
   );
 }
