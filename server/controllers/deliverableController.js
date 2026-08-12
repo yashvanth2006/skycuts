@@ -3,7 +3,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import VideoDeliverable from '../models/VideoDeliverable.js';
 import Project from '../models/Project.js';
-import { transcodeToHLS, getVideoDuration } from '../utils/ffmpegHelper.js';
+import { transcodeToHLS } from '../utils/ffmpegHelper.js';
 import { uploadFileToS3, getHlsPublicUrl, generatePresignedUrl } from '../utils/s3Helper.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -28,9 +28,9 @@ export const uploadDeliverable = async (req, res) => {
     const hlsOutputDir = path.join(__dirname, '..', 'uploads', 'hls', projectId);
 
     try {
-        // 1. Transcode to HLS locally (also extracts duration)
+        // 1. Transcode to HLS locally
         console.log('🎬 Starting HLS transcode...');
-        const { durationSeconds } = await transcodeToHLS(inputPath, hlsOutputDir);
+        await transcodeToHLS(inputPath, hlsOutputDir);
 
         // 2. Upload original .mp4 to S3
         const originalS3Key = `originals/${projectId}/original.mp4`;
@@ -57,7 +57,6 @@ export const uploadDeliverable = async (req, res) => {
             deliverable.s3OriginalKey = originalS3Key;
             deliverable.hlsPlaylistKey = playlistS3Key;
             deliverable.hlsPlaylistUrl = hlsPlaylistUrl;
-            deliverable.durationSeconds = durationSeconds;
             await deliverable.save();
         } else {
             deliverable = await VideoDeliverable.create({
@@ -65,7 +64,6 @@ export const uploadDeliverable = async (req, res) => {
                 s3OriginalKey: originalS3Key,
                 hlsPlaylistKey: playlistS3Key,
                 hlsPlaylistUrl,
-                durationSeconds,
             });
         }
 

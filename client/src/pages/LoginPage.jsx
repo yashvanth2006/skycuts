@@ -2,19 +2,11 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Zap, LogIn, UserPlus, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { GoogleLogin } from '@react-oauth/google';
 import AmbientBackground from '../components/three/AmbientBackground.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import api from '../api/axiosInstance.js';
-
-const GoogleIcon = () => (
-  <svg viewBox="0 0 533.5 544.3" width="18" height="18" aria-hidden="true">
-    <path fill="#4285F4" d="M533.5 278.4c0-17.4-1.4-34.2-4.1-50.4H272v95.5h146.9c-6.4 34.5-25.3 63.8-54 83.6v69.3h87.2c51-47 80.4-116.2 80.4-197.9z" />
-    <path fill="#34A853" d="M272 544.3c73.5 0 135.3-24.4 180.4-66.3l-87.2-69.3c-24.2 16.2-55.2 25.6-93.2 25.6-71.7 0-132.5-48.5-154.2-113.6H29.2v71.5C74.8 486.8 167.1 544.3 272 544.3z" />
-    <path fill="#FBBC05" d="M117.8 325.2c-10.4-31.2-10.4-64.8 0-96l-88-71.5C5 218.8 0 249.8 0 278.4s5 59.6 29.8 120.7l88-71.5z" />
-    <path fill="#EA4335" d="M272 108.7c39.9 0 75.8 13.7 104.1 40.7l78-78C404.8 24 342 0 272 0 167.1 0 74.8 57.5 29.2 144.7l88 71.5C139.5 157.2 200.3 108.7 272 108.7z" />
-  </svg>
-);
 
 const MotionDiv = motion.div;
 
@@ -27,7 +19,7 @@ const fadeUp = {
 };
 
 export default function LoginPage() {
-  const { login, signInWithGoogle, user } = useAuth();
+  const { login, loginWithGoogle, user } = useAuth();
   const { isDark } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -75,19 +67,20 @@ export default function LoginPage() {
     }
   };
 
-  const handleGoogleSignIn = async () => {
+  const handleGoogleSuccess = async (credentialResponse) => {
     try {
       setGoogleLoading(true);
       setError('');
-      const data = await signInWithGoogle();
-
+      const data = await loginWithGoogle(credentialResponse.credential);
+      
+      // Handle redirect after Google login
       if (fromStartProject) {
         navigate('/profile', { state: { openProjectRequest: true }, replace: true });
       } else {
         navigate(data.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
       }
     } catch (err) {
-      setError(err.message || 'Google sign-in failed. Please try again.');
+      setError('Google sign-in failed. Please try again.');
     } finally {
       setGoogleLoading(false);
     }
@@ -283,24 +276,18 @@ export default function LoginPage() {
                 <div style={{ flex: 1, height: 1, background: 'var(--border-subtle)' }} />
               </div>
               <div style={{ display: 'flex', justifyContent: 'center', minHeight: 44 }}>
-                <button
-                  type="button"
-                  onClick={handleGoogleSignIn}
-                  disabled={googleLoading}
-                  style={{
-                    width: '100%', maxWidth: 340,
-                    display: 'inline-flex', alignItems: 'center', justifyContent: 'center', gap: 10,
-                    padding: '12px 14px', borderRadius: 12,
-                    background: isDark ? 'rgba(255,255,255,0.06)' : '#fff',
-                    color: isDark ? '#fff' : '#111827',
-                    border: '1px solid var(--border-subtle)',
-                    cursor: googleLoading ? 'not-allowed' : 'pointer',
-                    boxShadow: '0 12px 30px rgba(0,0,0,0.08)',
-                  }}
-                >
-                  <GoogleIcon />
-                  {googleLoading ? 'Signing in…' : 'Sign in with Google'}
-                </button>
+                {googleLoading ? (
+                  <span style={{ color: 'var(--text-muted)', fontSize: 14 }}>Signing in...</span>
+                ) : (
+                  <GoogleLogin
+                    onSuccess={handleGoogleSuccess}
+                    onError={() => setError('Google sign-in failed.')}
+                    theme={isDark ? 'filled_black' : 'outline'}
+                    size="large"
+                    text="continue_with"
+                    shape="rectangular"
+                  />
+                )}
               </div>
             </MotionDiv>
           </form>

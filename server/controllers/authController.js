@@ -1,21 +1,8 @@
 import User from '../models/User.js';
 import generateToken from '../utils/generateToken.js';
-// firebase-admin is a CommonJS package; use subpath imports for ESM compatibility
-import { initializeApp, getApps, cert } from 'firebase-admin/app';
-import { getAuth } from 'firebase-admin/auth';
+import { OAuth2Client } from 'google-auth-library';
 
-// ─── Firebase Admin — initialise once ────────────────────────────────────────
-// Subpath imports (firebase-admin/app, firebase-admin/auth) are ESM-compatible.
-// No service-account JSON is needed — projectId is sufficient for verifyIdToken.
-if (!getApps().length) {
-    initializeApp({
-        projectId: process.env.FIREBASE_PROJECT_ID || 'skycuts-ff449',
-    });
-}
-
-const firebaseAuth = getAuth();
-
-// ─── Email / Password ────────────────────────────────────────────────────────
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 export const loginUser = async (req, res) => {
     const { email, password } = req.body;
@@ -58,66 +45,43 @@ export const registerUser = async (req, res) => {
 };
 
 export const seedAdmin = async (req, res) => {
-    // Block this endpoint in production to prevent accidental exposure
-    if (process.env.NODE_ENV === 'production') {
-        return res.status(403).json({ message: 'Seed endpoint is disabled in production' });
-    }
-
-    const seedPassword = process.env.ADMIN_SEED_PASSWORD;
-    if (!seedPassword) {
-        return res.status(500).json({ message: 'ADMIN_SEED_PASSWORD is not set in .env' });
-    }
-
     const adminExists = await User.findOne({ role: 'admin' });
+
     if (adminExists) {
         return res.status(400).json({ message: 'Admin account already exists' });
     }
 
-    const adminUser = await User.create({
+    const admin = await User.create({
         name: 'SkyCuts Admin',
         email: 'admin@skycuts.io',
-        password: seedPassword,
-        role: 'admin',
+        password: 'Admin@123',
+        role: 'admin'
     });
 
-    res.status(201).json({ message: 'Admin user successfully created!', admin: adminUser });
+    res.status(201).json({ message: 'Admin user successfully created!', admin });
 };
 
-// ─── Google / Firebase Sign-In ───────────────────────────────────────────────
-// The client sends a Firebase ID token (result.user.getIdToken()).
-// We verify it with Firebase Admin SDK — this handles all the audience/issuer
-// checks correctly regardless of which OAuth client Firebase used internally.
-
 export const googleLogin = async (req, res) => {
-    const { credential } = req.body; // Firebase ID token from the client
-
-    if (!credential) {
-        return res.status(400).json({ message: 'Firebase ID token is required' });
-    }
-
+    const { credential } = req.body;
     try {
-        // Verify the Firebase ID token using Firebase Admin SDK
-        const decodedToken = await firebaseAuth.verifyIdToken(credential);
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+        const payload = ticket.getPayload();
+        const { sub: googleId, email, name } = payload;
 
-        const { uid: firebaseUid, email, name } = decodedToken;
-
-        if (!email) {
-            return res.status(400).json({ message: 'No email found in Google account' });
-        }
-
-        // Find or create the user in our database
         let user = await User.findOne({ email });
 
         if (!user) {
             user = await User.create({
-                googleId: firebaseUid,
+                googleId,
                 email,
-                name: name || email.split('@')[0],
+                name,
                 role: 'client',
             });
         } else if (!user.googleId) {
-            // Link Google account to an existing email/password account
-            user.googleId = firebaseUid;
+            user.googleId = googleId;
             await user.save();
         }
 
@@ -133,16 +97,14 @@ export const googleLogin = async (req, res) => {
             requiresOnboarding,
         });
     } catch (err) {
-        console.error('Firebase token verification error:', err.message);
+        console.error('Google login error:', err);
         res.status(401).json({ message: 'Google authentication failed' });
     }
 };
 
-// ─── Profile Completion ───────────────────────────────────────────────────────
-
 export const completeProfile = async (req, res) => {
     const { name, mobileNumber } = req.body;
-
+    
     if (!name || !mobileNumber) {
         return res.status(400).json({ message: 'Name and Mobile Number are required' });
     }
