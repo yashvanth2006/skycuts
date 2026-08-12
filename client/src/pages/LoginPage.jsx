@@ -142,7 +142,7 @@ export default function LoginPage() {
           <MotionDiv custom={1} variants={fadeUp} initial="hidden" animate="visible" style={{ marginBottom: 32 }}>
             <div style={{
               display: 'grid', gridTemplateColumns: '1fr 1fr',
-              background: 'rgba(255,255,255,0.04)', borderRadius: 12,
+              background: 'var(--bg-glass)', borderRadius: 12,
               padding: 4, border: '1px solid var(--border-subtle)'
             }}>
               {['login', 'register'].map(m => (
