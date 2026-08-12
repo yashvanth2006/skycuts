@@ -22,7 +22,11 @@ export default function ChatPanel({ projectId }) {
 
   // ── Init Socket.io ────────────────────────────────────────────────────────
   useEffect(() => {
-    const socket = io(SOCKET_URL, { transports: ['websocket'] });
+    const token = localStorage.getItem('skycuts_token');
+    const socket = io(SOCKET_URL, { 
+        transports: ['websocket'],
+        auth: { token }
+    });
     socketRef.current = socket;
 
     socket.on('connect', () => {
@@ -32,6 +36,10 @@ export default function ChatPanel({ projectId }) {
     socket.on('receive_message', (msg) => {
       setMessages(prev => [...prev, msg]);
       if (!open) setUnread(n => n + 1);
+    });
+
+    socket.on('socket_error', (err) => {
+      console.error('Socket error:', err.message);
     });
 
     return () => socket.disconnect();

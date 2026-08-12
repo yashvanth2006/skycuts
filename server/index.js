@@ -19,7 +19,9 @@ import stripeRoutes from './routes/stripeRoutes.js';
 import projectRequestRoutes from './routes/projectRequestRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
 import Message from './models/Message.js';
-
+import User from './models/User.js';
+import Project from './models/Project.js';
+import jwt from 'jsonwebtoken';
 dotenv.config();
 
 const __filename = fileURLToPath(import.meta.url);
@@ -74,13 +76,47 @@ app.get('/api/health', (req, res) => {
 });
 
 // ─── Socket.io — Real-Time Chat Engine ──────────────────────────────────────
+
+// Authentication Middleware
+io.use(async (socket, next) => {
+    try {
+        const token = socket.handshake.auth.token;
+        if (!token) return next(new Error('Authentication error: No token provided'));
+
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await User.findById(decoded.userId || decoded.id).select('-password');
+        
+        if (!user) return next(new Error('Authentication error: User not found'));
+        
+        socket.user = user;
+        next();
+    } catch (err) {
+        next(new Error('Authentication error: Invalid token'));
+    }
+});
+
 io.on('connection', (socket) => {
-    console.log(`⚡ Client connected: ${socket.id}`);
+    console.log(`⚡ Client connected: ${socket.id} (User: ${socket.user.email})`);
 
     // Client joins a project-scoped private room
-    socket.on('join_project', (projectId) => {
-        socket.join(projectId);
-        console.log(`👤 ${socket.id} joined room: ${projectId}`);
+    socket.on('join_project', async (projectId) => {
+        try {
+            const project = await Project.findById(projectId);
+            if (!project) {
+                return socket.emit('socket_error', { message: 'Project not found' });
+            }
+
+            // Authorization: Must be Admin OR the assigned Client
+            if (socket.user.role !== 'admin' && project.client.toString() !== socket.user._id.toString()) {
+                console.log(`🚫 Unauthorized join attempt by ${socket.user.email} for project ${projectId}`);
+                return socket.emit('socket_error', { message: 'Unauthorized to access this project workspace' });
+            }
+
+            socket.join(projectId);
+            console.log(`👤 ${socket.id} joined room: ${projectId}`);
+        } catch (err) {
+            socket.emit('socket_error', { message: 'Failed to join project room' });
+        }
     });
 
     // Receive message, persist to DB, broadcast to room
