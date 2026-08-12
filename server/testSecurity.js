@@ -106,7 +106,59 @@ async function runTests() {
 
   // I. Valid admin JWT requesting any project -> 200
   await testApiScoped("Admin requesting Client A's project", tokenAdmin, projectA._id, 200);
-  
+
+  // 2. Authentication Login Tests (Bcrypt Fix)
+  console.log('\n--- Login Authentication Tests (Bcrypt Fix) ---');
+  async function testLogin(name, email, password, expectedStatus) {
+    try {
+      const response = await fetch(`${API_URL}/auth/login`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      if (response.status === expectedStatus) {
+        console.log(`✅ [Login] ${name} returned expected Status: ${response.status}`);
+      } else {
+        console.log(`❌ [Login] ${name} returned Status: ${response.status} (Expected: ${expectedStatus})`);
+      }
+    } catch (err) {
+      console.log(`❌ [Login] ${name} request error: ${err.message}`);
+    }
+  }
+
+  // Create a mock Google user with NO password
+  let googleUser = await User.findOne({ email: 'google@skycuts.io' });
+  if (!googleUser) {
+    googleUser = await User.create({
+      name: 'Google User',
+      email: 'google@skycuts.io',
+      googleId: '123456789',
+      role: 'client'
+    });
+  }
+
+  // Create a mock normal user for valid login test
+  let loginUser = await User.findOne({ email: 'testlogin@skycuts.io' });
+  if (!loginUser) {
+    loginUser = await User.create({
+      name: 'Test Login User',
+      email: 'testlogin@skycuts.io',
+      password: 'TestPassword123!',
+      role: 'client'
+    });
+  } else {
+    // Ensure password is correct for tests
+    loginUser.password = 'TestPassword123!';
+    await loginUser.save();
+  }
+
+  // Tests
+  await testLogin('Normal user + correct password', 'testlogin@skycuts.io', 'TestPassword123!', 200);
+  await testLogin('Normal user + wrong password', 'testlogin@skycuts.io', 'wrongpassword', 401);
+  await testLogin('Google-only user + email/password login', 'google@skycuts.io', 'anypassword', 401);
+  await testLogin('Nonexistent email', 'nobody@skycuts.io', 'password', 401);
+  await testLogin('Missing password (empty string)', 'testlogin@skycuts.io', '', 401);
+
   console.log('\nAll tests completed.');
   process.exit(0);
 }
