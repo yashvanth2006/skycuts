@@ -316,3 +316,41 @@ textarea.input-field { resize: vertical; min-height: 80px; }
   z-index: 0;
   opacity: 0.15;
 }
+
+/* ─── Mobile Responsive ──────────────────────────────────────────────────────── */
+
+/* Tablet — ≤768px */
+@media (max-width: 768px) {
+  .content-area {
+    padding: 16px;
+  }
+
+  .grid-auto {
+    grid-template-columns: 1fr;
+    gap: 14px;
+  }
+}
+
+/* Phone — ≤480px */
+@media (max-width: 480px) {
+  .content-area {
+    padding: 12px;
+  }
+
+  /* Shrink glow orbs so they don't bleed on small screens */
+  .glow-orb {
+    opacity: 0.08;
+  }
+
+  /* Glassmorphism cards: tighten padding on mobile */
+  .glass-card {
+    border-radius: var(--radius-md);
+  }
+
+  /* Buttons full-width on phone where appropriate */
+  .btn-primary,
+  .btn-ghost {
+    width: 100%;
+    justify-content: center;
+  }
+}

@@ -48,7 +48,7 @@ function RequestCard({ req, index }) {
                     </p>
                     <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 8 }}>{req.type}</p>
                     {req.description && (
-                        <p style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 420 }}>
+                        <p style={{ fontSize: 12, color: 'var(--text-muted)', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                             {req.description}
                         </p>
                     )}
@@ -106,36 +106,40 @@ export default function ClientDashboard() {
             <div className="glow-orb" style={{ width: 500, height: 500, background: 'var(--accent-blue)', top: -200, right: -150 }} />
             <div className="glow-orb" style={{ width: 300, height: 300, background: 'var(--accent-purple)', bottom: 100, left: -100 }} />
 
-            <main className="content-area" style={{ position: 'relative', zIndex: 1, paddingTop: 40 }}>
+            <main className="content-area" style={{ position: 'relative', zIndex: 1, paddingTop: 24 }}>
 
                 {/* Welcome hero */}
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6 }}
-                    style={{ marginBottom: 40, textAlign: 'center' }}
+                    style={{ marginBottom: 32, textAlign: 'center' }}
                 >
                     <div style={{
                         display: 'inline-flex', alignItems: 'center', gap: 8,
-                        padding: '6px 16px', borderRadius: 100, marginBottom: 20,
+                        padding: '5px 14px', borderRadius: 100, marginBottom: 16,
                         background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)'
                     }}>
-                        <Zap size={14} color="var(--accent-blue)" />
-                        <span style={{ fontSize: 13, color: 'var(--accent-indigo)', fontWeight: 500 }}>Your Studio Portal</span>
+                        <Zap size={13} color="var(--accent-blue)" />
+                        <span style={{ fontSize: 12, color: 'var(--accent-indigo)', fontWeight: 500 }}>Your Studio Portal</span>
                     </div>
-                    <h1 style={{ fontSize: 34, fontWeight: 700, marginBottom: 12, letterSpacing: '-0.03em' }}>
+                    <h1 style={{
+                        fontSize: 'clamp(22px, 6vw, 34px)',
+                        fontWeight: 700, marginBottom: 10, letterSpacing: '-0.03em',
+                        lineHeight: 1.15,
+                    }}>
                         Welcome back,{' '}
                         <span style={{ background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-luma))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                             {user?.name?.split(' ')[0]}
                         </span>
                     </h1>
-                    <p style={{ fontSize: 15, color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto' }}>
+                    <p style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto' }}>
                         Review deliverables, leave feedback, and track your project requests.
                     </p>
                 </motion.div>
 
                 {/* Tabs */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 4, marginBottom: 28, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 0 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: 2, marginBottom: 24, borderBottom: '1px solid var(--border-subtle)', paddingBottom: 0, overflowX: 'auto' }}>
                     {[
                         { id: 'projects', label: 'My Projects', icon: FolderOpen, count: projects.length },
                         { id: 'requests', label: 'My Requests', icon: Send, count: pendingCount, badge: pendingCount > 0 },
@@ -144,16 +148,16 @@ export default function ClientDashboard() {
                             key={id}
                             onClick={() => setActiveTab(id)}
                             style={{
-                                display: 'flex', alignItems: 'center', gap: 7,
-                                padding: '10px 18px', border: 'none', background: 'none',
+                                display: 'flex', alignItems: 'center', gap: 6,
+                                padding: '10px 16px', border: 'none', background: 'none',
                                 fontSize: 14, fontWeight: activeTab === id ? 600 : 500,
                                 color: activeTab === id ? 'var(--text-primary)' : 'var(--text-muted)',
                                 borderBottom: activeTab === id ? '2px solid var(--accent-blue)' : '2px solid transparent',
                                 marginBottom: -1, cursor: 'pointer', transition: 'all 0.15s ease',
-                                position: 'relative',
+                                position: 'relative', whiteSpace: 'nowrap', flexShrink: 0,
                             }}
                         >
-                            <Icon size={15} /> {label}
+                            <Icon size={14} /> {label}
                             {badge && (
                                 <span style={{
                                     padding: '1px 7px', borderRadius: 10, fontSize: 11, fontWeight: 700,
