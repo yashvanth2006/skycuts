@@ -45,7 +45,11 @@ export default function LoginPage() {
       const { data } = await api.post(endpoint, payload);
       const { token, ...userData } = data;
       login(userData, token);
-      navigate(userData.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+      if (userData.role === 'client') {
+        window.location.href = 'http://localhost:5176/dashboard';
+      } else {
+        navigate('/dashboard', { replace: true });
+      }
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong. Try again.');
     } finally {

@@ -50,7 +50,11 @@ export default function Navbar({ showBack = false }) {
         <button
           onClick={() => {
             if (user) {
-              navigate(user.role === 'admin' ? '/admin' : '/dashboard');
+              if (user.role === 'admin') {
+                window.location.href = 'http://localhost:5174/';
+              } else {
+                navigate('/dashboard');
+              }
             } else {
               navigate('/profile');
             }

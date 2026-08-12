@@ -4,7 +4,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import ClientDashboard from './pages/client/ClientDashboard.jsx';
 import ClientProjectPage from './pages/client/ClientProjectPage.jsx';
 import EditorProfile from './pages/public/EditorProfile.jsx';
-import AdminDashboard from './pages/admin/AdminDashboard.jsx';
+import EditorProfile from './pages/public/EditorProfile.jsx';
 
 // ─── Route Guards ──────────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -21,13 +21,6 @@ const ClientRoute = ({ children }) => {
   return children;
 };
 
-const AdminRoute = ({ children }) => {
-  const { user, loading } = useAuth();
-  if (loading) return <FullPageLoader />;
-  if (!user) return <Navigate to="/login" replace />;
-  if (user.role !== 'admin') return <Navigate to="/login" replace />;
-  return children;
-};
 
 const FullPageLoader = () => (
   <div style={{
@@ -49,7 +42,12 @@ const RootRedirect = () => {
   const { user, loading } = useAuth();
   if (loading) return <FullPageLoader />;
   if (!user) return <Navigate to="/profile" replace />;
-  if (user.role === 'admin') return <Navigate to="/admin" replace />;
+  
+  if (user.role === 'admin') {
+    window.location.href = 'http://localhost:5174/';
+    return null;
+  }
+  
   return <Navigate to="/dashboard" replace />;
 };
 
@@ -66,8 +64,6 @@ export default function App() {
       <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
       <Route path="/dashboard/project/:id" element={<ClientRoute><ClientProjectPage /></ClientRoute>} />
 
-      {/* Admin Routes */}
-      <Route path="/admin" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />

@@ -58,7 +58,12 @@ export default function LoginPage() {
       if (fromStartProject) {
         navigate('/profile', { state: { openProjectRequest: true }, replace: true });
       } else {
-        navigate(userData.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+        
+        if (userData.role === 'admin') {
+            window.location.href = 'http://localhost:5174/';
+        } else {
+            navigate('/dashboard', { replace: true });
+        }
       }
     } catch (err) {
       setError(err.response?.data?.message || 'Something went wrong. Try again.');
@@ -77,7 +82,11 @@ export default function LoginPage() {
       if (fromStartProject) {
         navigate('/profile', { state: { openProjectRequest: true }, replace: true });
       } else {
-        navigate(data.role === 'admin' ? '/admin' : '/dashboard', { replace: true });
+        if (data.role === 'admin') {
+            window.location.href = 'http://localhost:5174/';
+        } else {
+            navigate('/dashboard', { replace: true });
+        }
       }
     } catch (err) {
       setError('Google sign-in failed. Please try again.');
