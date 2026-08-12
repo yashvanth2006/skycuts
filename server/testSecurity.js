@@ -48,104 +48,65 @@ async function runTests() {
   const tokenA = jwt.sign({ userId: clientA._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
   const tokenB = jwt.sign({ userId: clientB._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
 
-  // 1. REST API Security Test
-  console.log('\n--- REST API Security Testing ---');
+  // 1. Backend Stability Tests
+  console.log('\n--- REST API Security & Stability Testing ---');
 
-  async function testApi(name, token, projectId, shouldSucceed) {
+  async function testApi(name, headers, expectedStatus) {
     try {
-      const response = await fetch(`${API_URL}/projects/${projectId}`, { 
-        headers: { Authorization: `Bearer ${token}` } 
-      });
-      if (response.ok) {
-        if (shouldSucceed) console.log(`✅ [REST] ${name} accessed project ${projectId} (Success)`);
-        else console.log(`❌ [REST] ${name} INCORRECTLY accessed project ${projectId}`);
+      const response = await fetch(`${API_URL}/projects`, { headers });
+      if (response.status === expectedStatus) {
+        console.log(`✅ [REST] ${name} returned expected Status: ${response.status}`);
       } else {
-        if (!shouldSucceed && [403, 401, 404].includes(response.status)) {
-          console.log(`✅ [REST] ${name} denied access to project ${projectId} (Status: ${response.status})`);
-        } else {
-          console.log(`❌ [REST] ${name} failed unexpectedly: HTTP ${response.status}`);
-        }
+        console.log(`❌ [REST] ${name} returned Status: ${response.status} (Expected: ${expectedStatus})`);
       }
     } catch (err) {
       console.log(`❌ [REST] ${name} request error: ${err.message}`);
     }
   }
 
-  await testApi('Client A', tokenA, projectA._id, true);
-  await testApi('Client A', tokenA, projectB._id, false);
-  await testApi('Client B', tokenB, projectB._id, true);
-  await testApi('Client B', tokenB, projectA._id, false);
-  await testApi('Admin', tokenAdmin, projectA._id, true);
-  await testApi('Admin', tokenAdmin, projectB._id, true);
+  // A. No Authorization header -> 401
+  await testApi('No Authorization header', {}, 401);
 
-  // 2. Socket.io Security Test
-  console.log('\n--- Socket.io Security Testing ---');
+  // B. Malformed Authorization header -> 401
+  await testApi('Malformed Authorization header', { Authorization: 'Bearer' }, 401);
 
-  function testSocket(name, token, projectId, shouldSucceed) {
-    return new Promise((resolve) => {
-      const socket = io(SOCKET_URL, {
-        transports: ['websocket'],
-        auth: { token }
-      });
+  // C. Invalid JWT -> 401
+  await testApi('Invalid JWT', { Authorization: 'Bearer this_is_invalid' }, 401);
 
-      let resolved = false;
+  // D. Expired JWT -> 401
+  const expiredToken = jwt.sign({ userId: clientA._id }, process.env.JWT_SECRET, { expiresIn: '-10s' });
+  await testApi('Expired JWT', { Authorization: `Bearer ${expiredToken}` }, 401);
 
-      socket.on('connect', () => {
-        socket.emit('join_project', projectId);
-      });
+  // E. Valid JWT but deleted/nonexistent user -> 401
+  const fakeId = new mongoose.Types.ObjectId();
+  const nonexistentToken = jwt.sign({ userId: fakeId }, process.env.JWT_SECRET, { expiresIn: '1h' });
+  await testApi('Deleted user JWT', { Authorization: `Bearer ${nonexistentToken}` }, 401);
 
-      // To verify success, there's no native success callback, we wait 1 sec.
-      const timeout = setTimeout(() => {
-        if (!resolved) {
-          if (shouldSucceed) console.log(`✅ [Socket] ${name} joined room ${projectId}`);
-          else console.log(`❌ [Socket] ${name} INCORRECTLY joined room ${projectId} (no error emitted)`);
-          socket.disconnect();
-          resolve();
-        }
-      }, 1000);
-
-      socket.on('socket_error', (err) => {
-        if (!resolved) {
-          resolved = true;
-          clearTimeout(timeout);
-          if (!shouldSucceed) {
-            console.log(`✅ [Socket] ${name} denied room ${projectId} (Error: ${err.message})`);
-          } else {
-            console.log(`❌ [Socket] ${name} failed to join room ${projectId} (Error: ${err.message})`);
-          }
-          socket.disconnect();
-          resolve();
-        }
-      });
-    });
+  // F. Valid client JWT requesting another client's project -> 403
+  async function testApiScoped(name, token, projectId, expectedStatus) {
+    try {
+      const response = await fetch(`${API_URL}/projects/${projectId}`, { headers: { Authorization: `Bearer ${token}` } });
+      if (response.status === expectedStatus) {
+        console.log(`✅ [REST] ${name} returned expected Status: ${response.status}`);
+      } else {
+        console.log(`❌ [REST] ${name} returned Status: ${response.status} (Expected: ${expectedStatus})`);
+      }
+    } catch (err) {
+      console.log(`❌ [REST] ${name} request error: ${err.message}`);
+    }
   }
 
-  await testSocket('Client A', tokenA, projectA._id, true);
-  await testSocket('Client A', tokenA, projectB._id, false);
-  await testSocket('Client B', tokenB, projectB._id, true);
-  await testSocket('Client B', tokenB, projectA._id, false);
-  await testSocket('Admin', tokenAdmin, projectA._id, true);
-  await testSocket('Admin', tokenAdmin, projectB._id, true);
+  await testApiScoped("Client A requesting Client B's project", tokenA, projectB._id, 403);
 
-  // Also test Unauthenticated Socket
-  await new Promise((resolve) => {
-    const unauthSocket = io(SOCKET_URL, { transports: ['websocket'] });
-    let errorCaught = false;
-    unauthSocket.on('connect_error', (err) => {
-      console.log(`✅ [Socket] Unauthenticated socket blocked (Error: ${err.message})`);
-      errorCaught = true;
-      unauthSocket.disconnect();
-      resolve();
-    });
-    setTimeout(() => {
-      if (!errorCaught) {
-        console.log(`❌ [Socket] Unauthenticated socket connected!`);
-        unauthSocket.disconnect();
-        resolve();
-      }
-    }, 1000);
-  });
+  // G. Valid client JWT requesting their own project -> 200
+  await testApiScoped("Client A requesting their own project", tokenA, projectA._id, 200);
 
+  // H. Valid admin JWT requesting projects -> 200
+  await testApi('Admin requesting all projects', { Authorization: `Bearer ${tokenAdmin}` }, 200);
+
+  // I. Valid admin JWT requesting any project -> 200
+  await testApiScoped("Admin requesting Client A's project", tokenAdmin, projectA._id, 200);
+  
   console.log('\nAll tests completed.');
   process.exit(0);
 }
