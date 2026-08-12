@@ -4,7 +4,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import ClientDashboard from './pages/client/ClientDashboard.jsx';
 import ClientProjectPage from './pages/client/ClientProjectPage.jsx';
 import EditorProfile from './pages/public/EditorProfile.jsx';
-import EditorProfile from './pages/public/EditorProfile.jsx';
+
 
 // ─── Route Guards ──────────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
