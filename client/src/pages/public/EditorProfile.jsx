@@ -546,12 +546,12 @@ export default function EditorProfile() {
               fontFamily: "'Inter', system-ui",
             }}
           >
-            Marcus
+            Yashvanth
             <span style={{
               background: `linear-gradient(135deg, ${colors.blue}, ${colors.blueL})`,
               WebkitBackgroundClip: "text", WebkitTextFillColor: "transparent",
               backgroundClip: "text",
-            }}> Reid</span>
+            }}> SKY</span>
           </motion.h1>
 
           {/* Title */}
