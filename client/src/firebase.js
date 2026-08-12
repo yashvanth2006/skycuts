@@ -1,39 +1,86 @@
-import { initializeApp } from "firebase/app";
-import { getAuth, GoogleAuthProvider, signInWithPopup } from "firebase/auth";
+import { initializeApp } from 'firebase/app';
+import {
+  getAuth,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  setPersistence,
+  browserLocalPersistence,
+} from 'firebase/auth';
 
-// Your web app's Firebase configuration from screenshot
 const firebaseConfig = {
-  apiKey: "AIzaSyA1JMnw0lnR4WGFT9TtnWiFZsyaGvuSU0",
-  authDomain: "skycuts-ff449.firebaseapp.com",
-  projectId: "skycuts-ff449",
-  storageBucket: "skycuts-ff449.firebasestorage.app",
-  messagingSenderId: "535549316425",
-  appId: "1:535549316425:web:d4cce77a1f8840cea95e98",
-  measurementId: "G-J2XQ05ZQ8P"
+  apiKey:            import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain:        import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId:         import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket:     import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId:             import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId:     import.meta.env.VITE_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
-
-// Initialize Auth & Provider
 export const auth = getAuth(app);
 export const googleProvider = new GoogleAuthProvider();
 
-// Sign-In Helper Function
+/**
+ * Sign in with Google.
+ * Uses signInWithPopup by default. If the browser blocks the popup (e.g. Brave
+ * with strict shields), falls back to signInWithRedirect automatically.
+ * Returns a Firebase ID token — verified on the backend with Firebase Admin SDK.
+ */
 export const signInWithGoogle = async () => {
   try {
-    const result = await signInWithPopup(auth, googleProvider);
-    // User credentials received
-    const user = result.user;
-    console.log("Logged in user details:", {
-      displayName: user.displayName,
-      email: user.email,
-      photoURL: user.photoURL,
-      uid: user.uid
-    });
-    return user;
+    await setPersistence(auth, browserLocalPersistence);
+
+    let result;
+    try {
+      // Try popup first (instant, no page reload)
+      result = await signInWithPopup(auth, googleProvider);
+    } catch (popupErr) {
+      // If popup was blocked or failed due to browser policy, fall back to redirect
+      const blockedCodes = [
+        'auth/popup-blocked',
+        'auth/popup-closed-by-user',
+        'auth/cancelled-popup-request',
+      ];
+      if (blockedCodes.includes(popupErr.code)) {
+        // Redirect triggers a full page reload — the result is caught in
+        // AuthContext via getRedirectResult() on mount.
+        await signInWithRedirect(auth, googleProvider);
+        return null; // Page will reload; caller handles null gracefully
+      }
+      throw popupErr;
+    }
+
+    // Get Firebase ID token — this is what we send to the backend.
+    // Firebase Admin SDK on the server verifies this token.
+    // This is more reliable than GoogleAuthProvider.credentialFromResult().idToken
+    // which can have audience mismatches depending on the OAuth client used.
+    const idToken = await result.user.getIdToken();
+
+    return {
+      user: result.user,
+      idToken,
+    };
   } catch (error) {
-    console.error("Google Sign-In Error:", error.message);
+    console.error('Google Sign-In Error:', error);
     throw error;
+  }
+};
+
+/**
+ * Call this once on app mount to catch the result of a redirect sign-in.
+ * Returns { user, idToken } if we just came back from a redirect, else null.
+ */
+export const getGoogleRedirectResult = async () => {
+  try {
+    const result = await getRedirectResult(auth);
+    if (!result) return null;
+    const idToken = await result.user.getIdToken();
+    return { user: result.user, idToken };
+  } catch (error) {
+    console.error('Redirect result error:', error);
+    return null;
   }
 };

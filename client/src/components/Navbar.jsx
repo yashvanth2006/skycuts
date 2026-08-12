@@ -72,9 +72,8 @@ export default function Navbar({ showBack = false }) {
         {/* Theme Toggle — always visible */}
         <ThemeToggle />
 
-        {user && (
+        {user ? (
           <>
-            {/* Separator */}
             <div style={{ width: 1, height: 28, background: 'var(--border-subtle)' }} />
 
             <div style={{
@@ -83,14 +82,22 @@ export default function Navbar({ showBack = false }) {
               background: 'var(--bg-glass)', borderRadius: 100,
               border: '1px solid var(--border-subtle)'
             }}>
-              <div style={{
-                width: 30, height: 30, borderRadius: '50%',
-                background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-luma))',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                fontSize: 12, fontWeight: 700, color: '#fff'
-              }}>
-                {initials}
-              </div>
+              {user.photoURL ? (
+                <img
+                  src={user.photoURL}
+                  alt={user.name || 'User avatar'}
+                  style={{ width: 30, height: 30, borderRadius: '50%', objectFit: 'cover' }}
+                />
+              ) : (
+                <div style={{
+                  width: 30, height: 30, borderRadius: '50%',
+                  background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-luma))',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontSize: 12, fontWeight: 700, color: '#fff'
+                }}>
+                  {initials}
+                </div>
+              )}
               <div>
                 <p style={{ fontSize: 13, fontWeight: 600, color: 'var(--text-primary)', lineHeight: 1.2 }}>{user.name}</p>
                 <p style={{ fontSize: 11, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{user.role}</p>
@@ -104,6 +111,14 @@ export default function Navbar({ showBack = false }) {
               <LogOut size={15} /> Logout
             </button>
           </>
+        ) : (
+          <button
+            onClick={() => navigate('/login')}
+            className="btn-primary"
+            style={{ padding: '10px 16px', gap: 8 }}
+          >
+            Login
+          </button>
         )}
       </div>
     </motion.nav>
