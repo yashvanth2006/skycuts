@@ -333,7 +333,7 @@ function StatTile({ stat, delay, colors }) {
 
 // ─── Main Page ───────────────────────────────────────────────────────────────
 export default function EditorProfile() {
-  const { user } = useAuth();
+  const { user, loading } = useAuth();
   const { theme } = useTheme();
   const navigate = useNavigate();
   const location = useLocation();
@@ -353,10 +353,12 @@ export default function EditorProfile() {
   };
 
   useEffect(() => {
-    if (location.state?.openProjectRequest) {
+    if (!loading && location.state?.openProjectRequest) {
       setAuthModalOpen(true);
+      // Consume the state exactly once so refresh doesn't reopen the modal
+      navigate(location.pathname, { replace: true, state: {} });
     }
-  }, [location.state]);
+  }, [loading, location.state, navigate, location.pathname]);
 
   useEffect(() => {
     const fetchPortfolio = async () => {

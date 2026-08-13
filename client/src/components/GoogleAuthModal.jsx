@@ -54,18 +54,29 @@ function StepDots({ current, total, dv }) {
 // If user is already authenticated, opens directly at 'request'.
 export default function GoogleAuthModal({ isOpen, onClose }) {
     const { dv, isDark } = useTheme();
-    const { user, token, loginWithGoogle, completeOnboarding } = useAuth();
+    const { user, token, loginWithGoogle, completeOnboarding, loading: authLoading } = useAuth();
 
-    const [step, setStep] = useState(user ? 'request' : 'login');
+    const [step, setStep] = useState('login');
 
     // Reset step every time the modal opens/closes so stale state is cleared.
-    // If the user is already authenticated when re-opening, jump straight to 'request'.
+    // React to user state changes to determine the correct step.
     useEffect(() => {
         if (isOpen) {
-            setStep(user ? 'request' : 'login');
+            if (authLoading) return; // Wait for AuthContext to finish loading
+
+            if (user) {
+                // If user doesn't have a name or mobile, force onboarding
+                if (!user.name || !user.mobileNumber) {
+                    setStep('onboarding');
+                } else {
+                    setStep('request');
+                }
+            } else {
+                setStep('login');
+            }
             setError('');
         }
-    }, [isOpen, user]);
+    }, [isOpen, user, authLoading]);
     const [name, setName] = useState('');
     const [mobile, setMobile] = useState('');
     const [error, setError] = useState('');

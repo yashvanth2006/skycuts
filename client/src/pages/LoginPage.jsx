@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Zap, LogIn, UserPlus, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
 import AmbientBackground from '../components/three/AmbientBackground.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
@@ -54,17 +55,8 @@ export default function LoginPage() {
       const { token, ...userData } = data;
       login(userData, token);
       
-      // Handle redirect after login
-      if (fromStartProject) {
-        navigate('/profile', { state: { openProjectRequest: true }, replace: true });
-      } else {
-        
-        if (userData.role === 'admin') {
-            window.location.href = 'http://localhost:5174/';
-        } else {
-            navigate('/dashboard', { replace: true });
-        }
-      }
+      // Removed manual synchronous navigate.
+      // The useEffect will handle redirection once the AuthContext state updates.
     } catch (err) {
       // Show the server's specific message if available and safe, otherwise generic
       const msg = err.response?.data?.message;
@@ -83,21 +75,9 @@ export default function LoginPage() {
       setGoogleLoading(true);
       setError('');
       const data = await loginWithGoogle(credentialResponse.credential);
-
-      // After Google login, both paths converge:
-      // - START PROJECT flow → always go to /profile, GoogleAuthModal handles onboarding inline
-      // - Direct login → go to dashboard (admin) or dashboard (client)
-      if (fromStartProject) {
-        // Navigate to /profile with openProjectRequest flag.
-        // GoogleAuthModal will check user state and show onboarding if needed.
-        navigate('/profile', { state: { openProjectRequest: true }, replace: true });
-      } else {
-        if (data.role === 'admin') {
-          window.location.href = 'http://localhost:5174/';
-        } else {
-          navigate('/dashboard', { replace: true });
-        }
-      }
+      
+      // Removed manual synchronous navigate.
+      // The useEffect will handle redirection once the AuthContext state updates.
     } catch {
       setError('Google sign-in failed. Please try again.');
     } finally {
@@ -110,6 +90,19 @@ export default function LoginPage() {
     setError('');
     setForm({ name: '', email: '', password: '' });
   };
+
+  // Redirect authenticated users AFTER state has updated
+  useEffect(() => {
+    if (user && !fromStartProject) {
+      if (user.role === 'admin') {
+          window.location.href = 'http://localhost:5176/dashboard';
+      } else {
+          navigate('/dashboard', { replace: true });
+      }
+    } else if (user && fromStartProject) {
+      navigate('/profile', { state: { openProjectRequest: true }, replace: true });
+    }
+  }, [user, navigate, fromStartProject]);
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
