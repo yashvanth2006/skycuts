@@ -422,7 +422,7 @@ export default function EditorProfile() {
         background: "var(--bg-void)",
         borderBottom: `1px solid var(--border-subtle)`,
       }}>
-        <Navbar />
+        <Navbar showDashboard={!!user} />
       </div>
 
       {/* ═══ HERO SECTION ═══════════════════════════════════════════════════ */}

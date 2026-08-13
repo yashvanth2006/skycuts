@@ -1,10 +1,10 @@
 import { useNavigate } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Zap, LogOut, ChevronLeft } from 'lucide-react';
+import { Zap, LogOut, ChevronLeft, LayoutDashboard } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.jsx';
 import ThemeToggle from './ThemeToggle.jsx';
 
-export default function Navbar({ showBack = false }) {
+export default function Navbar({ showBack = false, showDashboard = false }) {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -83,6 +83,27 @@ export default function Navbar({ showBack = false }) {
           <>
             <div style={{ width: 1, height: 24, background: 'var(--border-subtle)', flexShrink: 0 }} />
 
+            {/* Client Dashboard button — only when showDashboard prop is set */}
+            {showDashboard && (
+              <button
+                onClick={() => navigate('/dashboard')}
+                title="Client Dashboard"
+                style={{
+                  display: 'flex', alignItems: 'center', gap: 5,
+                  padding: '6px 12px',
+                  background: 'var(--bg-glass)', color: 'var(--text-secondary)',
+                  border: '1px solid var(--border-subtle)', borderRadius: 'var(--radius-md)',
+                  cursor: 'pointer', transition: 'all 0.2s ease', flexShrink: 0,
+                  fontSize: 13, fontWeight: 500, whiteSpace: 'nowrap',
+                }}
+                onMouseEnter={e => { e.currentTarget.style.background = 'var(--bg-glass-hover)'; e.currentTarget.style.color = 'var(--text-primary)'; e.currentTarget.style.borderColor = 'var(--accent-blue)'; }}
+                onMouseLeave={e => { e.currentTarget.style.background = 'var(--bg-glass)'; e.currentTarget.style.color = 'var(--text-secondary)'; e.currentTarget.style.borderColor = 'var(--border-subtle)'; }}
+              >
+                <LayoutDashboard size={14} />
+                <span className="nav-dashboard-label">Client Dashboard</span>
+              </button>
+            )}
+
             {/* User pill — shows avatar + first name on mobile, full name on desktop */}
             <div style={{
               display: 'flex', alignItems: 'center', gap: 8,
@@ -158,6 +179,9 @@ export default function Navbar({ showBack = false }) {
       <style>{`
         @media (max-width: 380px) {
           .nav-logout-label { display: none; }
+        }
+        @media (max-width: 480px) {
+          .nav-dashboard-label { display: none; }
         }
       `}</style>
     </motion.nav>
