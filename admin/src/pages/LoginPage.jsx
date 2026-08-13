@@ -52,10 +52,12 @@ export default function LoginPage() {
       const { data } = await api.post(endpoint, payload);
       const { token, ...userData } = data;
       login(userData, token);
+      
+      // If client accidentally logs in here, send them to the client app.
+      // Otherwise (for admins), the useEffect above will redirect to /dashboard
+      // as soon as the AuthContext state has fully updated.
       if (userData.role === 'client') {
-        window.location.href = 'http://localhost:5176/dashboard';
-      } else {
-        navigate('/dashboard', { replace: true });
+        window.location.href = 'http://localhost:5175/dashboard';
       }
     } catch (err) {
       const msg = err.response?.data?.message;
