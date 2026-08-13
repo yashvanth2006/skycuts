@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import {
     Film, Loader2, Zap, Clock, CheckCircle, XCircle,
-    FolderOpen, ChevronRight, Send
+    FolderOpen, ChevronRight, Send, ArrowLeft
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar.jsx';
@@ -136,6 +136,49 @@ export default function ClientDashboard() {
                     <p style={{ fontSize: 'clamp(13px, 3vw, 15px)', color: 'var(--text-muted)', maxWidth: 480, margin: '0 auto' }}>
                         Review deliverables, leave feedback, and track your project requests.
                     </p>
+                </motion.div>
+
+                {/* Back to Editor Profile button */}
+                <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.4, delay: 0.15 }}
+                    style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: 20 }}
+                >
+                    <button
+                        className="back-to-profile-btn"
+                        onClick={() => navigate('/profile')}
+                        style={{
+                            display: 'inline-flex',
+                            alignItems: 'center',
+                            gap: 7,
+                            padding: '9px 18px',
+                            borderRadius: 10,
+                            fontSize: 13.5,
+                            fontWeight: 600,
+                            color: 'var(--text-primary)',
+                            background: 'var(--glass-bg, rgba(255,255,255,0.7))',
+                            border: '1px solid var(--border-subtle, rgba(0,0,0,0.1))',
+                            boxShadow: '0 2px 8px rgba(0,0,0,0.07)',
+                            cursor: 'pointer',
+                            transition: 'all 0.18s ease',
+                            backdropFilter: 'blur(8px)',
+                            letterSpacing: '-0.01em',
+                        }}
+                        onMouseEnter={e => {
+                            e.currentTarget.style.transform = 'translateX(-3px)';
+                            e.currentTarget.style.boxShadow = '0 4px 14px rgba(0,0,0,0.12)';
+                            e.currentTarget.style.borderColor = 'var(--accent-blue, rgba(99,102,241,0.5))';
+                        }}
+                        onMouseLeave={e => {
+                            e.currentTarget.style.transform = 'translateX(0)';
+                            e.currentTarget.style.boxShadow = '0 2px 8px rgba(0,0,0,0.07)';
+                            e.currentTarget.style.borderColor = 'var(--border-subtle, rgba(0,0,0,0.1))';
+                        }}
+                    >
+                        <ArrowLeft size={15} style={{ flexShrink: 0 }} />
+                        Back to Editor Profile
+                    </button>
                 </motion.div>
 
                 {/* Tabs */}
