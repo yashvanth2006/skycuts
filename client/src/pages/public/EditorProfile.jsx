@@ -380,6 +380,7 @@ export default function EditorProfile() {
   }, []);
 
   const handleStartProject = () => {
+    if (loading) return;
     if (user) {
       setAuthModalOpen(true);
     } else {

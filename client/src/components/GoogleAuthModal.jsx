@@ -198,9 +198,10 @@ export default function GoogleAuthModal({ isOpen, onClose }) {
     };
 
     if (!isOpen) return null;
+    if (authLoading) return null; // Wait for authentication state restoration
 
     const totalDots = 3;
-    const currentDot = Math.min(STEP_INDEX[step], totalDots - 1);
+    const currentDot = Math.min(STEP_INDEX[step] || 0, totalDots - 1);
 
     return (
         <AnimatePresence>
