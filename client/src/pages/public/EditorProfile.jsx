@@ -394,6 +394,7 @@ export default function EditorProfile() {
       color: "var(--text-primary)",
       fontFamily: "'Inter', system-ui, sans-serif",
       colorScheme: theme === 'dark' ? "dark" : "light",
+      overflowX: "hidden",
     }}>
 
       {/* Google Fonts */}
@@ -416,6 +417,132 @@ export default function EditorProfile() {
           0%   { transform: translateY(-100%); }
           100% { transform: translateY(100vh); }
         }
+
+        /* ── Mobile responsiveness ─────────────────────────────── */
+
+        /* Hero: replace fixed 100vh with a sensible mobile height */
+        .ep-hero {
+          height: 100vh;
+          min-height: 600px;
+          max-height: 900px;
+        }
+
+        /* Hero content padding tightened on mobile */
+        .ep-hero-content {
+          padding: 0 24px;
+        }
+
+        /* CTA button group: row on desktop */
+        .ep-cta-group {
+          display: flex;
+          gap: 12px;
+          flex-wrap: wrap;
+          justify-content: center;
+        }
+
+        /* Stats: auto-fit 2+ columns on desktop */
+        .ep-stats-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          gap: 2px;
+          background: var(--border-subtle);
+          border: 1px solid var(--border-subtle);
+          border-radius: 8px;
+          overflow: hidden;
+          margin: 40px 0;
+        }
+
+        /* Portfolio: multi-col on desktop */
+        .ep-portfolio-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+          gap: 16px;
+        }
+
+        /* Contact box */
+        .ep-contact-box {
+          padding: 36px 40px;
+        }
+
+        /* HUD decorative corner labels */
+        .ep-hud-topleft, .ep-hud-bottomright {
+          display: flex;
+        }
+
+        /* ── ≤ 768px ─────────────────────────────────────────── */
+        @media (max-width: 768px) {
+
+          /* Hero: shrink to fit viewport content naturally */
+          .ep-hero {
+            height: auto !important;
+            min-height: 0 !important;
+            max-height: none !important;
+            padding: 60px 0 48px;
+          }
+
+          /* Hero content: switch to relative positioning flow */
+          .ep-hero-content {
+            position: relative !important;
+            padding: 0 20px !important;
+          }
+
+          /* CTA group: stack vertically */
+          .ep-cta-group {
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .ep-cta-group button {
+            width: min(280px, 85vw) !important;
+            justify-content: center;
+          }
+
+          /* Stats: force 2 columns */
+          .ep-stats-grid {
+            grid-template-columns: repeat(2, 1fr) !important;
+            margin: 24px 0 !important;
+          }
+
+          /* Portfolio: single column */
+          .ep-portfolio-grid {
+            grid-template-columns: 1fr !important;
+          }
+
+          /* Contact: reduce padding & stack */
+          .ep-contact-box {
+            padding: 24px 20px !important;
+            flex-direction: column !important;
+            align-items: flex-start !important;
+          }
+
+          /* Hide decorative HUD labels */
+          .ep-hud-topleft, .ep-hud-bottomright {
+            display: none !important;
+          }
+
+          /* Bottom fade overlay: shrink */
+          .ep-hero-bottom-fade {
+            height: 100px !important;
+          }
+        }
+
+        /* ── ≤ 480px ─────────────────────────────────────────── */
+        @media (max-width: 480px) {
+
+          .ep-hero {
+            padding: 48px 0 36px;
+          }
+
+          .ep-hero-content {
+            padding: 0 16px !important;
+          }
+
+          /* Stats tile: compact text */
+          .ep-stats-grid > div {
+            padding: 16px 12px !important;
+          }
+        }
       `}</style>
 
       <div style={{
@@ -426,14 +553,14 @@ export default function EditorProfile() {
       </div>
 
       {/* ═══ HERO SECTION ═══════════════════════════════════════════════════ */}
-      <section style={{
-        position: "relative",
-        height: "100vh",
-        minHeight: 600,
-        maxHeight: 900,
-        overflow: "hidden",
-        background: "var(--bg-void)",
-      }}>
+      <section
+        className="ep-hero"
+        style={{
+          position: "relative",
+          overflow: "hidden",
+          background: "var(--bg-void)",
+        }}
+      >
         <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
           <DaVinciNodeTree isDark={theme === 'dark'} />
         </div>
@@ -444,20 +571,25 @@ export default function EditorProfile() {
           zIndex: 2, opacity: 0.6,
         }} />
 
-        <div style={{
-          position: "absolute", bottom: 0, left: 0, right: 0, height: 200,
-          background: `linear-gradient(to bottom, transparent, var(--bg-void))`,
-          zIndex: 1, pointerEvents: "none",
-        }} />
+        <div
+          className="ep-hero-bottom-fade"
+          style={{
+            position: "absolute", bottom: 0, left: 0, right: 0, height: 200,
+            background: `linear-gradient(to bottom, transparent, var(--bg-void))`,
+            zIndex: 1, pointerEvents: "none",
+          }}
+        />
 
-        <div style={{
-          position: "absolute", inset: 0, zIndex: 2,
-          display: "flex", flexDirection: "column",
-          alignItems: "center", justifyContent: "center",
-          padding: "0 24px",
-          textAlign: "center",
-          pointerEvents: "none",
-        }}>
+        <div
+          className="ep-hero-content"
+          style={{
+            position: "absolute", inset: 0, zIndex: 2,
+            display: "flex", flexDirection: "column",
+            alignItems: "center", justifyContent: "center",
+            textAlign: "center",
+            pointerEvents: "none",
+          }}
+        >
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
@@ -481,13 +613,14 @@ export default function EditorProfile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.7, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
             style={{
-              fontSize: "clamp(40px, 8vw, 88px)",
+              fontSize: "clamp(32px, 10vw, 88px)",
               fontWeight: 900,
               color: "var(--text-primary)",
               letterSpacing: "-0.04em",
-              lineHeight: 1.0,
+              lineHeight: 1.05,
               marginBottom: 16,
               fontFamily: "'Inter', system-ui",
+              whiteSpace: "nowrap",
             }}
           >
             Yashvanth
@@ -503,12 +636,14 @@ export default function EditorProfile() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
             style={{
-              fontSize: "clamp(14px, 2.5vw, 20px)",
+              fontSize: "clamp(11px, 3vw, 20px)",
               fontWeight: 500,
               color: colors.amber,
               letterSpacing: "0.06em",
               textTransform: "uppercase",
-              marginBottom: 20,
+              marginBottom: 16,
+              lineHeight: 1.4,
+              maxWidth: "90vw",
             }}
           >
             Senior Colorist & Post-Production Editor
@@ -521,10 +656,10 @@ export default function EditorProfile() {
             style={{
               fontSize: "clamp(13px, 1.8vw, 16px)",
               color: "var(--text-secondary)",
-              maxWidth: 560,
+              maxWidth: "min(560px, 90vw)",
               lineHeight: 1.7,
               fontWeight: 400,
-              marginBottom: 36,
+              marginBottom: 28,
             }}
           >
             Transforming raw footage into cinematic experiences for over 8 years.
@@ -536,7 +671,8 @@ export default function EditorProfile() {
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, delay: 0.8 }}
-            style={{ display: "flex", gap: 12, pointerEvents: "all", flexWrap: "wrap", justifyContent: "center" }}
+            className="ep-cta-group"
+            style={{ pointerEvents: "all" }}
           >
             <button
               onClick={() => document.getElementById("portfolio-grid").scrollIntoView({ behavior: "smooth" })}
@@ -576,10 +712,13 @@ export default function EditorProfile() {
           </motion.div>
         </div>
 
-        <div style={{
-          position: "absolute", top: 20, left: 24, zIndex: 2,
-          display: "flex", flexDirection: "column", gap: 4,
-        }}>
+        <div
+          className="ep-hud-topleft"
+          style={{
+            position: "absolute", top: 20, left: 24, zIndex: 2,
+            flexDirection: "column", gap: 4,
+          }}
+        >
           {["NODE / 17", "CONN / 19", "FPS  / 24"].map((t, i) => (
             <motion.p
               key={i}
@@ -597,10 +736,13 @@ export default function EditorProfile() {
           ))}
         </div>
 
-        <div style={{
-          position: "absolute", bottom: 60, right: 24, zIndex: 2,
-          display: "flex", flexDirection: "column", gap: 4, alignItems: "flex-end",
-        }}>
+        <div
+          className="ep-hud-bottomright"
+          style={{
+            position: "absolute", bottom: 60, right: 24, zIndex: 2,
+            flexDirection: "column", gap: 4, alignItems: "flex-end",
+          }}
+        >
           {["COLOR SCIENCE: DaVinci Wide Gamut", "GRADE: ACES AP0", "OUTPUT: P3-D65"].map((t, i) => (
             <motion.p
               key={i}
@@ -623,16 +765,7 @@ export default function EditorProfile() {
       <div style={{ maxWidth: 1180, margin: "0 auto", padding: "0 24px 80px" }}>
 
         <SectionReveal>
-          <div style={{
-            display: "grid",
-            gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))",
-            gap: 2,
-            background: "var(--border-subtle)",
-            border: `1px solid var(--border-subtle)`,
-            borderRadius: 8,
-            overflow: "hidden",
-            margin: "40px 0",
-          }}>
+          <div className="ep-stats-grid">
             {AWARDS.map((s, i) => (
               <StatTile key={i} stat={s} delay={i * 0.08} colors={colors} />
             ))}
@@ -699,11 +832,7 @@ export default function EditorProfile() {
           />
           <div
             id="portfolio-grid"
-            style={{
-              display: "grid",
-              gridTemplateColumns: "repeat(auto-fill, minmax(320px, 1fr))",
-              gap: 16,
-            }}
+            className="ep-portfolio-grid"
           >
             {portfolioLoading ? (
               <div style={{ gridColumn: '1/-1', textAlign: 'center', padding: '60px 0', color: "var(--text-secondary)", fontSize: 14 }}>
@@ -755,17 +884,19 @@ export default function EditorProfile() {
 
         {/* ── Contact Footer ─────────────────────────────────────────────── */}
         <SectionReveal>
-          <div style={{
-            background: 'var(--bg-deep)',
-            border: `1px solid var(--border-subtle)`,
-            borderRadius: 8,
-            padding: "36px 40px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            flexWrap: "wrap",
-            gap: 24,
-          }}>
+          <div
+            className="ep-contact-box"
+            style={{
+              background: 'var(--bg-deep)',
+              border: `1px solid var(--border-subtle)`,
+              borderRadius: 8,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: 24,
+            }}
+          >
             <div>
               <p style={{ fontSize: 11, color: colors.blue, letterSpacing: "0.1em", textTransform: "uppercase", marginBottom: 6, fontWeight: 600 }}>
                 Available for Projects

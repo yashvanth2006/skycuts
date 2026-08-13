@@ -131,14 +131,17 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
 
               {/* Name + role — hidden on very small screens via inline responsive trick */}
               <div style={{ minWidth: 0, overflow: 'hidden' }}>
-                <p style={{
-                  fontSize: 13, fontWeight: 600, color: 'var(--text-primary)',
-                  lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
-                  maxWidth: '18ch',
-                }}>
+                <p
+                  className="nav-user-name"
+                  style={{
+                    fontSize: 13, fontWeight: 600, color: 'var(--text-primary)',
+                    lineHeight: 1.2, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis',
+                    maxWidth: '18ch',
+                  }}
+                >
                   {displayName}
                 </p>
-                <p style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{user.role}</p>
+                <p className="nav-user-role" style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{user.role}</p>
               </div>
 
               <span className={`badge badge-${user.role}`} style={{ marginLeft: 2, whiteSpace: 'nowrap', padding: '2px 8px', fontSize: 10 }}>
@@ -182,6 +185,10 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
         }
         @media (max-width: 480px) {
           .nav-dashboard-label { display: none; }
+        }
+        @media (max-width: 520px) {
+          .nav-user-name { display: none; }
+          .nav-user-role { display: none; }
         }
       `}</style>
     </motion.nav>
