@@ -51,32 +51,62 @@ function StepDots({ current, total, dv }) {
 
 // ── Main Component ────────────────────────────────────────────────────────────
 // Steps: 'login' → 'onboarding' (if needed) → 'request' → 'submitted'
-// If user is already authenticated, opens directly at 'request'.
+// If user is already authenticated, opens directly at 'request' (or 'onboarding').
+
+/** Derive the correct starting step from auth state. */
+function deriveStep(user, authLoading) {
+    if (authLoading) return 'login'; // will be corrected by useEffect once loading resolves
+    if (!user) return 'login';
+    if (!user.name || !user.mobileNumber) return 'onboarding';
+    return 'request';
+}
+
 export default function GoogleAuthModal({ isOpen, onClose }) {
-    const { dv, isDark } = useTheme();
+    const { theme } = useTheme();
     const { user, token, loginWithGoogle, completeOnboarding, loading: authLoading } = useAuth();
 
-    const [step, setStep] = useState('login');
+    // Derive helpers from theme string (ThemeContext only provides {theme, toggleTheme}).
+    const isDark = theme !== 'light';
+    const dv = isDark ? {
+        bg1:    '#141414',
+        bg2:    '#1e1e1e',
+        border: '#2a2a2a',
+        white:  '#f0f0f0',
+        gray1:  '#a0a0a0',
+        gray2:  '#606060',
+        gray3:  '#3a3a3a',
+        blue:   '#2F74D0',
+        amber:  '#F5A623',
+    } : {
+        bg1:    '#ffffff',
+        bg2:    '#f5f5f5',
+        border: '#e0e0e0',
+        white:  '#111111',
+        gray1:  '#555555',
+        gray2:  '#888888',
+        gray3:  '#cccccc',
+        blue:   '#2F74D0',
+        amber:  '#D48A00',
+    };
 
-    // Reset step every time the modal opens/closes so stale state is cleared.
-    // React to user state changes to determine the correct step.
+    // Initialise to the correct step immediately — no flash of 'login' for authenticated users.
+    const [step, setStep] = useState(() => deriveStep(user, authLoading));
+
+    // Keep step in sync whenever the modal opens or auth state changes asynchronously.
     useEffect(() => {
-        if (isOpen) {
-            if (authLoading) return; // Wait for AuthContext to finish loading
-
-            if (user) {
-                // If user doesn't have a name or mobile, force onboarding
-                if (!user.name || !user.mobileNumber) {
-                    setStep('onboarding');
-                } else {
-                    setStep('request');
-                }
-            } else {
-                setStep('login');
-            }
-            setError('');
-        }
+        if (!isOpen) return;
+        if (authLoading) return; // wait for AuthContext to finish loading
+        const correct = deriveStep(user, authLoading);
+        // Only update if we're still on 'login' — never override 'onboarding'/'request'/'submitted'
+        // back to an earlier step when the user is mid-flow.
+        setStep(prev => {
+            if (prev === 'login' || prev === 'onboarding') return correct;
+            // Already at 'request' or 'submitted' — don't regress.
+            return prev;
+        });
+        setError('');
     }, [isOpen, user, authLoading]);
+
     const [name, setName] = useState('');
     const [mobile, setMobile] = useState('');
     const [error, setError] = useState('');
@@ -162,7 +192,7 @@ export default function GoogleAuthModal({ isOpen, onClose }) {
     };
 
     const handleClose = () => {
-        setStep(user ? 'request' : 'login');
+        setStep(deriveStep(user, authLoading));
         setError('');
         onClose();
     };
