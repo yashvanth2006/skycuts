@@ -96,19 +96,29 @@ export default function ChatPanel({ projectId }) {
 
   return (
     <>
+      <style>{`
+        .chat-fab-btn {
+          position: fixed; bottom: 28px; right: 28px; z-index: 150;
+          width: 56px; height: 56px; border-radius: 50%; border: none;
+          background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+          color: #fff; cursor: pointer;
+          display: flex; align-items: center; justify-content: center;
+          box-shadow: 0 0 30px rgba(99,102,241,0.5);
+        }
+        @media(max-width: 768px) {
+          .chat-fab-btn {
+            bottom: 16px !important;
+            right: 16px !important;
+          }
+        }
+      `}</style>
       {/* FAB Trigger */}
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
         onClick={() => setOpen(true)}
-        style={{
-          position: 'fixed', bottom: 28, right: 28, zIndex: 150,
-          width: 56, height: 56, borderRadius: '50%', border: 'none',
-          background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
-          color: '#fff', cursor: 'pointer',
-          display: open ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 0 30px rgba(99,102,241,0.5)',
-        }}
+        className="chat-fab-btn"
+        style={{ display: open ? 'none' : 'flex' }}
         aria-label="Open chat"
       >
         <MessageCircle size={24} />
@@ -135,7 +145,7 @@ export default function ChatPanel({ projectId }) {
             transition={{ type: 'spring', damping: 28, stiffness: 280 }}
             style={{
               position: 'fixed', top: 64, right: 0, bottom: 0, zIndex: 150,
-              width: 360, display: 'flex', flexDirection: 'column',
+              width: '100%', maxWidth: 360, display: 'flex', flexDirection: 'column',
               background: 'rgba(8,8,16,0.9)',
               backdropFilter: 'blur(24px)',
               WebkitBackdropFilter: 'blur(24px)',
