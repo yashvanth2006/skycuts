@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { GoogleLogin } from '@react-oauth/google';
 import { X, CheckCircle, ChevronRight } from 'lucide-react';
@@ -57,6 +57,15 @@ export default function GoogleAuthModal({ isOpen, onClose }) {
     const { user, token, loginWithGoogle, completeOnboarding } = useAuth();
 
     const [step, setStep] = useState(user ? 'request' : 'login');
+
+    // Reset step every time the modal opens/closes so stale state is cleared.
+    // If the user is already authenticated when re-opening, jump straight to 'request'.
+    useEffect(() => {
+        if (isOpen) {
+            setStep(user ? 'request' : 'login');
+            setError('');
+        }
+    }, [isOpen, user]);
     const [name, setName] = useState('');
     const [mobile, setMobile] = useState('');
     const [error, setError] = useState('');

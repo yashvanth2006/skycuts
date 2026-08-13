@@ -5,9 +5,10 @@ const userSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        password: { 
-            type: String, 
-            required: function() { return !this.googleId; }
+        // password is optional for Google-only accounts
+        password: {
+            type: String,
+            required: function () { return !this.googleId; },
         },
         googleId: { type: String, unique: true, sparse: true },
         mobileNumber: { type: String },
@@ -20,8 +21,9 @@ const userSchema = new mongoose.Schema(
     { timestamps: true }
 );
 
-// Hash password before saving
+// ─── Hash password before saving ─────────────────────────────────────────────
 userSchema.pre('save', async function (next) {
+    // Skip if password was not modified, or this is a Google-only account (no password)
     if (!this.isModified('password') || !this.password) {
         return next();
     }
@@ -30,10 +32,20 @@ userSchema.pre('save', async function (next) {
     next();
 });
 
-// Method to compare entered password with hashed password
+// ─── Compare entered password with stored hash ────────────────────────────────
+// Safe contract:
+//   - Normal user + correct password  → true
+//   - Normal user + wrong password    → false
+//   - Google-only user (no hash)      → false  (never calls bcrypt.compare)
+//   - enteredPassword is undefined    → false  (never calls bcrypt.compare)
+//   - enteredPassword is null/''      → false  (never calls bcrypt.compare)
 userSchema.methods.matchPassword = async function (enteredPassword) {
+    // Guard 1: this account has no password hash (Google-only or unset)
     if (!this.password) return false;
-    return await bcrypt.compare(enteredPassword, this.password);
+    // Guard 2: caller passed a falsy value — reject without calling bcrypt
+    if (!enteredPassword) return false;
+    // Safe: both arguments are guaranteed to be non-empty strings here
+    return await bcrypt.compare(String(enteredPassword), this.password);
 };
 
 export default mongoose.model('User', userSchema);

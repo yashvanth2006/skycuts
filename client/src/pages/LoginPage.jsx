@@ -66,7 +66,13 @@ export default function LoginPage() {
         }
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Try again.');
+      // Show the server's specific message if available and safe, otherwise generic
+      const msg = err.response?.data?.message;
+      if (msg && msg !== 'Invalid email or password') {
+        setError(msg);
+      } else {
+        setError('Invalid email or password. Please try again.');
+      }
     } finally {
       setLoading(false);
     }
@@ -77,18 +83,22 @@ export default function LoginPage() {
       setGoogleLoading(true);
       setError('');
       const data = await loginWithGoogle(credentialResponse.credential);
-      
-      // Handle redirect after Google login
+
+      // After Google login, both paths converge:
+      // - START PROJECT flow → always go to /profile, GoogleAuthModal handles onboarding inline
+      // - Direct login → go to dashboard (admin) or dashboard (client)
       if (fromStartProject) {
+        // Navigate to /profile with openProjectRequest flag.
+        // GoogleAuthModal will check user state and show onboarding if needed.
         navigate('/profile', { state: { openProjectRequest: true }, replace: true });
       } else {
         if (data.role === 'admin') {
-            window.location.href = 'http://localhost:5174/';
+          window.location.href = 'http://localhost:5174/';
         } else {
-            navigate('/dashboard', { replace: true });
+          navigate('/dashboard', { replace: true });
         }
       }
-    } catch (err) {
+    } catch {
       setError('Google sign-in failed. Please try again.');
     } finally {
       setGoogleLoading(false);

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, Zap, LogIn, UserPlus, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -17,8 +17,15 @@ const fadeUp = {
 };
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { login, user } = useAuth();
   const navigate = useNavigate();
+
+  // Redirect already-authenticated admins away from the login page
+  useEffect(() => {
+    if (user) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [user, navigate]);
 
   const [mode, setMode]       = useState('login'); // 'login' | 'register'
   const [showPw, setShowPw]   = useState(false);
@@ -51,7 +58,9 @@ export default function LoginPage() {
         navigate('/dashboard', { replace: true });
       }
     } catch (err) {
-      setError(err.response?.data?.message || 'Something went wrong. Try again.');
+      const msg = err.response?.data?.message;
+      // Show specific server message if available, otherwise a safe generic message
+      setError(msg || 'Invalid email or password. Please try again.');
     } finally {
       setLoading(false);
     }
