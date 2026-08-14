@@ -52,7 +52,7 @@ function ConnectionLine({ start, end, color, opacity = 0.35, curveOffset }) {
     const curve = new THREE.QuadraticBezierCurve3(s, mid, e);
     const points = curve.getPoints(24);
     return new THREE.BufferGeometry().setFromPoints(points);
-  }, []);
+  }, [start, end, curveOffset]);
 
   useFrame(({ clock }) => {
     if (lineRef.current) {

@@ -19,6 +19,11 @@ export default function ChatPanel({ projectId }) {
   const socketRef  = useRef(null);
   const bottomRef  = useRef(null);
   const inputRef   = useRef(null);
+  const openRef    = useRef(open);
+
+  useEffect(() => {
+    openRef.current = open;
+  }, [open]);
 
   // ── Init Socket.io ────────────────────────────────────────────────────────
   useEffect(() => {
@@ -35,7 +40,7 @@ export default function ChatPanel({ projectId }) {
 
     socket.on('receive_message', (msg) => {
       setMessages(prev => [...prev, msg]);
-      if (!open) setUnread(n => n + 1);
+      if (!openRef.current) setUnread(n => n + 1);
     });
 
     socket.on('socket_error', (err) => {

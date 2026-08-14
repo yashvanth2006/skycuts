@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  Plus, Trash2, Link2, Loader2, Download,
+  Link2, Loader2, Download,
   CreditCard, CheckCircle2, AlertCircle, Lock,
-  Film, Upload, ExternalLink, MessageSquare,
+  Film, ExternalLink, MessageSquare,
   CheckCircle, Circle,
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
