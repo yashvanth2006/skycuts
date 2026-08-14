@@ -272,12 +272,12 @@ export default function ClientProjectPage() {
             width: 100%;
             max-width: 1400px;
             margin: 0 auto;
-            padding: 16px;
+            padding: 14px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
-            gap: 16px;
-            padding-bottom: 90px; /* Space for the floating chat button */
+            gap: 14px;
+            padding-bottom: 80px; /* Space for the floating chat button */
         }
         
         @media (min-width: 768px) {
@@ -304,12 +304,15 @@ export default function ClientProjectPage() {
             gap: 12px;
         }
         .pw-title {
-            font-size: 24px;
+            font-size: 20px;
             font-weight: 700;
             line-height: 1.2;
             color: var(--text-primary);
             word-break: break-word;
             margin: 0;
+        }
+        @media (max-width: 400px) {
+            .pw-title { font-size: 18px; }
         }
         .pw-header-meta {
             display: flex;
@@ -344,9 +347,9 @@ export default function ClientProjectPage() {
             align-items: center;
             width: 100%;
             overflow-x: auto;
-            padding: 4px 0 16px 0;
-            -ms-overflow-style: none;  /* IE and Edge */
-            scrollbar-width: none;  /* Firefox */
+            padding: 2px 0 12px 0;
+            -ms-overflow-style: none;
+            scrollbar-width: none;
         }
         .pw-timeline::-webkit-scrollbar {
             display: none;
@@ -354,15 +357,34 @@ export default function ClientProjectPage() {
         .pw-timeline-step {
             display: flex;
             align-items: center;
-            min-width: 0; /* allows shrinking */
-            flex: 1; /* evenly distribute */
+            min-width: 0;
+            flex: 1;
         }
-        /* Override on mobile to ensure it doesn't squish too much */
-        @media (max-width: 600px) {
+        /* On narrow mobile, give each step a fixed minimum so they don't get crushed
+           but keep DELIVERED visible by making min-width small enough for 5 steps */
+        @media (max-width: 767px) {
             .pw-timeline-step {
-                flex: 0 0 auto;
-                min-width: 90px;
+                flex: 1 1 0;
+                min-width: 0;
             }
+            /* Shrink the label font and circle so 5 steps fit in ~362px+ */
+            .pw-timeline-label {
+                font-size: 9px !important;
+                letter-spacing: 0 !important;
+            }
+            .pw-timeline-circle {
+                width: 22px !important;
+                height: 22px !important;
+            }
+            .pw-timeline-line {
+                margin: 0 4px !important;
+                margin-bottom: 22px !important;
+                min-width: 6px !important;
+            }
+        }
+        @media (max-width: 360px) {
+            .pw-timeline-label { font-size: 8px !important; }
+            .pw-timeline-line { min-width: 4px !important; }
         }
         .pw-timeline-content {
             display: flex;
@@ -535,12 +557,15 @@ export default function ClientProjectPage() {
 
         /* Action Cards */
         .pw-action-card {
-            padding: 20px;
+            padding: 16px;
             border-radius: 12px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             width: 100%;
+        }
+        @media (min-width: 768px) {
+            .pw-action-card { padding: 20px; gap: 12px; }
         }
         .pw-action-header {
             display: flex;
@@ -573,14 +598,17 @@ export default function ClientProjectPage() {
 
         /* Details Card */
         .pw-details-card {
-            padding: 20px;
+            padding: 16px;
             border: 1px solid var(--border-subtle);
             border-radius: 12px;
             background: var(--bg-card);
             display: flex;
             flex-direction: column;
-            gap: 8px;
+            gap: 4px;
             width: 100%;
+        }
+        @media (min-width: 768px) {
+            .pw-details-card { padding: 20px; gap: 8px; }
         }
         .pw-detail-row {
             display: flex;
@@ -610,9 +638,8 @@ export default function ClientProjectPage() {
             border-radius: 12px;
             overflow: hidden;
             background: var(--bg-card);
-            /* Reset fixed heights for mobile */
             height: auto;
-            min-height: 300px;
+            min-height: 180px;
             display: flex;
             flex-direction: column;
         }

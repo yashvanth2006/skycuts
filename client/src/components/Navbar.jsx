@@ -144,7 +144,7 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                 <p className="nav-user-role" style={{ fontSize: 10, color: 'var(--text-muted)', textTransform: 'capitalize' }}>{user.role}</p>
               </div>
 
-              <span className={`badge badge-${user.role}`} style={{ marginLeft: 2, whiteSpace: 'nowrap', padding: '2px 8px', fontSize: 10 }}>
+              <span className={`badge badge-${user.role} nav-badge-hidden`} style={{ marginLeft: 2, whiteSpace: 'nowrap', padding: '2px 8px', fontSize: 10 }}>
                 {user.role}
               </span>
             </div>
@@ -189,6 +189,15 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
         @media (max-width: 520px) {
           .nav-user-name { display: none; }
           .nav-user-role { display: none; }
+        }
+        /* On mobile, ensure the navbar has a bit of breathing room and doesn't feel glued to the top */
+        @media (max-width: 767px) {
+          nav[style] {
+            height: 54px;
+          }
+          .nav-badge-hidden {
+            display: none;
+          }
         }
       `}</style>
     </motion.nav>
