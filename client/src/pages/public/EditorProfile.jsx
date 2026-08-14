@@ -3,7 +3,7 @@ import { motion, useInView } from "framer-motion";
 import { useNavigate, useLocation } from "react-router-dom";
 import {
   Monitor, Film, Layers, Cpu, Star, Award, Clock,
-  Play, ChevronRight, Globe, Mail, Zap, Eye,
+  Play, ChevronRight, Mail, Zap, Eye,
   Shield, Video, MonitorPlay, ArrowRight
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
@@ -24,8 +24,6 @@ const TOOLKIT = [
 const AWARDS = [
   { label: "Projects Delivered", value: "340+",  icon: <Award size={18} /> },
   { label: "Years Experience",   value: "8",     icon: <Clock size={18} /> },
-  { label: "Client Countries",   value: "22",    icon: <Globe size={18} /> },
-  { label: "Awards Won",         value: "14",    icon: <Star size={18} /> },
 ];
 
 const CATEGORY_COLORS = (isDark) => ({
@@ -441,10 +439,10 @@ export default function EditorProfile() {
           justify-content: center;
         }
 
-        /* Stats: auto-fit 2+ columns on desktop */
+        /* Stats: 2 columns */
         .ep-stats-grid {
           display: grid;
-          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          grid-template-columns: repeat(2, 1fr);
           gap: 2px;
           background: var(--border-subtle);
           border: 1px solid var(--border-subtle);
