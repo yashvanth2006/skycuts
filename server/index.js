@@ -15,7 +15,7 @@ import projectRoutes from './routes/projectRoutes.js';
 import messageRoutes from './routes/messageRoutes.js';
 import commentRoutes from './routes/commentRoutes.js';
 import deliverableRoutes from './routes/deliverableRoutes.js';
-import stripeRoutes from './routes/stripeRoutes.js';
+import paymentRoutes from './routes/paymentRoutes.js';
 import projectRequestRoutes from './routes/projectRequestRoutes.js';
 import portfolioRoutes from './routes/portfolioRoutes.js';
 import Message from './models/Message.js';
@@ -52,8 +52,8 @@ const io = new Server(httpServer, {
 });
 
 // ─── Middleware ──────────────────────────────────────────────────────────────
-// Stripe webhook MUST receive raw body — mount BEFORE express.json()
-app.use('/api/stripe/webhook', express.raw({ type: 'application/json' }));
+// Razorpay webhook MUST receive raw body — mount BEFORE express.json()
+app.use('/api/payments/webhook', express.raw({ type: 'application/json' }));
 
 app.use(cors({
     origin: allowedOrigins,
@@ -67,7 +67,7 @@ app.use('/api/projects', projectRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/comments', commentRoutes);
 app.use('/api/deliverables', deliverableRoutes);
-app.use('/api/stripe', stripeRoutes);
+app.use('/api/payments', paymentRoutes);
 app.use('/api/project-requests', projectRequestRoutes);
 app.use('/api/portfolio', portfolioRoutes);
 

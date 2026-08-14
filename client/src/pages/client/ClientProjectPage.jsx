@@ -142,7 +142,7 @@ export default function ClientProjectPage() {
   const [assetForm,     setAssetForm]    = useState([{ url:"", label:"" }]);
   const [submitting,    setSubmitting]   = useState(false);
 
-  const paymentStatus = searchParams.get("payment");
+  const [paymentState,  setPaymentState] = useState(null); // null, 'verifying', 'success', 'failed', 'cancelled'
 
   useEffect(() => {
     const fetchData = async () => {
@@ -170,9 +170,62 @@ export default function ClientProjectPage() {
   const handlePay = async () => {
     setPaying(true);
     try {
-      const { data } = await api.post(`/stripe/checkout/${id}`);
-      window.location.href = data.sessionUrl;
-    } catch (err) { console.error(err); setPaying(false); }
+      const { data } = await api.post(`/payments/create-order/${id}`);
+      
+      const options = {
+        key: data.keyId,
+        amount: data.amount,
+        currency: data.currency,
+        name: "SkyCuts",
+        description: `Payment for ${project.title}`,
+        order_id: data.orderId,
+        handler: async function (response) {
+          setPaymentState("verifying");
+          try {
+            const verifyRes = await api.post("/payments/verify", {
+              razorpay_payment_id: response.razorpay_payment_id,
+              razorpay_order_id: response.razorpay_order_id,
+              razorpay_signature: response.razorpay_signature,
+            });
+            
+            if (verifyRes.data.success) {
+              setPaymentState("success");
+              // Refresh project data to get updated status
+              const projRes = await api.get(`/projects/${id}`);
+              setProject(projRes.data);
+            } else {
+              setPaymentState("failed");
+            }
+          } catch (err) {
+            console.error("Verification failed", err);
+            setPaymentState("failed");
+          }
+        },
+        prefill: {
+          email: project.client?.email || "",
+        },
+        theme: {
+          color: "#6366f1",
+        },
+        modal: {
+          ondismiss: function () {
+            setPaying(false);
+            setPaymentState("cancelled");
+          },
+        },
+      };
+
+      const rzp = new window.Razorpay(options);
+      rzp.on('payment.failed', function (response) {
+        setPaymentState("failed");
+      });
+      rzp.open();
+
+    } catch (err) {
+      console.error("Failed to initiate payment", err);
+      setPaying(false);
+      setPaymentState("failed");
+    }
   };
 
   const handleDownload = async () => {
@@ -352,13 +405,25 @@ export default function ClientProjectPage() {
 
         {/* Payment toast */}
         <AnimatePresence>
-          {paymentStatus === "success" && (
+          {paymentState === "success" && (
             <motion.div initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-16}}
               style={{ marginBottom:16, padding:"12px 16px", borderRadius:10, background:"rgba(52,211,153,0.08)", border:"1px solid rgba(52,211,153,0.22)", color:"#34d399", display:"flex", alignItems:"center", gap:8, fontSize:13 }}>
               <CheckCircle2 size={15}/> Payment successful! Your project is now unlocked for download.
             </motion.div>
           )}
-          {paymentStatus === "cancelled" && (
+          {paymentState === "verifying" && (
+            <motion.div initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-16}}
+              style={{ marginBottom:16, padding:"12px 16px", borderRadius:10, background:"rgba(99,102,241,0.08)", border:"1px solid rgba(99,102,241,0.22)", color:"var(--accent-indigo)", display:"flex", alignItems:"center", gap:8, fontSize:13 }}>
+              <Loader2 size={15} style={{animation:"spin 0.8s linear infinite"}}/> Verifying payment...
+            </motion.div>
+          )}
+          {paymentState === "failed" && (
+            <motion.div initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-16}}
+              style={{ marginBottom:16, padding:"12px 16px", borderRadius:10, background:"rgba(239,68,68,0.08)", border:"1px solid rgba(239,68,68,0.22)", color:"#ef4444", display:"flex", alignItems:"center", gap:8, fontSize:13 }}>
+              <AlertCircle size={15}/> Payment failed. Please try again.
+            </motion.div>
+          )}
+          {paymentState === "cancelled" && (
             <motion.div initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-16}}
               style={{ marginBottom:16, padding:"12px 16px", borderRadius:10, background:"rgba(251,191,36,0.08)", border:"1px solid rgba(251,191,36,0.22)", color:"#fbbf24", display:"flex", alignItems:"center", gap:8, fontSize:13 }}>
               <AlertCircle size={15}/> Payment was cancelled. You can retry below.

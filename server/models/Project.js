@@ -19,7 +19,18 @@ const projectSchema = new mongoose.Schema(
             },
         ],
         price: { type: Number, required: true, default: 0 },
-        stripeSessionId: { type: String, default: null },
+        paymentProvider: { type: String, enum: ['razorpay'], default: null },
+        paymentOrderId: { type: String, default: null },
+        paymentId: { type: String, default: null },
+        paymentSignature: { type: String, default: null },
+        paymentStatus: {
+            type: String,
+            enum: ['CREATED', 'AUTHORIZED', 'CAPTURED', 'FAILED'],
+            default: null,
+        },
+        paymentVerifiedAt: { type: Date, default: null },
+        paymentAmount: { type: Number, default: null },
+        paymentCurrency: { type: String, default: null },
     },
     { timestamps: true }
 );
