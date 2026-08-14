@@ -53,7 +53,7 @@ function StatusTimeline({ status }) {
   );
 }
 
-function VideoEmptyState({ status, onUploadAssets }) {
+function VideoEmptyState({ status }) {
   const isAwaiting = status === "awaiting_assets";
   return (
     <motion.div
@@ -68,14 +68,9 @@ function VideoEmptyState({ status, onUploadAssets }) {
         <h3>{isAwaiting ? "AWAITING RAW FOOTAGE" : "EDITOR IS ASSEMBLING YOUR CUT"}</h3>
         <p>
           {isAwaiting
-            ? "Submit your raw footage to begin the editing process."
+            ? "Submit your Google Drive folder containing the raw footage to begin the editing process."
             : "Check back soon — your video is being crafted with care."}
         </p>
-        {isAwaiting && (
-            <button onClick={onUploadAssets} className="pw-btn-empty-upload">
-                <Upload size={14} /> Submit Raw Assets
-            </button>
-        )}
       </div>
     </motion.div>
   );
@@ -109,9 +104,9 @@ export default function ClientProjectPage() {
   const [paying,        setPaying]       = useState(false);
   const [downloading,   setDownloading]  = useState(false);
   const [downloadError, setDownloadError]= useState("");
-  const [assetModal,    setAssetModal]   = useState(false);
-  const [assetForm,     setAssetForm]    = useState([{ url:"", label:"" }]);
-  const [submitting,    setSubmitting]   = useState(false);
+  const [driveLink,     setDriveLink]    = useState("");
+  const [linkError,     setLinkError]    = useState("");
+  const [isSubmittingDriveLink, setIsSubmittingDriveLink] = useState(false);
 
   const [paymentState,  setPaymentState] = useState(null);
 
@@ -215,21 +210,40 @@ export default function ClientProjectPage() {
     } finally { setDownloading(false); }
   };
 
-  const handleSubmitAssets = async (e) => {
+  const handleSubmitDriveLink = async (e) => {
     e.preventDefault();
-    const valid = assetForm.filter(a => a.url.trim());
-    if (!valid.length) return;
-    setSubmitting(true);
-    try {
-      const { data } = await api.post(`/projects/${id}/assets`, { assets: valid });
-      setProject(data); setAssetModal(false); setAssetForm([{ url:"", label:"" }]);
-    } catch {/* */}
-    finally { setSubmitting(false); }
-  };
+    setLinkError("");
+    const url = driveLink.trim();
 
-  const addAssetRow    = () => setAssetForm(p => [...p, { url:"", label:"" }]);
-  const removeAssetRow = (i) => setAssetForm(p => p.filter((_,idx) => idx !== i));
-  const updateAssetRow = (i, field, val) => setAssetForm(p => p.map((r,idx) => idx===i ? {...r,[field]:val} : r));
+    if (!url) {
+      setLinkError("Please enter a Google Drive link.");
+      return;
+    }
+
+    try {
+      const parsed = new URL(url);
+      if (parsed.hostname !== "drive.google.com") {
+        setLinkError("Please enter a valid Google Drive link.");
+        return;
+      }
+    } catch {
+      setLinkError("Please enter a valid Google Drive link.");
+      return;
+    }
+
+    setIsSubmittingDriveLink(true);
+    try {
+      const { data } = await api.post(`/projects/${id}/assets`, { 
+        assets: [{ url, label: "Google Drive Folder" }] 
+      });
+      setProject(data);
+      setDriveLink("");
+    } catch (err) {
+      setLinkError(err.response?.data?.message || "Failed to submit link. Please try again.");
+    } finally {
+      setIsSubmittingDriveLink(false);
+    }
+  };
 
   if (loading) return (
     <div className="page-container">
@@ -721,44 +735,53 @@ export default function ClientProjectPage() {
                             )}
                         </>
                     ) : (
-                        <VideoEmptyState status={project.status} onUploadAssets={() => setAssetModal(true)} />
+                        <VideoEmptyState status={project.status} />
                     )}
                 </div>
 
-                {/* Submitted Assets List */}
-                {project.rawAssets?.length > 0 && (
-                    <div className="glass-card" style={{ padding:"16px 20px", border:"1px solid var(--border-subtle)", marginTop: 8 }}>
-                        <h3 style={{ fontSize:12, fontWeight:600, marginBottom:12, color:"var(--text-secondary)", letterSpacing:"0.06em", textTransform:"uppercase" }}>Submitted Raw Assets</h3>
-                        <div style={{ display:"flex", flexDirection:"column", gap:8 }}>
-                        {project.rawAssets.map((asset,i) => (
-                            <a key={i} href={asset.url} target="_blank" rel="noopener noreferrer"
-                            style={{ display:"flex", alignItems:"center", gap:8, padding:"12px", borderRadius:8, background:"var(--bg-glass)", border:"1px solid var(--border-subtle)", color:"var(--accent-cyan)", textDecoration:"none", fontSize:13 }}
-                            onMouseEnter={e => e.currentTarget.style.background="var(--bg-glass-hover)"}
-                            onMouseLeave={e => e.currentTarget.style.background="var(--bg-glass)"}>
-                            <Link2 size={14} style={{flexShrink:0}}/>
-                            <span style={{ overflow:"hidden", textOverflow:"ellipsis", whiteSpace:"nowrap", flex:1 }}>{asset.label || asset.url}</span>
-                            <ExternalLink size={12} style={{flexShrink:0,opacity:0.5}}/>
-                            </a>
-                        ))}
-                        </div>
-                    </div>
-                )}
-            </div>
-
-            {/* RIGHT / SIDE COLUMN */}
-            <div className="pw-side-col">
-                
-                {/* ACTION REQUIRED */}
-                {canSubmitAssets && (
+                {/* ACTION REQUIRED: SUBMIT DRIVE LINK */}
+                {canSubmitAssets && (!project.rawAssets || project.rawAssets.length === 0) && (
                     <div className="pw-action-card" style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.1),rgba(167,139,250,0.07))", border:"1px solid rgba(99,102,241,0.2)" }}>
                         <div className="pw-action-header" style={{ color: "#fbbf24" }}>
                             <div style={{ width:8, height:8, borderRadius:"50%", background:"#fbbf24", boxShadow:"0 0 8px rgba(251,191,36,0.4)", animation:"pulse-dot 1.5s ease-in-out infinite" }}/>
                             ACTION REQUIRED
                         </div>
-                        <p className="pw-action-desc">Your project is waiting for raw footage before the editor can begin.</p>
-                        <button onClick={() => setAssetModal(true)} className="pw-action-btn" style={{ background:"linear-gradient(135deg,var(--accent-blue),var(--accent-purple))" }}>
-                            <Upload size={16}/> Submit Raw Assets
-                        </button>
+                        <p className="pw-action-desc">
+                            Your project is waiting for raw footage.<br/><br/>
+                            Upload your raw footage to Google Drive, make sure the folder is accessible, and submit the Google Drive link below.
+                        </p>
+                        
+                        <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
+                            <input
+                                type="url"
+                                value={driveLink}
+                                onChange={e => {
+                                    setDriveLink(e.target.value);
+                                    if(linkError) setLinkError("");
+                                }}
+                                placeholder="https://drive.google.com/drive/folders/..."
+                                className="input-field"
+                                style={{ width: "100%", minWidth: 0, boxSizing: "border-box", minHeight: 44, padding: "10px 14px", borderRadius: 8, fontSize: 14 }}
+                            />
+                            {linkError && <span style={{ color: "#f87171", fontSize: 13, display: "flex", alignItems: "center", gap: 4 }}><AlertCircle size={14}/> {linkError}</span>}
+                            <span style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Make sure your Google Drive folder is accessible to the editor before submitting. (Anyone with the link can view)</span>
+                            <button onClick={handleSubmitDriveLink} disabled={isSubmittingDriveLink} className="pw-action-btn" style={{ background:"linear-gradient(135deg,var(--accent-blue),var(--accent-purple))", width: "100%", minHeight: 44 }}>
+                                {isSubmittingDriveLink ? <Loader2 size={16} className="spin" /> : <Link2 size={16}/>} Submit Google Drive Link
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {/* RAW FOOTAGE SUBMITTED */}
+                {project.rawAssets?.length > 0 && (
+                    <div className="pw-action-card" style={{ background:"linear-gradient(135deg,rgba(52,211,153,0.08),rgba(6,182,212,0.06))", border:"1px solid rgba(52,211,153,0.2)" }}>
+                        <div className="pw-action-header" style={{ color: "#34d399" }}>
+                            <CheckCircle2 size={16} color="#34d399" /> RAW FOOTAGE SUBMITTED
+                        </div>
+                        <p className="pw-action-desc">Your Google Drive link has been submitted successfully. The editor can now access your footage.</p>
+                        <a href={project.rawAssets[0].url} target="_blank" rel="noopener noreferrer" className="pw-action-btn" style={{ background:"linear-gradient(135deg,#34d399,#059669)", textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center", minHeight: 44, marginTop: 8 }}>
+                            Open Google Drive Folder <ExternalLink size={14} style={{ marginLeft: 6 }}/>
+                        </a>
                     </div>
                 )}
 
@@ -790,7 +813,7 @@ export default function ClientProjectPage() {
                     <DetailRow label="Status" value={project.status?.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())} accent="var(--accent-indigo)"/>
                     <DetailRow label="Created" value={fmtDate(project.createdAt)}/>
                     <DetailRow label="Deadline" value={fmtDate(project.deadline)}/>
-                    <DetailRow label="Assets Submitted" value={project.rawAssets?.length ?? 0}/>
+                    <DetailRow label="Raw Footage" value={project.rawAssets?.length > 0 ? "Submitted" : "Awaiting"}/>
                 </div>
 
                 {/* COMMENTS */}
@@ -816,40 +839,6 @@ export default function ClientProjectPage() {
         </div>
 
       </main>
-
-      {/* Submit assets modal */}
-      <Modal isOpen={assetModal} onClose={() => setAssetModal(false)} title="Submit Raw Footage Links" maxWidth={560}>
-        <p style={{ fontSize:13, color:"var(--text-muted)", marginBottom:20, lineHeight:1.6 }}>
-          Paste Google Drive, Dropbox, WeTransfer, or any cloud storage links. Add a short label to help the editor identify each file.
-        </p>
-        <form onSubmit={handleSubmitAssets} style={{ display:"flex", flexDirection:"column", gap:12 }}>
-          {assetForm.map((row,i) => (
-            <div key={i} style={{ display:"flex", gap:8, alignItems:"flex-start", flexWrap:"wrap" }}>
-              <div style={{ flex:2, minWidth:180 }}>
-                <input value={row.url} onChange={e=>updateAssetRow(i,"url",e.target.value)} placeholder="https://drive.google.com/…" className="input-field" style={{ padding:"12px 14px", fontSize:14 }} required/>
-              </div>
-              <div style={{ flex:1, minWidth:100 }}>
-                <input value={row.label} onChange={e=>updateAssetRow(i,"label",e.target.value)} placeholder="Label (optional)" className="input-field" style={{ padding:"12px 14px", fontSize:14 }}/>
-              </div>
-              {assetForm.length > 1 && (
-                <button type="button" onClick={() => removeAssetRow(i)} className="btn-danger" style={{ padding:"12px", flexShrink:0 }}>
-                  <Trash2 size={16}/>
-                </button>
-              )}
-            </div>
-          ))}
-          <button type="button" onClick={addAssetRow} className="btn-ghost" style={{ alignSelf:"flex-start", padding:"10px 16px", gap:6, fontSize:14 }}>
-            <Plus size={16}/> Add another link
-          </button>
-          <div style={{ display:"flex", gap:10, paddingTop:16 }}>
-            <button type="button" onClick={() => setAssetModal(false)} className="btn-ghost" style={{ flex:1, padding: "12px" }}>Cancel</button>
-            <button type="submit" disabled={submitting} className="btn-primary" style={{ flex:2, padding: "12px" }}>
-              {submitting ? <Loader2 size={16} className="spin" /> : <Link2 size={16}/>}
-              Submit Assets
-            </button>
-          </div>
-        </form>
-      </Modal>
 
       <ChatPanel projectId={id}/>
     </div>

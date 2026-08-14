@@ -276,27 +276,38 @@ export default function AdminProjectPage() {
 
             {/* Raw Assets */}
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card" style={{ padding: '20px', border: '1px solid var(--border-subtle)' }}>
-              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Client Assets</h3>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 16 }}>
+                <h3 style={{ fontSize: 14, fontWeight: 600, letterSpacing: '0.04em', textTransform: 'uppercase' }}>RAW FOOTAGE</h3>
+                {project.rawAssets?.length > 0 ? (
+                  <span style={{ fontSize: 11, fontWeight: 600, color: '#34d399', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: '#34d399' }} />
+                    SUBMITTED
+                  </span>
+                ) : (
+                  <span style={{ fontSize: 11, fontWeight: 600, color: 'var(--text-muted)', display: 'flex', alignItems: 'center', gap: 4 }}>
+                    <div style={{ width: 6, height: 6, borderRadius: '50%', background: 'var(--text-muted)' }} />
+                    NOT SUBMITTED
+                  </span>
+                )}
+              </div>
+              
               {!project.rawAssets || project.rawAssets.length === 0 ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-muted)', padding: '12px 16px', background: 'var(--bg-panel)', borderRadius: 8 }}>
                   <FileText size={16} style={{ opacity: 0.5 }} />
-                  <span style={{ fontSize: 13 }}>No assets submitted yet.</span>
+                  <span style={{ fontSize: 13 }}>Client has not submitted the Google Drive folder yet.</span>
                 </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-                  {project.rawAssets.map((asset, i) => (
-                    <a
-                      key={i}
-                      href={asset.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="asset-link"
-                    >
-                      <Link2 size={14} color="var(--accent-cyan)" style={{ flexShrink: 0 }} />
-                      <span className="asset-link-text">{asset.label || asset.url.split('/').pop() || asset.url}</span>
-                      <ExternalLink size={12} style={{ flexShrink: 0, opacity: 0.4 }} />
-                    </a>
-                  ))}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+                  <p style={{ fontSize: 13, color: 'var(--text-secondary)' }}>Google Drive folder submitted</p>
+                  <a
+                    href={project.rawAssets[0].url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="asset-link"
+                    style={{ background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))', color: '#fff', border: 'none', justifyContent: 'center', padding: '12px', fontWeight: 500 }}
+                  >
+                    Open Google Drive Folder <ExternalLink size={14} style={{ marginLeft: 6 }} />
+                  </a>
                 </div>
               )}
             </motion.div>
@@ -318,8 +329,8 @@ export default function AdminProjectPage() {
                   <span className="detail-value">{new Date(project.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
                 </div>
                 <div className="detail-item">
-                  <span className="detail-label">Assets Submitted</span>
-                  <span className="detail-value">{project.rawAssets?.length || 0}</span>
+                  <span className="detail-label">Raw Footage</span>
+                  <span className="detail-value">{project.rawAssets?.length > 0 ? "Submitted" : "Awaiting"}</span>
                 </div>
               </div>
             </motion.div>

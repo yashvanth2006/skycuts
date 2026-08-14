@@ -47,13 +47,30 @@ export const getProjectById = async (req, res) => {
 export const submitRawAssets = async (req, res) => {
     const { assets } = req.body; // [{ url, label }]
 
+    if (!assets || !Array.isArray(assets) || assets.length === 0 || !assets[0].url) {
+        return res.status(400).json({ message: 'A valid Google Drive link is required.' });
+    }
+
+    const driveUrl = assets[0].url.trim();
+
+    try {
+        const urlObj = new URL(driveUrl);
+        if (urlObj.hostname !== 'drive.google.com') {
+            return res.status(400).json({ message: 'Only drive.google.com URLs are allowed.' });
+        }
+    } catch (e) {
+        return res.status(400).json({ message: 'Invalid URL format.' });
+    }
+
     // req.project is provided by projectParticipant middleware
     const project = req.project;
 
-    project.rawAssets.push(...assets);
+    project.rawAssets = [{ url: driveUrl, label: 'Google Drive Folder' }];
+    
     if (project.status === 'awaiting_assets') {
         project.status = 'in_progress';
     }
+    
     await project.save();
     res.json(project);
 };
