@@ -98,7 +98,7 @@ export default function ChatPanel({ projectId }) {
     <>
       <style>{`
         .chat-fab-btn {
-          position: fixed; bottom: 28px; right: 28px; z-index: 150;
+          position: fixed; bottom: 24px; right: 24px; z-index: 150;
           width: 56px; height: 56px; border-radius: 50%; border: none;
           background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
           color: #fff; cursor: pointer;
@@ -109,6 +109,8 @@ export default function ChatPanel({ projectId }) {
           .chat-fab-btn {
             bottom: 16px !important;
             right: 16px !important;
+            width: 52px !important;
+            height: 52px !important;
           }
         }
       `}</style>
