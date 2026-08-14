@@ -3,17 +3,23 @@ import { useParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import {
   Upload, Link2, ChevronDown, Loader2, CheckCircle2,
-  AlertCircle, ExternalLink, Settings
+  AlertCircle, ExternalLink, Settings, Film, Clock,
+  CheckCircle, FileText
 } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
 import StatusBadge from '../../components/StatusBadge.jsx';
 import VideoPlayer from '../../components/VideoPlayer.jsx';
 import CommentSidebar from '../../components/CommentSidebar.jsx';
 import ChatPanel from '../../components/ChatPanel.jsx';
-import Processing3DPlaceholder from '../../components/three/Processing3DPlaceholder.jsx';
 import api from '../../api/axiosInstance.js';
 
 const STATUS_OPTIONS = ['awaiting_assets', 'in_progress', 'in_review', 'paid'];
+const STATUS_LABELS = {
+  'awaiting_assets': 'Assets',
+  'in_progress': 'Editing',
+  'in_review': 'Review',
+  'paid': 'Delivered'
+};
 
 export default function AdminProjectPage() {
   const { id } = useParams();
@@ -31,14 +37,27 @@ export default function AdminProjectPage() {
 
   const fetchProject = async () => {
     try {
-      const [projRes, delivRes] = await Promise.allSettled([
-        api.get(`/projects/${id}`),
-        api.get(`/deliverables/${id}`),
-      ]);
-      if (projRes.status === 'fulfilled') setProject(projRes.value.data);
-      if (delivRes.status === 'fulfilled') setDeliverable(delivRes.value.data);
-    } catch {/* */}
-    finally { setLoading(false); }
+      // Validate ID locally first before making requests
+      if (!id || id === 'undefined') return;
+
+      const projRes = await api.get(`/projects/${id}`);
+      setProject(projRes.data);
+
+      try {
+        const delivRes = await api.get(`/deliverables/${id}`);
+        setDeliverable(delivRes.data);
+      } catch (err) {
+        // 404 is expected if no deliverable exists yet.
+        // Don't treat it as an error that breaks the page.
+        if (err.response && err.response.status === 404) {
+          setDeliverable(null);
+        }
+      }
+    } catch (err) {
+      console.error('Failed to fetch project', err);
+    } finally {
+      setLoading(false);
+    }
   };
 
   useEffect(() => { fetchProject(); }, [id]);
@@ -81,8 +100,11 @@ export default function AdminProjectPage() {
     try {
       const { data } = await api.patch(`/projects/${id}/status`, { status: newStatus });
       setProject(data);
-    } catch {/* */}
-    finally { setStatusChanging(false); }
+    } catch (err) {
+      console.error('Failed to change status', err);
+    } finally {
+      setStatusChanging(false);
+    }
   };
 
   if (loading) {
@@ -110,58 +132,54 @@ export default function AdminProjectPage() {
   }
 
   const [msgType, msgText] = uploadMsg.includes(':') ? uploadMsg.split(':') : ['', uploadMsg];
+  const currentStatusIndex = STATUS_OPTIONS.indexOf(project.status);
 
   return (
     <div className="page-container">
       <Navbar showBack />
 
-      <main className="content-area" style={{ paddingTop: 20, paddingBottom: 60 }}>
+      <main className="content-area" style={{ paddingTop: 20, paddingBottom: 60, width: '100%', maxWidth: '1200px', margin: '0 auto' }}>
 
-        {/* Header */}
+        {/* Responsive Header */}
         <motion.div
           initial={{ opacity: 0, y: -10 }}
           animate={{ opacity: 1, y: 0 }}
-          style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: 20, gap: 12, flexWrap: 'wrap' }}
+          className="project-header"
         >
-          <div>
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 4 }}>
-              <h1 style={{ fontSize: 20, fontWeight: 700 }}>{project.title}</h1>
-              <StatusBadge status={project.status} />
-            </div>
-            <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>
-              Client: <span style={{ color: 'var(--text-secondary)' }}>{project.client?.name}</span>
-              {' · '}Invoice: <span style={{ color: 'var(--accent-indigo)' }}>${project.price.toLocaleString()}</span>
+          <div className="project-header-info">
+            <h1 className="project-title">{project.title}</h1>
+            <p className="project-meta">
+              Client: <span className="project-meta-highlight">{project.client?.name}</span>
+              {' · '}Invoice: <span className="project-meta-accent">${project.price?.toLocaleString() || '0'}</span>
             </p>
           </div>
 
-          {/* Status Control */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-            <Settings size={13} color="var(--text-muted)" />
-            <span style={{ fontSize: 12, color: 'var(--text-muted)' }}>Status:</span>
-            <div style={{ position: 'relative' }}>
+          <div className="project-status-control">
+            <Settings size={14} color="var(--text-muted)" style={{ flexShrink: 0 }} />
+            <div style={{ position: 'relative', flex: 1 }}>
               <select
                 value={project.status}
                 onChange={e => handleStatusChange(e.target.value)}
                 disabled={statusChanging}
-                className="input-field"
-                style={{ padding: '6px 32px 6px 12px', fontSize: 12, cursor: 'pointer', appearance: 'none', minWidth: 148 }}
+                className="input-field status-select"
               >
                 {STATUS_OPTIONS.map(s => (
-                  <option key={s} value={s}>{s.replace('_', ' ')}</option>
+                  <option key={s} value={s}>{s.replace('_', ' ').toUpperCase()}</option>
                 ))}
               </select>
-              <ChevronDown size={12} style={{ position: 'absolute', right: 10, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
+              <ChevronDown size={14} style={{ position: 'absolute', right: 12, top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)', pointerEvents: 'none' }} />
             </div>
           </div>
         </motion.div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 300px', gap: 16, alignItems: 'start' }}>
-
-          {/* Left Column */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-
-            {/* Video Player / 3D Empty State */}
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="glass-card" style={{ padding: 0, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}>
+        {/* 2-Column Responsive Layout */}
+        <div className="project-layout">
+          
+          {/* Left / Main Column */}
+          <div className="main-column">
+            
+            {/* Video Player / Empty State */}
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="video-container glass-card">
               {deliverable ? (
                 <VideoPlayer
                   hlsUrl={deliverable.hlsPlaylistUrl}
@@ -169,18 +187,41 @@ export default function AdminProjectPage() {
                   onTimeUpdate={setCurrentTime}
                 />
               ) : (
-                <Processing3DPlaceholder
-                  label="No Deliverable Uploaded"
-                  subLabel="Upload an .mp4 below — it will be transcoded to HLS"
-                />
+                <div className="empty-video">
+                  <Film size={48} className="empty-video-icon" />
+                  <h3 className="empty-video-title">NO DELIVERABLE</h3>
+                  <p className="empty-video-text">
+                    No final video has been uploaded yet.<br/>
+                    The video preview will appear here once you upload a deliverable.
+                  </p>
+                </div>
               )}
             </motion.div>
 
+            {/* Project Progress */}
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }} className="glass-card" style={{ padding: '16px 20px', border: '1px solid var(--border-subtle)' }}>
+              <div className="progress-tracker">
+                {STATUS_OPTIONS.map((status, index) => {
+                  const isCompleted = index <= currentStatusIndex;
+                  const isCurrent = index === currentStatusIndex;
+                  return (
+                    <div key={status} className={`progress-step ${isCompleted ? 'completed' : ''} ${isCurrent ? 'current' : ''}`}>
+                      <div className="step-circle">
+                        {isCompleted ? <CheckCircle size={14} /> : <span className="step-dot" />}
+                      </div>
+                      <span className="step-label">{STATUS_LABELS[status]}</span>
+                      {index < STATUS_OPTIONS.length - 1 && <div className="step-line" />}
+                    </div>
+                  );
+                })}
+              </div>
+            </motion.div>
+
             {/* Upload Panel */}
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card" style={{ padding: '18px', border: '1px solid var(--border-subtle)' }}>
-              <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 3 }}>Upload Deliverable</h3>
-              <p style={{ fontSize: 12, color: 'var(--text-muted)', marginBottom: 14 }}>
-                Upload the final .mp4 — transcoded to HLS and stored on S3.
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card" style={{ padding: '20px', border: '1px solid var(--border-subtle)' }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Upload Deliverable</h3>
+              <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
+                Upload the final .mp4 file. The file will be transcoded to HLS and stored securely.
               </p>
 
               <input
@@ -192,33 +233,30 @@ export default function AdminProjectPage() {
                 onChange={handleUpload}
                 disabled={uploading}
               />
-              <label htmlFor="video-upload" style={{ display: 'block' }}>
+              <label htmlFor="video-upload" style={{ display: 'block', width: '100%' }}>
                 <div
+                  className="upload-dropzone"
                   style={{
-                    border: '1px dashed var(--border-subtle)',
-                    borderRadius: 10, padding: '22px',
-                    textAlign: 'center', cursor: uploading ? 'not-allowed' : 'pointer',
-                    transition: 'border-color 0.2s',
-                    background: 'rgba(99,102,241,0.02)',
+                    cursor: uploading ? 'not-allowed' : 'pointer',
+                    borderColor: uploading ? 'var(--accent-blue)' : 'var(--border-subtle)'
                   }}
-                  onMouseEnter={e => e.currentTarget.style.borderColor = 'var(--border-glow)'}
-                  onMouseLeave={e => e.currentTarget.style.borderColor = 'var(--border-subtle)'}
                 >
                   {uploading ? (
                     <>
-                      <Loader2 size={22} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite', margin: '0 auto 10px', display: 'block' }} />
-                      <p style={{ color: 'var(--text-secondary)', fontSize: 13, marginBottom: 8 }}>
+                      <Loader2 size={24} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite', margin: '0 auto 12px', display: 'block' }} />
+                      <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 10, fontWeight: 500 }}>
                         {uploadProgress < 100 ? `Uploading… ${uploadProgress}%` : 'Transcoding with FFmpeg…'}
                       </p>
-                      <div style={{ height: 3, background: 'var(--bg-glass)', borderRadius: 4, overflow: 'hidden' }}>
+                      <div style={{ height: 4, background: 'var(--bg-glass)', borderRadius: 4, overflow: 'hidden', width: '100%', maxWidth: 300, margin: '0 auto' }}>
                         <div style={{ height: '100%', width: `${uploadProgress}%`, background: 'linear-gradient(90deg,var(--accent-blue),var(--accent-purple))', transition: 'width 0.3s' }} />
                       </div>
                     </>
                   ) : (
                     <>
-                      <Upload size={22} color="var(--accent-indigo)" style={{ margin: '0 auto 10px', display: 'block', opacity: 0.65 }} />
-                      <p style={{ color: 'var(--text-secondary)', fontSize: 13, fontWeight: 500 }}>Drop .mp4 here or click to browse</p>
-                      <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 4 }}>Up to 5 GB · Auto-transcoded to HLS</p>
+                      <Upload size={28} color="var(--accent-indigo)" style={{ margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
+                      <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Upload Video</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Tap to browse or drag & drop</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 12, opacity: 0.7 }}>Maximum 5 GB · Auto-transcoded to HLS</p>
                     </>
                   )}
                 </div>
@@ -228,57 +266,71 @@ export default function AdminProjectPage() {
                 <motion.div
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
-                  style={{
-                    marginTop: 10, padding: '9px 12px', borderRadius: 8, fontSize: 12,
-                    background: msgType === 'success' ? 'rgba(52,211,153,0.08)' : msgType === 'error' ? 'rgba(239,68,68,0.08)' : 'rgba(99,102,241,0.08)',
-                    border: `1px solid ${msgType === 'success' ? 'rgba(52,211,153,0.2)' : msgType === 'error' ? 'rgba(239,68,68,0.2)' : 'rgba(99,102,241,0.2)'}`,
-                    color: msgType === 'success' ? '#34d399' : msgType === 'error' ? '#f87171' : '#818cf8',
-                    display: 'flex', alignItems: 'center', gap: 7,
-                  }}
+                  className={`upload-message ${msgType}`}
                 >
-                  {msgType === 'success' ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
-                  {msgText}
+                  {msgType === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
+                  <span>{msgText}</span>
                 </motion.div>
               )}
             </motion.div>
 
             {/* Raw Assets */}
-            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card" style={{ padding: '18px', border: '1px solid var(--border-subtle)' }}>
-              <h3 style={{ fontSize: 13, fontWeight: 600, marginBottom: 12 }}>Client Raw Assets</h3>
-              {project.rawAssets.length === 0 ? (
-                <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>No assets submitted yet.</p>
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className="glass-card" style={{ padding: '20px', border: '1px solid var(--border-subtle)' }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Client Assets</h3>
+              {!project.rawAssets || project.rawAssets.length === 0 ? (
+                <div style={{ display: 'flex', alignItems: 'center', gap: 10, color: 'var(--text-muted)', padding: '12px 16px', background: 'var(--bg-panel)', borderRadius: 8 }}>
+                  <FileText size={16} style={{ opacity: 0.5 }} />
+                  <span style={{ fontSize: 13 }}>No assets submitted yet.</span>
+                </div>
               ) : (
-                <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
                   {project.rawAssets.map((asset, i) => (
                     <a
                       key={i}
                       href={asset.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 8,
-                        padding: '9px 12px', borderRadius: 8,
-                        background: 'var(--bg-glass)', border: '1px solid var(--border-subtle)',
-                        color: 'var(--text-secondary)', textDecoration: 'none', fontSize: 12,
-                        transition: 'all 0.2s',
-                      }}
+                      className="asset-link"
                     >
-                      <Link2 size={12} color="var(--accent-cyan)" style={{ flexShrink: 0 }} />
-                      <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{asset.label || asset.url}</span>
-                      <ExternalLink size={11} style={{ flexShrink: 0, opacity: 0.45 }} />
+                      <Link2 size={14} color="var(--accent-cyan)" style={{ flexShrink: 0 }} />
+                      <span className="asset-link-text">{asset.label || asset.url.split('/').pop() || asset.url}</span>
+                      <ExternalLink size={12} style={{ flexShrink: 0, opacity: 0.4 }} />
                     </a>
                   ))}
                 </div>
               )}
             </motion.div>
+
+            {/* Project Details (Mobile-friendly grid) */}
+            <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.35 }} className="glass-card" style={{ padding: '20px', border: '1px solid var(--border-subtle)' }}>
+              <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 16 }}>Project Details</h3>
+              <div className="details-grid">
+                <div className="detail-item">
+                  <span className="detail-label">Status</span>
+                  <span className="detail-value"><StatusBadge status={project.status} /></span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Budget</span>
+                  <span className="detail-value" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>${project.price?.toLocaleString() || '0'}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Created</span>
+                  <span className="detail-value">{new Date(project.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Assets Submitted</span>
+                  <span className="detail-value">{project.rawAssets?.length || 0}</span>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
           {/* Right Column — Comments */}
           <motion.div
-            initial={{ opacity: 0, x: 16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
-            style={{ height: 660, position: 'sticky', top: 80, borderRadius: 14, overflow: 'hidden', border: '1px solid var(--border-subtle)' }}
+            initial={{ opacity: 0, y: 14 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="sidebar-column"
           >
             <CommentSidebar
               projectId={id}
@@ -290,7 +342,338 @@ export default function AdminProjectPage() {
       </main>
 
       <ChatPanel projectId={id} />
-      <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+
+      <style>{`
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Mobile First Responsive Styles */
+        .project-header {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+          margin-bottom: 24px;
+        }
+        .project-title {
+          font-size: 24px;
+          font-weight: 700;
+          margin-bottom: 6px;
+          color: var(--text-primary);
+        }
+        .project-meta {
+          color: var(--text-muted);
+          font-size: 13px;
+        }
+        .project-meta-highlight {
+          color: var(--text-secondary);
+          font-weight: 500;
+        }
+        .project-meta-accent {
+          color: var(--accent-indigo);
+          font-weight: 600;
+        }
+        .project-status-control {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          width: 100%;
+        }
+        .status-select {
+          width: 100%;
+          padding: 10px 32px 10px 14px;
+          font-size: 13px;
+          font-weight: 600;
+          cursor: pointer;
+          appearance: none;
+          background: var(--bg-panel);
+          border-radius: 8px;
+        }
+
+        .project-layout {
+          display: grid;
+          grid-template-columns: minmax(0, 1fr);
+          gap: 20px;
+          align-items: start;
+        }
+
+        .main-column {
+          display: flex;
+          flex-direction: column;
+          gap: 20px;
+          min-width: 0;
+        }
+
+        .video-container {
+          padding: 0;
+          overflow: hidden;
+          border: 1px solid var(--border-subtle);
+          width: 100%;
+          aspect-ratio: 16/9;
+          background: #000;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+        }
+
+        .empty-video {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          justify-content: center;
+          text-align: center;
+          padding: 24px;
+          height: 100%;
+          background: linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-void) 100%);
+        }
+        .empty-video-icon {
+          color: var(--text-muted);
+          opacity: 0.4;
+          margin-bottom: 16px;
+        }
+        .empty-video-title {
+          font-size: 14px;
+          font-weight: 700;
+          color: var(--text-secondary);
+          letter-spacing: 0.05em;
+          margin-bottom: 8px;
+        }
+        .empty-video-text {
+          font-size: 13px;
+          color: var(--text-muted);
+          line-height: 1.5;
+          max-width: 320px;
+        }
+
+        .upload-dropzone {
+          border: 2px dashed var(--border-subtle);
+          border-radius: 12px;
+          padding: 32px 20px;
+          text-align: center;
+          transition: all 0.2s;
+          background: rgba(99,102,241,0.02);
+          width: 100%;
+        }
+        .upload-dropzone:active {
+          background: rgba(99,102,241,0.05);
+        }
+
+        .upload-message {
+          margin-top: 14px;
+          padding: 12px 14px;
+          border-radius: 8px;
+          font-size: 13px;
+          display: flex;
+          align-items: center;
+          gap: 8px;
+        }
+        .upload-message.success {
+          background: rgba(52,211,153,0.08);
+          border: 1px solid rgba(52,211,153,0.2);
+          color: #34d399;
+        }
+        .upload-message.error {
+          background: rgba(239,68,68,0.08);
+          border: 1px solid rgba(239,68,68,0.2);
+          color: #f87171;
+        }
+        .upload-message.info {
+          background: rgba(99,102,241,0.08);
+          border: 1px solid rgba(99,102,241,0.2);
+          color: #818cf8;
+        }
+
+        .asset-link {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          background: var(--bg-panel);
+          border: 1px solid var(--border-subtle);
+          color: var(--text-secondary);
+          text-decoration: none;
+          font-size: 13px;
+          transition: all 0.2s;
+        }
+        .asset-link:active {
+          background: var(--bg-glass);
+        }
+        .asset-link-text {
+          flex: 1;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .progress-tracker {
+          display: flex;
+          flex-direction: column;
+          gap: 16px;
+        }
+        .progress-step {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          position: relative;
+        }
+        .step-circle {
+          width: 24px;
+          height: 24px;
+          border-radius: 50%;
+          border: 2px solid var(--border-subtle);
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          background: var(--bg-card);
+          z-index: 2;
+        }
+        .step-dot {
+          width: 8px;
+          height: 8px;
+          border-radius: 50%;
+          background: var(--border-subtle);
+        }
+        .progress-step.completed .step-circle,
+        .progress-step.current .step-circle {
+          border-color: var(--accent-blue);
+        }
+        .progress-step.completed .step-circle {
+          background: var(--accent-blue);
+          color: white;
+        }
+        .progress-step.current .step-dot {
+          background: var(--accent-blue);
+        }
+        .step-label {
+          font-size: 13px;
+          font-weight: 500;
+          color: var(--text-muted);
+        }
+        .progress-step.completed .step-label,
+        .progress-step.current .step-label {
+          color: var(--text-primary);
+          font-weight: 600;
+        }
+        .step-line {
+          position: absolute;
+          left: 11px;
+          top: 24px;
+          bottom: -16px;
+          width: 2px;
+          background: var(--border-subtle);
+          z-index: 1;
+        }
+        .progress-step.completed .step-line {
+          background: var(--accent-blue);
+        }
+
+        .details-grid {
+          display: flex;
+          flex-direction: column;
+          gap: 12px;
+        }
+        .detail-item {
+          display: flex;
+          flex-direction: column;
+          gap: 4px;
+          padding: 10px 14px;
+          background: var(--bg-panel);
+          border-radius: 8px;
+        }
+        .detail-label {
+          font-size: 11px;
+          text-transform: uppercase;
+          letter-spacing: 0.05em;
+          color: var(--text-muted);
+          font-weight: 600;
+        }
+        .detail-value {
+          font-size: 14px;
+          color: var(--text-secondary);
+        }
+
+        .sidebar-column {
+          width: 100%;
+          min-width: 0;
+          border-radius: 14px;
+          overflow: hidden;
+          border: 1px solid var(--border-subtle);
+          /* On mobile, height auto. Desktop will fix height. */
+          height: auto;
+          min-height: 400px;
+        }
+
+        /* Desktop Layout Overrides */
+        @media (min-width: 768px) {
+          .project-header {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .project-status-control {
+            width: auto;
+            min-width: 200px;
+          }
+          .details-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+          }
+          .detail-item {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 0;
+            background: transparent;
+            border-bottom: 1px solid var(--border-subtle);
+            border-radius: 0;
+          }
+          .detail-item:last-child {
+            border-bottom: none;
+          }
+          
+          /* Horizontal Progress on Desktop */
+          .progress-tracker {
+            flex-direction: row;
+            align-items: center;
+            justify-content: space-between;
+          }
+          .progress-step {
+            flex-direction: column;
+            flex: 1;
+            gap: 8px;
+          }
+          .step-line {
+            left: 50%;
+            top: 11px;
+            bottom: auto;
+            right: -50%;
+            width: 100%;
+            height: 2px;
+          }
+          .progress-step:last-child .step-line {
+            display: none;
+          }
+        }
+
+        @media (min-width: 1024px) {
+          .project-layout {
+            grid-template-columns: minmax(0, 1fr) 340px;
+          }
+          .sidebar-column {
+            position: sticky;
+            top: 80px;
+            height: calc(100vh - 120px);
+            max-height: 800px;
+          }
+          .upload-dropzone:hover {
+            border-color: var(--border-glow);
+          }
+          .asset-link:hover {
+            background: var(--bg-glass);
+            border-color: var(--border-glow);
+          }
+        }
+      `}</style>
     </div>
   );
 }

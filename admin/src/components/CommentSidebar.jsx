@@ -52,8 +52,8 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
   };
 
   return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', height: '100%',
+    <div className="comment-sidebar-container" style={{
+      display: 'flex', flexDirection: 'column', height: '100%', minHeight: '400px',
       background: 'var(--bg-card)',
       backdropFilter: 'blur(20px)',
       WebkitBackdropFilter: 'blur(20px)',
@@ -172,19 +172,19 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
             At {formatTs(currentTime)}
           </span>
         </div>
-        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 6 }}>
+        <form onSubmit={handleSubmit} style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
           <input
             value={text}
             onChange={e => setText(e.target.value)}
             placeholder="Add a note…"
             className="input-field"
-            style={{ flex: 1, padding: '8px 12px', borderRadius: 8, fontSize: 12 }}
+            style={{ flex: 1, minWidth: 0, padding: '12px 14px', borderRadius: 8, fontSize: 14, minHeight: 44 }}
           />
           <button
             type="submit"
             disabled={!text.trim() || submitting}
             style={{
-              width: 34, height: 34, borderRadius: 8, border: 'none',
+              width: 44, height: 44, borderRadius: 8, border: 'none',
               background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
               color: '#fff', cursor: 'pointer', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
