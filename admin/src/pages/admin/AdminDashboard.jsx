@@ -303,7 +303,7 @@ export default function AdminDashboard() {
             ) : (
               <div className="grid-auto">
                 {filtered.map((p, i) => (
-                  <ProjectCard key={p._id} project={p} index={i} basePath="/project" />
+                  <ProjectCard key={p._id} project={p} index={i} basePath="" />
                 ))}
               </div>
             )}
