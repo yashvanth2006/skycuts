@@ -47,6 +47,13 @@ export default function ChatPanel({ projectId }) {
       console.error('Socket error:', err.message);
     });
 
+    socket.on('connect_error', (err) => {
+      console.error('Socket connection error:', err.message);
+      if (err.message.includes('Authentication')) {
+        socket.disconnect();
+      }
+    });
+
     return () => socket.disconnect();
   }, [projectId]);
 

@@ -404,7 +404,7 @@ export default function AdminDashboard() {
           }
           .stats-grid {
             grid-template-columns: repeat(2, 1fr);
-            gap: 12;
+            gap: 12px;
           }
           .tab-button {
             padding: 10px 14px;
@@ -415,7 +415,7 @@ export default function AdminDashboard() {
           }
           .request-row-content {
             flex-direction: column;
-            gap: 12;
+            gap: 12px;
           }
           .request-info {
             min-width: 100%;

@@ -60,8 +60,8 @@ export default function ProjectCard({ project, index = 0, basePath = '/dashboard
       <hr className="divider" />
 
       {/* Meta */}
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-        <div style={{ display: 'flex', gap: 16 }}>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexWrap: 'wrap', gap: '12px' }}>
+        <div style={{ display: 'flex', gap: 16, flexWrap: 'wrap' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
             <DollarSign size={13} />
             {project.price > 0 ? `$${project.price.toLocaleString()}` : 'TBD'}
