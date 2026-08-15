@@ -7,7 +7,6 @@ import {
   Shield, Video, MonitorPlay, ArrowRight
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
-import DaVinciNodeTree from "../../components/three/DaVinciNodeTree.jsx";
 import GoogleAuthModal from "../../components/GoogleAuthModal.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
@@ -560,8 +559,20 @@ export default function EditorProfile() {
           background: "var(--bg-void)",
         }}
       >
-        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
-          <DaVinciNodeTree isDark={theme === 'dark'} />
+        <div style={{ position: "absolute", inset: 0, zIndex: 0, pointerEvents: 'none' }}>
+          {/* Clean CSS-only background replacement */}
+          <div style={{
+            position: 'absolute', inset: 0,
+            background: 'radial-gradient(circle at 50% 30%, rgba(47,116,208,0.08) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(245,166,35,0.05) 0%, transparent 50%)',
+          }} />
+          <div style={{
+            position: 'absolute', inset: 0,
+            backgroundImage: 'linear-gradient(var(--border-subtle) 1px, transparent 1px), linear-gradient(90deg, var(--border-subtle) 1px, transparent 1px)',
+            backgroundSize: '40px 40px',
+            opacity: 0.3,
+            maskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
+            WebkitMaskImage: 'linear-gradient(to bottom, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 100%)',
+          }} />
         </div>
 
         <div style={{

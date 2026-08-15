@@ -4,7 +4,6 @@ import { Eye, EyeOff, Zap, LogIn, UserPlus, Loader2 } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import { GoogleLogin } from '@react-oauth/google';
-import AmbientBackground from '../components/three/AmbientBackground.jsx';
 import { useAuth } from '../context/AuthContext.jsx';
 import { useTheme } from '../context/ThemeContext.jsx';
 import api from '../api/axiosInstance.js';
@@ -107,8 +106,7 @@ export default function LoginPage() {
   return (
     <div style={{ minHeight: '100vh', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
 
-      {/* 3D Background */}
-      <AmbientBackground />
+      {/* 3D Background removed */}
 
       {/* Static glow orbs */}
       <div className="glow-orb" style={{ width: 600, height: 600, background: 'var(--accent-blue)', top: -200, left: -200 }} />
