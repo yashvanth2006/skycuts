@@ -7,6 +7,7 @@ import {
   Shield, Video, MonitorPlay, ArrowRight
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
+import DaVinciNodeTree from "../../components/three/DaVinciNodeTree.jsx";
 import GoogleAuthModal from "../../components/GoogleAuthModal.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
@@ -559,17 +560,8 @@ export default function EditorProfile() {
           background: "var(--bg-void)",
         }}
       >
-        <div style={{ position: "absolute", inset: 0, zIndex: 0, overflow: 'hidden' }}>
-          <div style={{
-            position: 'absolute', top: '-10%', left: '-10%', width: '50%', height: '50%',
-            background: 'radial-gradient(circle, var(--accent-blue) 0%, transparent 70%)',
-            opacity: 0.15, filter: 'blur(80px)'
-          }} />
-          <div style={{
-            position: 'absolute', bottom: '-10%', right: '-5%', width: '60%', height: '60%',
-            background: 'radial-gradient(circle, var(--accent-purple) 0%, transparent 70%)',
-            opacity: 0.15, filter: 'blur(100px)'
-          }} />
+        <div style={{ position: "absolute", inset: 0, zIndex: 0 }}>
+          <DaVinciNodeTree isDark={theme === 'dark'} />
         </div>
 
         <div style={{
