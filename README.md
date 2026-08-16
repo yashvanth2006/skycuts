@@ -51,41 +51,6 @@ The repository is structured as a monorepo with three primary directories:
 - AWS Account (S3 bucket)
 - Google Cloud Console (OAuth Client ID)
 
-### Environment Setup
-Create a `.env` file in the `/server` directory with the following variables:
-
-```env
-PORT=5000
-MONGODB_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-CLIENT_URL=http://localhost:5173
-ADMIN_URL=http://localhost:5174
-
-# Google Auth
-GOOGLE_CLIENT_ID=your_google_client_id
-
-# Razorpay
-RAZORPAY_KEY_ID=your_razorpay_key_id
-RAZORPAY_KEY_SECRET=your_razorpay_secret
-RAZORPAY_WEBHOOK_SECRET=your_webhook_secret
-
-# AWS S3
-AWS_REGION=your_aws_region
-AWS_ACCESS_KEY_ID=your_access_key
-AWS_SECRET_ACCESS_KEY=your_secret_key
-AWS_S3_BUCKET_NAME=your_bucket_name
-```
-
-Create a `.env` file in the `/client` directory:
-```env
-VITE_API_URL=http://localhost:5000/api
-VITE_GOOGLE_CLIENT_ID=your_google_client_id
-```
-
-Create a `.env` file in the `/admin` directory:
-```env
-VITE_API_URL=http://localhost:5000/api
-```
 
 ### Running the App
 Run the following commands in three separate terminal instances:
