@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from 'react-router-dom';
+import { formatCurrency } from '../utils/currency.js';
 import { ArrowRight, Film, DollarSign, Clock } from 'lucide-react';
 import StatusBadge from './StatusBadge.jsx';
 
@@ -64,7 +65,7 @@ export default function ProjectCard({ project, index = 0, basePath = '/dashboard
         <div style={{ display: 'flex', gap: 16 }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
             <DollarSign size={13} />
-            {project.price > 0 ? `$${project.price.toLocaleString()}` : 'TBD'}
+            {formatCurrency(project.price)}
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: 5, fontSize: 12, color: 'var(--text-muted)' }}>
             <Clock size={13} />

@@ -12,6 +12,7 @@ import VideoPlayer from '../../components/VideoPlayer.jsx';
 import CommentSidebar from '../../components/CommentSidebar.jsx';
 import ChatPanel from '../../components/ChatPanel.jsx';
 import api from '../../api/axiosInstance.js';
+import { formatCurrency } from '../../utils/currency.js';
 
 const STATUS_OPTIONS = ['awaiting_assets', 'in_progress', 'in_review', 'paid'];
 const STATUS_LABELS = {
@@ -150,7 +151,7 @@ export default function AdminProjectPage() {
             <h1 className="project-title">{project.title}</h1>
             <p className="project-meta">
               Client: <span className="project-meta-highlight">{project.client?.name}</span>
-              {' · '}Invoice: <span className="project-meta-accent">${project.price?.toLocaleString() || '0'}</span>
+              {' · '}Invoice: <span className="project-meta-accent">{formatCurrency(project.price)}</span>
             </p>
           </div>
 
@@ -322,7 +323,7 @@ export default function AdminProjectPage() {
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Budget</span>
-                  <span className="detail-value" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>${project.price?.toLocaleString() || '0'}</span>
+                  <span className="detail-value" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{formatCurrency(project.price)}</span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Created</span>

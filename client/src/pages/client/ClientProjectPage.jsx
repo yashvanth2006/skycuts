@@ -14,6 +14,7 @@ import CommentSidebar from "../../components/CommentSidebar.jsx";
 import ChatPanel from "../../components/ChatPanel.jsx";
 import Modal from "../../components/Modal.jsx";
 import api from "../../api/axiosInstance.js";
+import { formatCurrency } from "../../utils/currency.js";
 
 const TIMELINE_STEPS = [
   { key: "awaiting_assets", short: "Assets"    },
@@ -711,7 +712,7 @@ export default function ClientProjectPage() {
             
             <div className="pw-header-meta">
                 <span className="pw-meta-item">Client: <strong>{project.client?.name || 'Unknown'}</strong></span>
-                <span className="pw-meta-item">Budget: <strong>{project.price ? `$${Number(project.price).toLocaleString()}` : 'TBD'}</strong></span>
+                <span className="pw-meta-item">Budget: <strong>{formatCurrency(project.price)}</strong></span>
                 {project.type && <span className="pw-meta-item">Type: <strong>{project.type}</strong></span>}
             </div>
         </div>
@@ -791,7 +792,7 @@ export default function ClientProjectPage() {
                         <p className="pw-action-desc">Your edited video is ready. Review it then pay the invoice to unlock the final file.</p>
                         <button onClick={handlePay} disabled={paying} className="pw-action-btn" style={{ background:"linear-gradient(135deg,#34d399,#059669)" }}>
                             {paying ? <Loader2 size={16} className="spin" /> : <CreditCard size={16} />}
-                            Pay ${project.price?.toLocaleString()}
+                            Pay {formatCurrency(project.price)}
                         </button>
                     </div>
                 )}

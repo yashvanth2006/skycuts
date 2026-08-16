@@ -30,7 +30,7 @@ const projectSchema = new mongoose.Schema(
         },
         paymentVerifiedAt: { type: Date, default: null },
         paymentAmount: { type: Number, default: null },
-        paymentCurrency: { type: String, default: null },
+        paymentCurrency: { type: String, default: 'INR' },
     },
     { timestamps: true }
 );
