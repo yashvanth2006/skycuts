@@ -3,7 +3,7 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import VideoDeliverable from '../models/VideoDeliverable.js';
 import Project from '../models/Project.js';
-import { uploadLargeVideo } from '../services/cloudinaryService.js';
+import { uploadLargeVideo, deleteMedia } from '../services/cloudinaryService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -25,48 +25,94 @@ export const uploadDeliverable = async (req, res) => {
 
     const inputPath = req.file.path;
 
+    let cloudResult = null;
+    let localFileCleaned = false;
+
+    const cleanupLocalFile = () => {
+        if (!localFileCleaned && fs.existsSync(inputPath)) {
+            try {
+                fs.unlinkSync(inputPath);
+                localFileCleaned = true;
+                console.log('[DELIVERABLE] Local temp file cleaned up successfully');
+            } catch (fsErr) {
+                console.error('[DELIVERABLE] Temp file cleanup failed (likely EBUSY on Windows):', fsErr.message);
+                // On Windows, EBUSY might resolve shortly after. A robust system might use setTimeout to retry, but we'll ignore for now.
+            }
+        }
+    };
+
     try {
-        console.log('🎬 Starting Cloudinary large video upload...');
+        console.log(`[DELIVERABLE] Upload started for project ${projectId}`);
         const folder = `skycuts/projects/${projectId}/deliverables`;
         
-        const result = await uploadLargeVideo(inputPath, folder);
+        console.log('[DELIVERABLE] Cloudinary upload started');
+        cloudResult = await uploadLargeVideo(inputPath, folder);
+        console.log(`[DELIVERABLE] Cloudinary upload successful. Public ID: ${cloudResult.public_id}`);
+        
+        // Immediately try to cleanup local file since Cloudinary upload stream is finished.
+        cleanupLocalFile();
+    } catch (cloudErr) {
+        console.error('[DELIVERABLE] Cloudinary upload failed:', cloudErr);
+        cleanupLocalFile();
+        return res.status(502).json({ message: 'Cloudinary upload failed', error: cloudErr.message });
+    }
 
-        // Save deliverable record
-        let deliverable = await VideoDeliverable.findOne({ project: projectId });
+    let deliverable;
+    try {
+        console.log('[DELIVERABLE] MongoDB save started');
+        deliverable = await VideoDeliverable.findOne({ project: projectId });
         
         const updateData = {
             provider: 'cloudinary',
-            cloudinaryPublicId: result.public_id,
-            cloudinarySecureUrl: result.secure_url,
-            cloudinaryResourceType: result.resource_type,
-            cloudinaryFormat: result.format,
-            videoUrl: result.secure_url,
+            cloudinaryPublicId: cloudResult.public_id,
+            cloudinarySecureUrl: cloudResult.secure_url,
+            cloudinaryResourceType: cloudResult.resource_type,
+            cloudinaryFormat: cloudResult.format,
+            videoUrl: cloudResult.secure_url,
         };
 
         if (deliverable) {
             Object.assign(deliverable, updateData);
             await deliverable.save();
+            console.log('[DELIVERABLE] MongoDB update successful');
         } else {
             deliverable = await VideoDeliverable.create({
                 project: projectId,
                 ...updateData
             });
+            console.log('[DELIVERABLE] MongoDB creation successful');
         }
+    } catch (dbErr) {
+        console.error('[DELIVERABLE] MongoDB save failed:', dbErr);
+        
+        // Attempt cleanup of the uploaded Cloudinary asset to prevent orphaned files
+        if (cloudResult && cloudResult.public_id) {
+            try {
+                console.log(`[DELIVERABLE] Attempting to rollback Cloudinary upload: ${cloudResult.public_id}`);
+                await deleteMedia(cloudResult.public_id, cloudResult.resource_type);
+                console.log('[DELIVERABLE] Cloudinary rollback successful');
+            } catch (rollbackErr) {
+                console.error('[DELIVERABLE] Cloudinary rollback failed:', rollbackErr.message);
+            }
+        }
+        
+        cleanupLocalFile();
+        return res.status(500).json({ message: 'Database save failed', error: dbErr.message });
+    }
 
-        // Update project status to 'in_review'
+    try {
         project.status = 'in_review';
         await project.save();
-
-        // Cleanup local temp file
-        fs.unlinkSync(inputPath);
-
-        res.status(201).json({ message: 'Deliverable uploaded successfully', deliverable });
-    } catch (err) {
-        console.error('❌ Deliverable upload failed:', err);
-        // Cleanup on error
-        if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
-        res.status(500).json({ message: 'Upload failed. Please try again.', error: err.message });
+        console.log('[DELIVERABLE] Project update successful');
+    } catch (projErr) {
+        console.error('[DELIVERABLE] Project update failed:', projErr);
+        // We do not rollback DB/Cloudinary for project status error, as the asset is safely stored.
+        cleanupLocalFile();
+        return res.status(500).json({ message: 'Project status update failed', error: projErr.message });
     }
+
+    console.log('[DELIVERABLE] Response sent');
+    res.status(201).json({ message: 'Deliverable uploaded successfully', deliverable });
 };
 
 // @desc   Get deliverable for a project
