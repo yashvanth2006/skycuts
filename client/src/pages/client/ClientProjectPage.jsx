@@ -728,7 +728,7 @@ export default function ClientProjectPage() {
                 <div style={{ width: '100%', borderRadius: 12, overflow: 'hidden', border: deliverable ? '1px solid var(--border-subtle)' : 'none' }}>
                     {deliverable ? (
                         <>
-                            <VideoPlayer hlsUrl={deliverable.hlsPlaylistUrl} seekTo={seekTo} onTimeUpdate={setCurrentTime} />
+                            <VideoPlayer hlsUrl={deliverable.videoUrl || deliverable.hlsPlaylistUrl} seekTo={seekTo} onTimeUpdate={setCurrentTime} />
                             {project.status === "in_review" && (
                                 <div style={{ padding:"12px 16px", background:"rgba(99,102,241,0.05)", borderTop:"1px solid var(--border-subtle)", display:"flex", alignItems:"center", gap:8, fontSize:12, color:"var(--text-muted)" }}>
                                 <Lock size={12} color="var(--accent-indigo)"/> Pay the invoice to download the full-resolution original file.

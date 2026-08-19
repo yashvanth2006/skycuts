@@ -3,13 +3,12 @@ import fs from 'fs';
 import { fileURLToPath } from 'url';
 import VideoDeliverable from '../models/VideoDeliverable.js';
 import Project from '../models/Project.js';
-import { transcodeToHLS } from '../utils/ffmpegHelper.js';
-import { uploadFileToS3, getHlsPublicUrl, generatePresignedUrl } from '../utils/s3Helper.js';
+import { uploadLargeVideo } from '../services/cloudinaryService.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// @desc   Upload final .mp4, transcode to HLS, push to S3 (Admin only)
+// @desc   Upload final .mp4 to Cloudinary (Admin only)
 // @route  POST /api/deliverables/:projectId
 export const uploadDeliverable = async (req, res) => {
     const { projectId } = req.params;
@@ -25,67 +24,52 @@ export const uploadDeliverable = async (req, res) => {
     }
 
     const inputPath = req.file.path;
-    const hlsOutputDir = path.join(__dirname, '..', 'uploads', 'hls', projectId);
 
     try {
-        // 1. Transcode to HLS locally
-        console.log('🎬 Starting HLS transcode...');
-        await transcodeToHLS(inputPath, hlsOutputDir);
+        console.log('🎬 Starting Cloudinary large video upload...');
+        const folder = `skycuts/projects/${projectId}/deliverables`;
+        
+        const result = await uploadLargeVideo(inputPath, folder);
 
-        // 2. Upload original .mp4 to S3
-        const originalS3Key = `originals/${projectId}/original.mp4`;
-        await uploadFileToS3(inputPath, originalS3Key, 'video/mp4');
-
-        // 3. Upload all HLS files to S3
-        const hlsFiles = fs.readdirSync(hlsOutputDir);
-        const playlistS3Key = `hls/${projectId}/playlist.m3u8`;
-
-        for (const file of hlsFiles) {
-            const filePath = path.join(hlsOutputDir, file);
-            const contentType = file.endsWith('.m3u8')
-                ? 'application/x-mpegURL'
-                : 'video/mp2t';
-            await uploadFileToS3(filePath, `hls/${projectId}/${file}`, contentType);
-        }
-
-        // 4. Build public HLS URL
-        const hlsPlaylistUrl = getHlsPublicUrl(playlistS3Key);
-
-        // 5. Save deliverable record
+        // Save deliverable record
         let deliverable = await VideoDeliverable.findOne({ project: projectId });
+        
+        const updateData = {
+            provider: 'cloudinary',
+            cloudinaryPublicId: result.public_id,
+            cloudinarySecureUrl: result.secure_url,
+            cloudinaryResourceType: result.resource_type,
+            cloudinaryFormat: result.format,
+            videoUrl: result.secure_url,
+        };
+
         if (deliverable) {
-            deliverable.s3OriginalKey = originalS3Key;
-            deliverable.hlsPlaylistKey = playlistS3Key;
-            deliverable.hlsPlaylistUrl = hlsPlaylistUrl;
+            Object.assign(deliverable, updateData);
             await deliverable.save();
         } else {
             deliverable = await VideoDeliverable.create({
                 project: projectId,
-                s3OriginalKey: originalS3Key,
-                hlsPlaylistKey: playlistS3Key,
-                hlsPlaylistUrl,
+                ...updateData
             });
         }
 
-        // 6. Update project status to 'in_review'
+        // Update project status to 'in_review'
         project.status = 'in_review';
         await project.save();
 
-        // 7. Cleanup local temp files
+        // Cleanup local temp file
         fs.unlinkSync(inputPath);
-        fs.rmSync(hlsOutputDir, { recursive: true, force: true });
 
-        res.status(201).json({ message: 'Deliverable uploaded and transcoded successfully', deliverable });
+        res.status(201).json({ message: 'Deliverable uploaded successfully', deliverable });
     } catch (err) {
-        console.error('❌ Deliverable upload failed:', err.message);
+        console.error('❌ Deliverable upload failed:', err);
         // Cleanup on error
         if (fs.existsSync(inputPath)) fs.unlinkSync(inputPath);
-        if (fs.existsSync(hlsOutputDir)) fs.rmSync(hlsOutputDir, { recursive: true, force: true });
-        res.status(500).json({ message: 'Video processing failed', error: err.message });
+        res.status(500).json({ message: 'Upload failed. Please try again.', error: err.message });
     }
 };
 
-// @desc   Get deliverable for a project (returns HLS URL)
+// @desc   Get deliverable for a project
 // @route  GET /api/deliverables/:projectId
 export const getDeliverable = async (req, res) => {
     const { projectId } = req.params;
@@ -103,7 +87,7 @@ export const getDeliverable = async (req, res) => {
     res.json(deliverable);
 };
 
-// @desc   Generate pre-signed URL for final download (project must be 'paid')
+// @desc   Generate download URL for final deliverable (project must be 'paid')
 // @route  GET /api/deliverables/:projectId/download
 export const getDownloadUrl = async (req, res) => {
     const { projectId } = req.params;
@@ -117,13 +101,25 @@ export const getDownloadUrl = async (req, res) => {
     }
 
     // Payment gate
-    if (project.status !== 'paid') {
+    if (project.status !== 'paid' && project.status !== 'PAID' && project.status !== 'DELIVERED') {
         return res.status(402).json({ message: 'Payment required to download the final file' });
     }
 
     const deliverable = await VideoDeliverable.findOne({ project: projectId });
     if (!deliverable) return res.status(404).json({ message: 'Deliverable not found' });
 
-    const signedUrl = await generatePresignedUrl(deliverable.s3OriginalKey, 7200);
-    res.json({ downloadUrl: signedUrl, expiresIn: 7200 });
+    if (deliverable.provider === 'cloudinary' || deliverable.cloudinarySecureUrl) {
+        // Adding fl_attachment ensures browser triggers a file download
+        const downloadUrl = deliverable.cloudinarySecureUrl.replace('/upload/', '/upload/fl_attachment/');
+        res.json({ downloadUrl: downloadUrl, expiresIn: null });
+    } else {
+        if (deliverable.s3OriginalKey) {
+            // Since AWS S3 access is removed, we cannot generate presigned URL.
+            // If the old video was public, we could construct a URL.
+            // Since HLS URL was public, let's use that as fallback if available.
+            res.json({ downloadUrl: deliverable.hlsPlaylistUrl, expiresIn: null });
+        } else {
+            res.status(500).json({ message: 'Legacy deliverable cannot be downloaded without migration.' });
+        }
+    }
 };

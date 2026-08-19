@@ -14,8 +14,8 @@ SkyCuts is a premium video editing platform designed for independent colorists a
 
 ### For Admins (Editors)
 - **Admin Dashboard:** Manage all incoming project requests and active workspaces.
-- **Video Processing:** Automated HLS transcoding using FFmpeg for smooth playback of deliverables.
-- **AWS S3 Integration:** Secure cloud storage for all heavy video assets.
+- **Video Processing:** Automated video delivery and responsive playback across devices.
+- **Cloudinary Integration:** Secure cloud media storage and optimized video delivery.
 - **Status Management:** Track projects through various stages (Awaiting Assets, In Progress, Review, Paid, Delivered).
 
 ## 🛠 Tech Stack
@@ -30,8 +30,7 @@ SkyCuts is a premium video editing platform designed for independent colorists a
 - **Runtime:** Node.js (Express.js)
 - **Database:** MongoDB (Mongoose)
 - **Payments:** Razorpay API
-- **Video Processing:** FFmpeg
-- **Cloud Storage:** AWS S3 (AWS SDK v3)
+- **Cloud Storage & Delivery:** Cloudinary
 
 ## 📦 Project Structure
 
@@ -46,9 +45,8 @@ The repository is structured as a monorepo with three primary directories:
 ### Prerequisites
 - Node.js (v18+)
 - MongoDB instance
-- FFmpeg installed locally
 - Razorpay Account
-- AWS Account (S3 bucket)
+- Cloudinary Account (Cloud name, API key, API secret)
 - Google Cloud Console (OAuth Client ID)
 
 

@@ -89,7 +89,7 @@ export default function AdminProjectPage() {
       setUploadMsg('success:Video uploaded and transcoded successfully!');
       await fetchProject();
     } catch (err) {
-      setUploadMsg(`error:${err.response?.data?.message || 'Upload failed. Check FFmpeg and S3 config.'}`);
+      setUploadMsg(`error:${err.response?.data?.message || 'Upload failed. Please try again.'}`);
     } finally {
       setUploading(false);
       if (fileRef.current) fileRef.current.value = '';
@@ -183,7 +183,7 @@ export default function AdminProjectPage() {
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }} className="video-container glass-card">
               {deliverable ? (
                 <VideoPlayer
-                  hlsUrl={deliverable.hlsPlaylistUrl}
+                  hlsUrl={deliverable.videoUrl || deliverable.hlsPlaylistUrl}
                   seekTo={seekTo}
                   onTimeUpdate={setCurrentTime}
                 />
@@ -222,7 +222,7 @@ export default function AdminProjectPage() {
             <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }} className="glass-card" style={{ padding: '20px', border: '1px solid var(--border-subtle)' }}>
               <h3 style={{ fontSize: 14, fontWeight: 600, marginBottom: 4 }}>Upload Deliverable</h3>
               <p style={{ fontSize: 13, color: 'var(--text-muted)', marginBottom: 16 }}>
-                Upload the final .mp4 file. The file will be transcoded to HLS and stored securely.
+                Upload the final .mp4 file. The file will be securely stored and processed.
               </p>
 
               <input
@@ -246,7 +246,7 @@ export default function AdminProjectPage() {
                     <>
                       <Loader2 size={24} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite', margin: '0 auto 12px', display: 'block' }} />
                       <p style={{ color: 'var(--text-secondary)', fontSize: 14, marginBottom: 10, fontWeight: 500 }}>
-                        {uploadProgress < 100 ? `Uploading… ${uploadProgress}%` : 'Transcoding with FFmpeg…'}
+                        {uploadProgress < 100 ? `Uploading… ${uploadProgress}%` : 'Processing video…'}
                       </p>
                       <div style={{ height: 4, background: 'var(--bg-glass)', borderRadius: 4, overflow: 'hidden', width: '100%', maxWidth: 300, margin: '0 auto' }}>
                         <div style={{ height: '100%', width: `${uploadProgress}%`, background: 'linear-gradient(90deg,var(--accent-blue),var(--accent-purple))', transition: 'width 0.3s' }} />
@@ -257,7 +257,7 @@ export default function AdminProjectPage() {
                       <Upload size={28} color="var(--accent-indigo)" style={{ margin: '0 auto 12px', display: 'block', opacity: 0.8 }} />
                       <p style={{ color: 'var(--text-primary)', fontSize: 15, fontWeight: 600, marginBottom: 4 }}>Upload Video</p>
                       <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Tap to browse or drag & drop</p>
-                      <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 12, opacity: 0.7 }}>Maximum 5 GB · Auto-transcoded to HLS</p>
+                      <p style={{ color: 'var(--text-muted)', fontSize: 11, marginTop: 12, opacity: 0.7 }}>Maximum 5 GB · Ready for playback</p>
                     </>
                   )}
                 </div>

@@ -8,6 +8,13 @@ const portfolioSchema = new mongoose.Schema(
         category: { type: String },
         thumbnail: { type: String },
         videoUrl: { type: String },
+        
+        provider: { type: String, enum: ['cloudinary', 'aws'], default: 'cloudinary' },
+        cloudinaryPublicId: { type: String },
+        cloudinarySecureUrl: { type: String },
+        cloudinaryResourceType: { type: String },
+        cloudinaryFormat: { type: String },
+        
         isPublished: { type: Boolean, default: false },
         order: { type: Number, default: 0 },
     },
