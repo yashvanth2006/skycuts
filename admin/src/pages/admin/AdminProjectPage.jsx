@@ -14,12 +14,17 @@ import ChatPanel from '../../components/ChatPanel.jsx';
 import api from '../../api/axiosInstance.js';
 import { formatCurrency } from '../../utils/currency.js';
 
-const STATUS_OPTIONS = ['awaiting_assets', 'in_progress', 'in_review', 'paid'];
+const STATUS_OPTIONS = ['awaiting_assets', 'in_progress', 'in_review', 'paid', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'PAID', 'DELIVERED'];
 const STATUS_LABELS = {
   'awaiting_assets': 'Assets',
   'in_progress': 'Editing',
   'in_review': 'Review',
-  'paid': 'Delivered'
+  'paid': 'Delivered',
+  'IN_PROGRESS': 'Editing',
+  'REVIEW': 'Review',
+  'COMPLETED': 'Completed',
+  'PAID': 'Paid',
+  'DELIVERED': 'Delivered'
 };
 
 export default function AdminProjectPage() {

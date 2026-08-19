@@ -30,11 +30,18 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
   const [showControls, setShowControls] = useState(true);
   const hideTimeout = useRef(null);
 
-  // ── Load HLS ──────────────────────────────────────────────────────────────
+  // ── Load Video (Native MP4 or HLS) ────────────────────────────────────────
   useEffect(() => {
     if (!hlsUrl || !videoRef.current) return;
     setLoading(true);
     setError('');
+
+    // Native HTML5 fallback for non-HLS URLs (like Cloudinary MP4s)
+    if (!hlsUrl.includes('.m3u8')) {
+      videoRef.current.src = hlsUrl;
+      videoRef.current.addEventListener('loadedmetadata', () => setLoading(false));
+      return;
+    }
 
     if (Hls.isSupported()) {
       const hls = new Hls({
