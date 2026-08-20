@@ -108,6 +108,8 @@ export default function ClientProjectPage() {
   const [driveLink,     setDriveLink]    = useState("");
   const [linkError,     setLinkError]    = useState("");
   const [isSubmittingDriveLink, setIsSubmittingDriveLink] = useState(false);
+  const [isDeletingDriveLink, setIsDeletingDriveLink] = useState(false);
+  const [isEditingDriveLink, setIsEditingDriveLink] = useState(false);
 
   const [paymentState,  setPaymentState] = useState(null);
 
@@ -239,10 +241,25 @@ export default function ClientProjectPage() {
       });
       setProject(data);
       setDriveLink("");
+      setIsEditingDriveLink(false);
     } catch (err) {
       setLinkError(err.response?.data?.message || "Failed to submit link. Please try again.");
     } finally {
       setIsSubmittingDriveLink(false);
+    }
+  };
+
+  const handleDeleteDriveLink = async () => {
+    if (!window.confirm("Are you sure you want to delete the submitted Google Drive link?")) return;
+    setIsDeletingDriveLink(true);
+    setLinkError("");
+    try {
+      const { data } = await api.delete(`/projects/${id}/assets`);
+      setProject(data);
+    } catch (err) {
+      setLinkError(err.response?.data?.message || "Failed to delete link.");
+    } finally {
+      setIsDeletingDriveLink(false);
     }
   };
 
@@ -741,15 +758,14 @@ export default function ClientProjectPage() {
                 </div>
 
                 {/* ACTION REQUIRED: SUBMIT DRIVE LINK */}
-                {canSubmitAssets && (!project.rawAssets || project.rawAssets.length === 0) && (
+                {canSubmitAssets && ((!project.rawAssets || project.rawAssets.length === 0) || isEditingDriveLink) && (
                     <div className="pw-action-card" style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.1),rgba(167,139,250,0.07))", border:"1px solid rgba(99,102,241,0.2)" }}>
                         <div className="pw-action-header" style={{ color: "#fbbf24" }}>
                             <div style={{ width:8, height:8, borderRadius:"50%", background:"#fbbf24", boxShadow:"0 0 8px rgba(251,191,36,0.4)", animation:"pulse-dot 1.5s ease-in-out infinite" }}/>
-                            ACTION REQUIRED
+                            {isEditingDriveLink ? "EDIT GOOGLE DRIVE LINK" : "ACTION REQUIRED"}
                         </div>
                         <p className="pw-action-desc">
-                            Your project is waiting for raw footage.<br/><br/>
-                            Upload your raw footage to Google Drive, make sure the folder is accessible, and submit the Google Drive link below.
+                            {isEditingDriveLink ? "Update your Google Drive link below." : "Your project is waiting for raw footage.\n\nUpload your raw footage to Google Drive, make sure the folder is accessible, and submit the Google Drive link below."}
                         </p>
                         
                         <div style={{ display: "flex", flexDirection: "column", gap: 8, marginTop: 4 }}>
@@ -766,23 +782,57 @@ export default function ClientProjectPage() {
                             />
                             {linkError && <span style={{ color: "#f87171", fontSize: 13, display: "flex", alignItems: "center", gap: 4 }}><AlertCircle size={14}/> {linkError}</span>}
                             <span style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Make sure your Google Drive folder is accessible to the editor before submitting. (Anyone with the link can view)</span>
-                            <button onClick={handleSubmitDriveLink} disabled={isSubmittingDriveLink} className="pw-action-btn" style={{ background:"linear-gradient(135deg,var(--accent-blue),var(--accent-purple))", width: "100%", minHeight: 44 }}>
-                                {isSubmittingDriveLink ? <Loader2 size={16} className="spin" /> : <Link2 size={16}/>} Submit Google Drive Link
-                            </button>
+                            <div style={{ display: "flex", gap: 8 }}>
+                                <button onClick={handleSubmitDriveLink} disabled={isSubmittingDriveLink} className="pw-action-btn" style={{ background:"linear-gradient(135deg,var(--accent-blue),var(--accent-purple))", flex: 1, minHeight: 44 }}>
+                                    {isSubmittingDriveLink ? <Loader2 size={16} className="spin" /> : <Link2 size={16}/>} {isEditingDriveLink ? "Update Link" : "Submit Google Drive Link"}
+                                </button>
+                                {isEditingDriveLink && (
+                                    <button onClick={() => { setIsEditingDriveLink(false); setLinkError(""); }} className="pw-action-btn" style={{ background: "rgba(255,255,255,0.1)", flex: 0.3, minHeight: 44, color: "var(--text-primary)" }}>
+                                        Cancel
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     </div>
                 )}
 
                 {/* RAW FOOTAGE SUBMITTED */}
-                {project.rawAssets?.length > 0 && (
+                {project.rawAssets?.length > 0 && !isEditingDriveLink && (
                     <div className="pw-action-card" style={{ background:"linear-gradient(135deg,rgba(52,211,153,0.08),rgba(6,182,212,0.06))", border:"1px solid rgba(52,211,153,0.2)" }}>
-                        <div className="pw-action-header" style={{ color: "#34d399" }}>
-                            <CheckCircle2 size={16} color="#34d399" /> RAW FOOTAGE SUBMITTED
+                        <div className="pw-action-header" style={{ color: "#34d399", display: "flex", justifyContent: "space-between", width: "100%" }}>
+                            <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                                <CheckCircle2 size={16} color="#34d399" /> RAW FOOTAGE SUBMITTED
+                            </div>
                         </div>
                         <p className="pw-action-desc">Your Google Drive link has been submitted successfully. The editor can now access your footage.</p>
-                        <a href={project.rawAssets[0].url} target="_blank" rel="noopener noreferrer" className="pw-action-btn" style={{ background:"linear-gradient(135deg,#34d399,#059669)", textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center", minHeight: 44, marginTop: 8 }}>
-                            Open Google Drive Folder <ExternalLink size={14} style={{ marginLeft: 6 }}/>
-                        </a>
+                        
+                        <div style={{ display: "flex", gap: 8, marginTop: 8 }}>
+                            <a href={project.rawAssets[0].url} target="_blank" rel="noopener noreferrer" className="pw-action-btn" style={{ background:"linear-gradient(135deg,#34d399,#059669)", textDecoration:"none", display:"flex", alignItems:"center", justifyContent:"center", minHeight: 44, flex: 1 }}>
+                                Open Google Drive Folder <ExternalLink size={14} style={{ marginLeft: 6 }}/>
+                            </a>
+                            {canSubmitAssets && (
+                                <>
+                                    <button 
+                                        onClick={() => {
+                                            setDriveLink(project.rawAssets[0].url);
+                                            setIsEditingDriveLink(true);
+                                        }} 
+                                        className="pw-action-btn" 
+                                        style={{ background: "rgba(255,255,255,0.1)", flex: 0.3, minHeight: 44, color: "var(--text-primary)" }}
+                                    >
+                                        Edit
+                                    </button>
+                                    <button 
+                                        onClick={handleDeleteDriveLink} 
+                                        disabled={isDeletingDriveLink}
+                                        className="pw-action-btn" 
+                                        style={{ background: "rgba(239,68,68,0.1)", border: "1px solid rgba(239,68,68,0.3)", flex: 0.3, minHeight: 44, color: "#ef4444" }}
+                                    >
+                                        {isDeletingDriveLink ? <Loader2 size={14} className="spin" /> : "Delete"}
+                                    </button>
+                                </>
+                            )}
+                        </div>
                     </div>
                 )}
 
