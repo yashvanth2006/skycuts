@@ -40,6 +40,8 @@ export default function AdminProjectPage() {
   const [statusChanging, setStatusChanging] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [seekTo,      setSeekTo]      = useState(null);
+  const [isEditingPrice, setIsEditingPrice] = useState(false);
+  const [newPrice, setNewPrice] = useState("");
 
   const fetchProject = async () => {
     try {
@@ -110,6 +112,20 @@ export default function AdminProjectPage() {
       console.error('Failed to change status', err);
     } finally {
       setStatusChanging(false);
+    }
+  };
+
+  const handleUpdatePrice = async () => {
+    if (newPrice === "" || isNaN(newPrice) || newPrice < 0) {
+      alert("Please enter a valid price.");
+      return;
+    }
+    try {
+      const { data } = await api.patch(`/projects/${id}/price`, { price: Number(newPrice) });
+      setProject(data);
+      setIsEditingPrice(false);
+    } catch (err) {
+      alert(err.response?.data?.message || "Failed to update price.");
     }
   };
 
@@ -328,7 +344,28 @@ export default function AdminProjectPage() {
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Budget</span>
-                  <span className="detail-value" style={{ fontWeight: 600, color: 'var(--text-primary)' }}>{formatCurrency(project.price)}</span>
+                  <span className="detail-value" style={{ fontWeight: 600, color: 'var(--text-primary)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    {isEditingPrice ? (
+                      <div style={{ display: 'flex', gap: '4px' }}>
+                        <input
+                          type="number"
+                          value={newPrice}
+                          onChange={(e) => setNewPrice(e.target.value)}
+                          style={{ width: '80px', padding: '4px 8px', borderRadius: '4px', border: '1px solid var(--border-subtle)', background: 'var(--bg-card)', color: 'var(--text-primary)' }}
+                          autoFocus
+                        />
+                        <button onClick={handleUpdatePrice} style={{ padding: '4px 8px', background: 'var(--accent-blue)', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontSize: '12px' }}>Save</button>
+                        <button onClick={() => setIsEditingPrice(false)} style={{ padding: '4px 8px', background: 'transparent', color: 'var(--text-muted)', border: 'none', cursor: 'pointer', fontSize: '12px' }}>Cancel</button>
+                      </div>
+                    ) : (
+                      <>
+                        {formatCurrency(project.price)}
+                        <button onClick={() => { setNewPrice(project.price); setIsEditingPrice(true); }} style={{ padding: '2px 6px', background: 'transparent', border: '1px solid var(--border-subtle)', borderRadius: '4px', color: 'var(--text-muted)', cursor: 'pointer', fontSize: '11px', display: 'flex', alignItems: 'center', gap: '4px' }}>
+                          Edit
+                        </button>
+                      </>
+                    )}
+                  </span>
                 </div>
                 <div className="detail-item">
                   <span className="detail-label">Created</span>
