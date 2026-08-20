@@ -116,3 +116,22 @@ export const getAllClients = async (req, res) => {
     const clients = await User.find({ role: 'client' }).select('-password').sort({ name: 1 });
     res.json(clients);
 };
+
+// @desc   Admin updates project price (budget)
+// @route  PATCH /api/projects/:id/price
+export const updateProjectPrice = async (req, res) => {
+    const { price } = req.body;
+    
+    if (price === undefined || isNaN(price) || price < 0) {
+        return res.status(400).json({ message: 'A valid price is required' });
+    }
+
+    const project = await Project.findByIdAndUpdate(
+        req.params.id,
+        { price: Number(price) },
+        { new: true }
+    ).populate('client', 'name email');
+
+    if (!project) return res.status(404).json({ message: 'Project not found' });
+    res.json(project);
+};
