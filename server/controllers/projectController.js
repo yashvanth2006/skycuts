@@ -94,7 +94,7 @@ export const deleteRawAssets = async (req, res) => {
 // @route  PATCH /api/projects/:id/status
 export const updateProjectStatus = async (req, res) => {
     const { status } = req.body;
-    const validStatuses = ['awaiting_assets', 'in_progress', 'in_review', 'paid'];
+    const validStatuses = ['awaiting_assets', 'in_progress', 'in_review', 'paid', 'delivered'];
 
     if (!validStatuses.includes(status)) {
         return res.status(400).json({ message: 'Invalid status value' });
