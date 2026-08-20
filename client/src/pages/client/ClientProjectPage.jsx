@@ -20,7 +20,7 @@ const TIMELINE_STEPS = [
   { key: "awaiting_assets", short: "Assets"    },
   { key: "in_progress",     short: "Editing"   },
   { key: "in_review",       short: "Review"    },
-  { key: "paid",            short: "Paid"      },
+  { key: "paid",            short: "Payment"   },
   { key: "delivered",       short: "Delivered" },
 ];
 const STATUS_ORDER = { awaiting_assets:0, in_progress:1, in_review:2, paid:3, delivered:4 };
