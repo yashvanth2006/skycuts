@@ -1,5 +1,7 @@
+import fs from 'fs';
 import Portfolio from '../models/Portfolio.js';
 import User from '../models/User.js';
+import { uploadLargeVideo, uploadMedia } from '../services/cloudinaryService.js';
 
 // ─── PUBLIC ──────────────────────────────────────────────────────────────────
 
@@ -35,8 +37,26 @@ export const getAllPortfolio = async (req, res) => {
 // @route POST /api/portfolio
 export const createPortfolioItem = async (req, res) => {
     try {
-        const { title, description, category, thumbnail, videoUrl, isPublished, order } = req.body;
+        const { title, description, category, isPublished, order } = req.body;
+        let { thumbnail, videoUrl } = req.body;
         if (!title) return res.status(400).json({ message: 'Title is required' });
+
+        const files = req.files || {};
+        const videoFile = files['video'] ? files['video'][0] : null;
+        const thumbnailFile = files['thumbnail'] ? files['thumbnail'][0] : null;
+        const folder = 'skycuts/portfolio';
+
+        if (videoFile) {
+            const cloudResult = await uploadLargeVideo(videoFile.path, folder);
+            videoUrl = cloudResult.secure_url;
+            fs.unlinkSync(videoFile.path);
+        }
+
+        if (thumbnailFile) {
+            const cloudResult = await uploadMedia(thumbnailFile.path, folder, 'image');
+            thumbnail = cloudResult.secure_url;
+            fs.unlinkSync(thumbnailFile.path);
+        }
 
         const item = await Portfolio.create({
             editor: req.user._id,
@@ -45,12 +65,17 @@ export const createPortfolioItem = async (req, res) => {
             category,
             thumbnail,
             videoUrl,
-            isPublished: isPublished ?? false,
-            order: order ?? 0,
+            isPublished: isPublished === 'true' || isPublished === true,
+            order: order ? Number(order) : 0,
         });
         res.status(201).json(item);
     } catch (err) {
-        res.status(500).json({ message: 'Server error creating portfolio item' });
+        if (req.files) {
+            Object.values(req.files).flat().forEach(f => {
+                if (fs.existsSync(f.path)) fs.unlinkSync(f.path);
+            });
+        }
+        res.status(500).json({ message: 'Server error creating portfolio item', error: err.message });
     }
 };
 
@@ -58,15 +83,42 @@ export const createPortfolioItem = async (req, res) => {
 // @route PUT /api/portfolio/:id
 export const updatePortfolioItem = async (req, res) => {
     try {
+        const files = req.files || {};
+        const videoFile = files['video'] ? files['video'][0] : null;
+        const thumbnailFile = files['thumbnail'] ? files['thumbnail'][0] : null;
+        const folder = 'skycuts/portfolio';
+        const updateData = { ...req.body };
+        
+        if (updateData.isPublished === 'true') updateData.isPublished = true;
+        if (updateData.isPublished === 'false') updateData.isPublished = false;
+        if (updateData.order !== undefined) updateData.order = Number(updateData.order);
+
+        if (videoFile) {
+            const cloudResult = await uploadLargeVideo(videoFile.path, folder);
+            updateData.videoUrl = cloudResult.secure_url;
+            fs.unlinkSync(videoFile.path);
+        }
+
+        if (thumbnailFile) {
+            const cloudResult = await uploadMedia(thumbnailFile.path, folder, 'image');
+            updateData.thumbnail = cloudResult.secure_url;
+            fs.unlinkSync(thumbnailFile.path);
+        }
+
         const item = await Portfolio.findByIdAndUpdate(
             req.params.id,
-            { $set: req.body },
+            { $set: updateData },
             { new: true, runValidators: true }
         );
         if (!item) return res.status(404).json({ message: 'Portfolio item not found' });
         res.json(item);
     } catch (err) {
-        res.status(500).json({ message: 'Server error updating portfolio item' });
+        if (req.files) {
+            Object.values(req.files).flat().forEach(f => {
+                if (fs.existsSync(f.path)) fs.unlinkSync(f.path);
+            });
+        }
+        res.status(500).json({ message: 'Server error updating portfolio item', error: err.message });
     }
 };
 
