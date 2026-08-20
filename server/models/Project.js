@@ -8,7 +8,7 @@ const projectSchema = new mongoose.Schema(
         projectRequest: { type: mongoose.Schema.Types.ObjectId, ref: 'ProjectRequest' },
         status: {
             type: String,
-            enum: ['awaiting_assets', 'in_progress', 'in_review', 'paid', 'IN_PROGRESS', 'REVIEW', 'COMPLETED', 'PAID', 'DELIVERED'],
+            enum: ['awaiting_assets', 'in_progress', 'in_review', 'paid', 'delivered'],
             default: 'awaiting_assets',
         },
         rawAssets: [
