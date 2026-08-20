@@ -4,6 +4,7 @@ import {
     getProjects,
     getProjectById,
     submitRawAssets,
+    deleteRawAssets,
     updateProjectStatus,
     getAllClients,
 } from '../controllers/projectController.js';
@@ -15,6 +16,7 @@ router.get('/clients', protect, adminOnly, getAllClients);
 router.route('/').get(protect, getProjects).post(protect, adminOnly, createProject);
 router.route('/:id').get(protect, projectParticipant, getProjectById);
 router.post('/:id/assets', protect, projectParticipant, submitRawAssets);
+router.delete('/:id/assets', protect, projectParticipant, deleteRawAssets);
 router.patch('/:id/status', protect, adminOnly, updateProjectStatus);
 
 export default router;
