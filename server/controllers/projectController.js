@@ -75,6 +75,21 @@ export const submitRawAssets = async (req, res) => {
     res.json(project);
 };
 
+// @desc   Client deletes raw asset URLs
+// @route  DELETE /api/projects/:id/assets
+export const deleteRawAssets = async (req, res) => {
+    const project = req.project;
+    project.rawAssets = [];
+    
+    // If we revert to awaiting_assets, it helps reflect the state accurately
+    if (project.status === 'in_progress') {
+        project.status = 'awaiting_assets';
+    }
+    
+    await project.save();
+    res.json(project);
+};
+
 // @desc   Admin updates project status
 // @route  PATCH /api/projects/:id/status
 export const updateProjectStatus = async (req, res) => {
