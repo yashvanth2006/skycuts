@@ -28,7 +28,9 @@ function PortfolioModal({ item, onClose, onSave }) {
         title: item?.title || '',
         description: item?.description || '',
         category: item?.category || '',
-        thumbnail: item?.thumbnail || '',
+        thumbnail: null,
+        video: null,
+        thumbnailUrl: item?.thumbnail || '',
         videoUrl: item?.videoUrl || '',
         isPublished: item?.isPublished ?? false,
         order: item?.order ?? 0,
@@ -39,14 +41,31 @@ function PortfolioModal({ item, onClose, onSave }) {
     const handleSubmit = async (e) => {
         e.preventDefault();
         if (!form.title.trim()) return setError('Title is required');
+        if (!isEdit && !form.video) return setError('Video file is required');
+
         setSaving(true);
         setError('');
+
+        const formData = new FormData();
+        formData.append('title', form.title);
+        formData.append('description', form.description);
+        formData.append('category', form.category);
+        formData.append('isPublished', form.isPublished);
+        formData.append('order', form.order);
+        
+        if (form.thumbnail) formData.append('thumbnail', form.thumbnail);
+        if (form.video) formData.append('video', form.video);
+
         try {
             if (isEdit) {
-                const res = await api.put(`/portfolio/${item._id}`, form);
+                const res = await api.put(`/portfolio/${item._id}`, formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 onSave(res.data, 'update');
             } else {
-                const res = await api.post('/portfolio', form);
+                const res = await api.post('/portfolio', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
                 onSave(res.data, 'create');
             }
             onClose();
@@ -68,23 +87,24 @@ function PortfolioModal({ item, onClose, onSave }) {
                 initial={{ opacity: 0, y: 16, scale: 0.97 }}
                 animate={{ opacity: 1, y: 0, scale: 1 }}
                 style={{
-                    background: 'var(--bg-panel)',
-                    border: '1px solid var(--border-subtle)',
+                    background: '#1e293b',
+                    border: '1px solid #334155',
                     borderRadius: 12, padding: '24px 24px',
                     width: '100%', maxWidth: 520,
                     maxHeight: '90vh', overflowY: 'auto',
                     boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
+                    color: '#f8fafc',
                 }}
             >
                 <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 24 }}>
-                    <h2 style={{ fontSize: 18, fontWeight: 700 }}>{isEdit ? 'Edit Portfolio Item' : 'Add Portfolio Item'}</h2>
-                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--text-muted)' }}>
+                    <h2 style={{ fontSize: 18, fontWeight: 700, color: '#fff' }}>{isEdit ? 'Edit Portfolio Item' : 'Add Portfolio Item'}</h2>
+                    <button onClick={onClose} style={{ background: 'none', border: 'none', cursor: 'pointer', color: '#94a3b8' }}>
                         <X size={20} />
                     </button>
                 </div>
 
                 {error && (
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, marginBottom: 16, color: '#f87171', fontSize: 13 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 14px', background: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 6, marginBottom: 16, color: '#fca5a5', fontSize: 13 }}>
                         <AlertTriangle size={14} /> {error}
                     </div>
                 )}
@@ -93,11 +113,9 @@ function PortfolioModal({ item, onClose, onSave }) {
                     {[
                         { label: 'Title *', key: 'title', placeholder: 'AURORA — Fashion Campaign' },
                         { label: 'Category', key: 'category', placeholder: 'Commercial / Music Video / Narrative / Documentary' },
-                        { label: 'Thumbnail URL', key: 'thumbnail', placeholder: 'https://...' },
-                        { label: 'Video URL', key: 'videoUrl', placeholder: 'https://...' },
                     ].map(({ label, key, placeholder }) => (
                         <div key={key}>
-                            <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 500 }}>{label}</label>
+                            <label style={{ display: 'block', fontSize: 13, color: '#e2e8f0', marginBottom: 6, fontWeight: 500 }}>{label}</label>
                             <input
                                 type="text"
                                 value={form[key]}
@@ -105,8 +123,8 @@ function PortfolioModal({ item, onClose, onSave }) {
                                 placeholder={placeholder}
                                 style={{
                                     width: '100%', padding: '12px',
-                                    background: 'var(--bg-input)', color: 'var(--text-primary)',
-                                    border: '1px solid var(--border-subtle)', borderRadius: 8,
+                                    background: 'rgba(15, 23, 42, 0.6)', color: '#fff',
+                                    border: '1px solid #475569', borderRadius: 8,
                                     fontSize: 14, outline: 'none', boxSizing: 'border-box',
                                 }}
                             />
@@ -114,7 +132,39 @@ function PortfolioModal({ item, onClose, onSave }) {
                     ))}
 
                     <div>
-                        <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 500 }}>Description</label>
+                        <label style={{ display: 'block', fontSize: 13, color: '#e2e8f0', marginBottom: 6, fontWeight: 500 }}>Thumbnail Image (Optional)</label>
+                        <input
+                            type="file"
+                            accept="image/*"
+                            onChange={e => setForm(f => ({ ...f, thumbnail: e.target.files[0] }))}
+                            style={{
+                                width: '100%', padding: '10px',
+                                background: 'rgba(15, 23, 42, 0.6)', color: '#fff',
+                                border: '1px solid #475569', borderRadius: 8,
+                                fontSize: 14, outline: 'none', boxSizing: 'border-box',
+                            }}
+                        />
+                        {form.thumbnailUrl && !form.thumbnail && <div style={{fontSize: 12, color: '#94a3b8', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>Current: {form.thumbnailUrl}</div>}
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: 13, color: '#e2e8f0', marginBottom: 6, fontWeight: 500 }}>Video File *</label>
+                        <input
+                            type="file"
+                            accept="video/mp4,video/quicktime,video/*"
+                            onChange={e => setForm(f => ({ ...f, video: e.target.files[0] }))}
+                            style={{
+                                width: '100%', padding: '10px',
+                                background: 'rgba(15, 23, 42, 0.6)', color: '#fff',
+                                border: '1px solid #475569', borderRadius: 8,
+                                fontSize: 14, outline: 'none', boxSizing: 'border-box',
+                            }}
+                        />
+                        {form.videoUrl && !form.video && <div style={{fontSize: 12, color: '#94a3b8', marginTop: 4, whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis'}}>Current: {form.videoUrl}</div>}
+                    </div>
+
+                    <div>
+                        <label style={{ display: 'block', fontSize: 13, color: '#e2e8f0', marginBottom: 6, fontWeight: 500 }}>Description</label>
                         <textarea
                             rows={3}
                             value={form.description}
@@ -122,8 +172,8 @@ function PortfolioModal({ item, onClose, onSave }) {
                             placeholder="Brief description of the work..."
                             style={{
                                 width: '100%', padding: '12px', resize: 'vertical',
-                                background: 'var(--bg-input)', color: 'var(--text-primary)',
-                                border: '1px solid var(--border-subtle)', borderRadius: 8,
+                                background: 'rgba(15, 23, 42, 0.6)', color: '#fff',
+                                border: '1px solid #475569', borderRadius: 8,
                                 fontSize: 14, outline: 'none', boxSizing: 'border-box',
                                 fontFamily: 'inherit',
                             }}
@@ -132,7 +182,7 @@ function PortfolioModal({ item, onClose, onSave }) {
 
                     <div style={{ display: 'flex', gap: 16 }}>
                         <div style={{ flex: 1 }}>
-                            <label style={{ display: 'block', fontSize: 12, color: 'var(--text-muted)', marginBottom: 6, fontWeight: 500 }}>Display Order</label>
+                            <label style={{ display: 'block', fontSize: 13, color: '#e2e8f0', marginBottom: 6, fontWeight: 500 }}>Display Order</label>
                             <input
                                 type="number"
                                 min={0}
@@ -140,8 +190,8 @@ function PortfolioModal({ item, onClose, onSave }) {
                                 onChange={e => setForm(f => ({ ...f, order: Number(e.target.value) }))}
                                 style={{
                                     width: '100%', padding: '12px',
-                                    background: 'var(--bg-input)', color: 'var(--text-primary)',
-                                    border: '1px solid var(--border-subtle)', borderRadius: 8,
+                                    background: 'rgba(15, 23, 42, 0.6)', color: '#fff',
+                                    border: '1px solid #475569', borderRadius: 8,
                                     fontSize: 14, outline: 'none', boxSizing: 'border-box',
                                 }}
                             />
@@ -160,11 +210,11 @@ function PortfolioModal({ item, onClose, onSave }) {
                     </div>
 
                     <div style={{ display: 'flex', gap: 10, justifyContent: 'flex-end', marginTop: 8 }}>
-                        <button type="button" onClick={onClose} style={{ padding: '12px 20px', background: 'var(--bg-input)', border: '1px solid var(--border-subtle)', borderRadius: 8, color: 'var(--text-primary)', cursor: 'pointer', fontSize: 14, fontWeight: 500 }}>
+                        <button type="button" onClick={onClose} style={{ padding: '12px 20px', background: 'rgba(15, 23, 42, 0.6)', border: '1px solid #475569', borderRadius: 8, color: '#f8fafc', cursor: 'pointer', fontSize: 14, fontWeight: 500 }}>
                             Cancel
                         </button>
                         <button type="submit" disabled={saving} style={{ padding: '12px 24px', background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))', color: '#fff', border: 'none', borderRadius: 8, fontSize: 14, fontWeight: 600, cursor: 'pointer', opacity: saving ? 0.7 : 1 }}>
-                            {saving ? 'Saving...' : isEdit ? 'Save Changes' : 'Add Item'}
+                            {saving ? 'Uploading...' : isEdit ? 'Save Changes' : 'Add Item'}
                         </button>
                     </div>
                 </form>
