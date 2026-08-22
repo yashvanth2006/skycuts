@@ -100,8 +100,14 @@ function DVDivider({ label, colors }) {
 // ─── Portfolio Clip Card ──────────────────────────────────────────────────────
 function ClipCard({ item, colors }) {
   const [hovered, setHovered] = useState(false);
+  const [mediaError, setMediaError] = useState(false);
   const cat = CATEGORY_COLORS(colors.theme === 'dark')[item.category] || CATEGORY_COLORS(colors.theme === 'dark')["Documentary"];
   const accentColor = item.accent || colors.blue;
+
+  const hasVideo = Boolean(item.videoUrl);
+  const hasThumbnail = Boolean(item.thumbnail);
+  const hasMedia = hasVideo || hasThumbnail;
+  const showFallback = !hasMedia || mediaError;
 
   return (
     <motion.div
@@ -131,75 +137,126 @@ function ClipCard({ item, colors }) {
         position: "relative",
         overflow: "hidden",
       }}>
+        {/* Render Media */}
+        <div style={{ position: "absolute", inset: 0, zIndex: 1 }}>
+          {showFallback ? (
+            <div style={{
+              width: "100%", height: "100%",
+              display: "flex", flexDirection: "column",
+              alignItems: "center", justifyContent: "center",
+              background: "var(--bg-deep)", color: "var(--text-muted)"
+            }}>
+              <span style={{ fontSize: 11, letterSpacing: "0.1em", marginBottom: 6, fontWeight: 600 }}>MEDIA PREVIEW</span>
+              <span style={{ fontSize: 13 }}>Preview unavailable</span>
+            </div>
+          ) : hasVideo ? (
+            <video
+              src={item.videoUrl}
+              poster={item.thumbnail || undefined}
+              controls
+              playsInline
+              preload="metadata"
+              onError={() => {
+                if (!mediaError) {
+                  console.error("Video failed to load:", item.videoUrl);
+                  setMediaError(true);
+                }
+              }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          ) : (
+            <img
+              src={item.thumbnail}
+              alt={item.title}
+              onError={() => {
+                if (!mediaError) {
+                  console.error("Image failed to load:", item.thumbnail);
+                  setMediaError(true);
+                }
+              }}
+              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+            />
+          )}
+        </div>
+
+        {/* Overlays - Ensure pointerEvents: "none" so media controls work */}
         <div style={{
-          position: "absolute", inset: 0,
+          position: "absolute", inset: 0, zIndex: 2, pointerEvents: "none",
           backgroundImage: `
             radial-gradient(ellipse at 30% 40%, ${item.accent}18 0%, transparent 60%),
             radial-gradient(ellipse at 70% 60%, ${colors.blue}12 0%, transparent 55%)
           `,
         }} />
 
-        <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 24, display: "flex", alignItems: "flex-end", gap: 2, padding: "0 12px 6px", opacity: 0.4 }}>
-          {Array.from({ length: 28 }).map((_, i) => (
-            <div key={i} style={{
-              flex: 1,
-              height: `${Math.max(20, Math.sin(i * 0.7) * 50 + 60)}%`,
-              background: item.accent,
-              borderRadius: 1,
-              opacity: 0.6 + Math.sin(i) * 0.4,
-            }} />
-          ))}
-        </div>
+        {!hasVideo && !showFallback && (
+          <div style={{ position: "absolute", bottom: 0, left: 0, right: 0, height: 24, display: "flex", alignItems: "flex-end", gap: 2, padding: "0 12px 6px", opacity: 0.4, zIndex: 2, pointerEvents: "none" }}>
+            {Array.from({ length: 28 }).map((_, i) => (
+              <div key={i} style={{
+                flex: 1,
+                height: `${Math.max(20, Math.sin(i * 0.7) * 50 + 60)}%`,
+                background: item.accent,
+                borderRadius: 1,
+                opacity: 0.6 + Math.sin(i) * 0.4,
+              }} />
+            ))}
+          </div>
+        )}
 
         <motion.div
           animate={{ opacity: hovered ? 1 : 0 }}
           transition={{ duration: 0.2 }}
           style={{
-            position: "absolute", inset: 0,
+            position: "absolute", inset: 0, zIndex: 3,
             border: `2px solid ${item.accent}`,
             pointerEvents: "none",
           }}
         />
 
-        <motion.div
-          animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1 : 0.8 }}
-          transition={{ duration: 0.2 }}
-          style={{
-            position: "absolute", inset: 0,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}
-        >
-          <div style={{
-            width: 48, height: 48, borderRadius: "50%",
-            background: `${item.accent}22`,
-            backdropFilter: "blur(8px)",
-            border: `1px solid ${item.accent}88`,
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <Play size={18} color={item.accent} style={{ marginLeft: 3 }} />
-          </div>
-        </motion.div>
+        {/* Only show custom play button if it's an image or fallback, since video has native controls */}
+        {(!hasVideo && !showFallback) && (
+          <motion.div
+            animate={{ opacity: hovered ? 1 : 0, scale: hovered ? 1 : 0.8 }}
+            transition={{ duration: 0.2 }}
+            style={{
+              position: "absolute", inset: 0, zIndex: 4,
+              display: "flex", alignItems: "center", justifyContent: "center",
+              pointerEvents: "none",
+            }}
+          >
+            <div style={{
+              width: 48, height: 48, borderRadius: "50%",
+              background: `${item.accent}22`,
+              backdropFilter: "blur(8px)",
+              border: `1px solid ${item.accent}88`,
+              display: "flex", alignItems: "center", justifyContent: "center",
+            }}>
+              <Play size={18} color={item.accent} style={{ marginLeft: 3 }} />
+            </div>
+          </motion.div>
+        )}
 
         <div style={{
-          position: "absolute", top: 10, right: 10,
+          position: "absolute", top: 10, right: 10, zIndex: 5, pointerEvents: "none",
           padding: "3px 8px", borderRadius: 4,
-          background: "var(--bg-card)",
-          fontSize: 11, fontWeight: 600, color: "var(--text-primary)",
+          background: "rgba(15, 23, 42, 0.7)",
+          backdropFilter: "blur(4px)",
+          fontSize: 11, fontWeight: 600, color: "#fff",
           fontFamily: "'JetBrains Mono', 'Courier New', monospace",
           letterSpacing: "0.04em",
         }}>
-          {item.duration}
+          {item.duration || "00:00"}
         </div>
 
         <div style={{
-          position: "absolute", top: 10, left: 10,
+          position: "absolute", top: 10, left: 10, zIndex: 5, pointerEvents: "none",
           padding: "3px 8px", borderRadius: 4,
-          background: `${item.accent}22`,
+          background: "rgba(15, 23, 42, 0.7)",
+          backdropFilter: "blur(4px)",
           border: `1px solid ${item.accent}44`,
           fontSize: 9, fontWeight: 600, color: item.accent,
           letterSpacing: "0.08em", textTransform: "uppercase",
         }}>
-          {item.grade}
+          {item.grade || "REC.709"}
         </div>
       </div>
 
