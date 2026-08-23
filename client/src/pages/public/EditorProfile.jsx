@@ -1020,8 +1020,8 @@ export default function EditorProfile() {
           flexWrap: "wrap", gap: 12,
         }}>
           <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-            © 2025 SKYCUTS · Powered by{"SKY GROUPS"}
-            <span style={{ color: colors.blue }}>SkyCuts</span>
+            © 2025 SKYCUTS · Powered by{" "}
+            <span style={{ color: colors.blue }}>SKY GROUPS</span>
           </p>
           <p style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: "monospace" }}>
             DaVinci Resolve Studio 19.1 · ACES · P3-D65
