@@ -30,11 +30,11 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
     <>
       <nav
         style={{
-          position: 'sticky', top: 0, zIndex: 100,
+          position: 'sticky', top: 0, zIndex: 1000,
           background: 'var(--nav-bg)',
-          backdropFilter: 'blur(20px)',
-          WebkitBackdropFilter: 'blur(20px)',
-          borderBottom: '1px solid var(--border-subtle)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid var(--nav-border)',
           transition: 'background 0.35s ease, border-color 0.35s ease',
         }}
       >
@@ -214,7 +214,7 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
               onClick={closeMenu}
               style={{
                 position: 'fixed', top: 60, left: 0, right: 0, bottom: 0,
-                background: 'rgba(0,0,0,0.5)', zIndex: 99,
+                background: 'rgba(0,0,0,0.55)', zIndex: 999,
               }}
             />
             {/* Menu */}
@@ -225,10 +225,11 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
               transition={{ duration: 0.2 }}
               style={{
                 position: 'fixed', top: 60, left: 0, right: 0,
-                background: 'var(--nav-bg)',
-                borderBottom: '1px solid var(--border-subtle)',
+                background: 'var(--nav-surface)',
+                borderBottom: '1px solid var(--nav-border)',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.45)',
                 padding: '16px',
-                zIndex: 100,
+                zIndex: 1000,
                 boxSizing: 'border-box',
                 width: '100%',
                 maxWidth: '100%',
@@ -239,41 +240,25 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                   <>
                     <button
                       onClick={() => { navigate('/profile'); closeMenu(); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '12px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        fontSize: 15, fontWeight: 500,
-                        background: location.pathname === '/profile' ? 'var(--bg-glass)' : 'none',
-                        color: location.pathname === '/profile' ? 'var(--text-primary)' : 'var(--text-muted)',
-                        transition: 'all 0.15s ease',
-                        minHeight: 44,
-                      }}
+                      className={`mobile-nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
                     >
                       <User size={18} /> Editor Profile
                     </button>
                     {(showDashboard || user) && (
                       <button
                         onClick={() => { navigate('/dashboard'); closeMenu(); }}
-                        style={{
-                          display: 'flex', alignItems: 'center', gap: 12,
-                          padding: '12px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                          fontSize: 15, fontWeight: 500,
-                          background: location.pathname.startsWith('/dashboard') ? 'var(--bg-glass)' : 'none',
-                          color: location.pathname.startsWith('/dashboard') ? 'var(--text-primary)' : 'var(--text-muted)',
-                          transition: 'all 0.15s ease',
-                          minHeight: 44,
-                        }}
+                        className={`mobile-nav-item ${location.pathname.startsWith('/dashboard') ? 'active' : ''}`}
                       >
                         <LayoutDashboard size={18} /> Dashboard
                       </button>
                     )}
                     <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', minHeight: 44 }}>
+                    <div className="mobile-nav-item" style={{ cursor: 'default', display: 'flex', justifyContent: 'flex-start' }}>
                       <ThemeToggle />
-                      <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>Theme</span>
+                      <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)' }}>Theme</span>
                     </div>
                     <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', minHeight: 44 }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', minHeight: 48 }}>
                       {user.photoURL ? (
                         <img
                           src={user.photoURL}
@@ -297,14 +282,7 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                     </div>
                     <button
                       onClick={() => { handleLogout(); closeMenu(); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '12px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        fontSize: 15, fontWeight: 500, color: '#ef4444',
-                        background: 'none',
-                        transition: 'all 0.15s ease',
-                        minHeight: 44,
-                      }}
+                      className="mobile-nav-item logout"
                     >
                       <LogOut size={18} /> Logout
                     </button>
@@ -313,34 +291,20 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                   <>
                     <button
                       onClick={() => { navigate('/profile'); closeMenu(); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '12px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        fontSize: 15, fontWeight: 500,
-                        background: location.pathname === '/profile' ? 'var(--bg-glass)' : 'none',
-                        color: location.pathname === '/profile' ? 'var(--text-primary)' : 'var(--text-muted)',
-                        transition: 'all 0.15s ease',
-                        minHeight: 44,
-                      }}
+                      className={`mobile-nav-item ${location.pathname === '/profile' ? 'active' : ''}`}
                     >
                       <User size={18} /> Editor Profile
                     </button>
                     <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 16px', minHeight: 44 }}>
+                    <div className="mobile-nav-item" style={{ cursor: 'default', display: 'flex', justifyContent: 'flex-start' }}>
                       <ThemeToggle />
-                      <span style={{ fontSize: 14, fontWeight: 500, color: 'var(--text-muted)' }}>Theme</span>
+                      <span style={{ fontSize: 15, fontWeight: 500, color: 'var(--text-primary)' }}>Theme</span>
                     </div>
                     <div style={{ height: 1, background: 'var(--border-subtle)', margin: '4px 0' }} />
                     <button
                       onClick={() => { navigate('/login'); closeMenu(); }}
-                      style={{
-                        display: 'flex', alignItems: 'center', gap: 12,
-                        padding: '12px 16px', borderRadius: 8, border: 'none', cursor: 'pointer',
-                        fontSize: 15, fontWeight: 500, color: 'var(--accent-blue)',
-                        background: 'none',
-                        transition: 'all 0.15s ease',
-                        minHeight: 44,
-                      }}
+                      className="mobile-nav-item"
+                      style={{ color: 'var(--accent-blue)' }}
                     >
                       Login
                     </button>
@@ -387,8 +351,9 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
 
         .mobile-hamburger {
           display: none;
-          background: none;
-          border: none;
+          background: var(--hamburger-bg);
+          border: 1px solid var(--hamburger-border);
+          border-radius: 10px;
           cursor: pointer;
           color: var(--text-primary);
           padding: 10px;
@@ -396,6 +361,45 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
           min-height: 44px;
           align-items: center;
           justify-content: center;
+        }
+
+        .mobile-nav-item {
+          display: flex;
+          align-items: center;
+          gap: 12px;
+          padding: 12px 14px;
+          border-radius: 10px;
+          border: none;
+          cursor: pointer;
+          font-size: 15px;
+          font-weight: 500;
+          background: transparent;
+          color: var(--text-primary);
+          transition: all 0.15s ease;
+          min-height: 48px;
+          width: 100%;
+          text-align: left;
+        }
+        .mobile-nav-item:hover {
+          background: var(--bg-glass-hover);
+          color: var(--text-primary);
+        }
+        .mobile-nav-item.active {
+          background: rgba(99,102,241,0.14);
+          color: var(--accent-indigo);
+        }
+        .mobile-nav-item.active svg {
+          color: var(--accent-indigo);
+        }
+        .mobile-nav-item.logout {
+          color: #ef4444;
+        }
+        .mobile-nav-item.logout svg {
+          color: #ef4444;
+        }
+        .mobile-nav-item.logout:hover {
+          background: rgba(239,68,68,0.10);
+          color: #fca5a5;
         }
 
         /* Responsive Breakpoints */
