@@ -12,23 +12,23 @@ import { useAuth } from "../../context/AuthContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
 
 const TOOLKIT = [
-  { name: "DaVinci Resolve Studio",  version: "19.1",  icon: <Cpu size={16} />,     role: "Color Grading · Editing · Fusion",  level: 98 },
-  { name: "Adobe Premiere Pro",      version: "2025",  icon: <Film size={16} />,     role: "Assembly Edit · Multicam",           level: 90 },
-  { name: "After Effects",           version: "2025",  icon: <Layers size={16} />,   role: "Motion Graphics · Compositing",      level: 85 },
-  { name: "Cinema 4D",               version: "2025",  icon: <Monitor size={16} />,  role: "3D Integration · Title Sequences",   level: 72 },
-  { name: "Avid Media Composer",     version: "23.x",  icon: <Film size={16} />,     role: "Broadcast Delivery",                 level: 68 },
-  { name: "Blackmagic Design RAW",   version: "Latest",icon: <Star size={16} />,     role: "RAW Processing · Dailies",           level: 95 },
+  { name: "DaVinci Resolve Studio", version: "19.1", icon: <Cpu size={16} />, role: "Color Grading · Editing · Fusion", level: 98 },
+  { name: "Adobe Premiere Pro", version: "2025", icon: <Film size={16} />, role: "Assembly Edit · Multicam", level: 90 },
+  { name: "After Effects", version: "2025", icon: <Layers size={16} />, role: "Motion Graphics · Compositing", level: 85 },
+  { name: "Cinema 4D", version: "2025", icon: <Monitor size={16} />, role: "3D Integration · Title Sequences", level: 72 },
+  { name: "Avid Media Composer", version: "23.x", icon: <Film size={16} />, role: "Broadcast Delivery", level: 68 },
+  { name: "Blackmagic Design RAW", version: "Latest", icon: <Star size={16} />, role: "RAW Processing · Dailies", level: 95 },
 ];
 
 const AWARDS = [
-  { label: "Projects Delivered", value: "340+",  icon: <Award size={18} /> },
-  { label: "Years Experience",   value: "8",     icon: <Clock size={18} /> },
+  { label: "Projects Delivered", value: "340+", icon: <Award size={18} /> },
+  { label: "Years Experience", value: "8", icon: <Clock size={18} /> },
 ];
 
 const CATEGORY_COLORS = (isDark) => ({
-  "Commercial":  { bg: "rgba(47,116,208,0.12)",  border: "rgba(47,116,208,0.3)",  text: "#4A9EFF" },
-  "Music Video": { bg: "rgba(245,166,35,0.12)",  border: "rgba(245,166,35,0.3)",  text: "#FFB74D" },
-  "Narrative":   { bg: "rgba(74,158,255,0.12)",  border: "rgba(74,158,255,0.3)",  text: "#7CBFFF" },
+  "Commercial": { bg: "rgba(47,116,208,0.12)", border: "rgba(47,116,208,0.3)", text: "#4A9EFF" },
+  "Music Video": { bg: "rgba(245,166,35,0.12)", border: "rgba(245,166,35,0.3)", text: "#FFB74D" },
+  "Narrative": { bg: "rgba(74,158,255,0.12)", border: "rgba(74,158,255,0.3)", text: "#7CBFFF" },
   "Documentary": { bg: "var(--bg-glass)", border: "var(--border-subtle)", text: "var(--text-secondary)" },
 });
 
@@ -397,13 +397,13 @@ export default function EditorProfile() {
   const [portfolioError, setPortfolioError] = useState(false);
 
   const colors = {
-      blue:   "#2F74D0",
-      blueL:  "#4A9EFF",
-      amber:  "#F5A623",
-      amberL: "#FFB74D",
-      purple: "#8B5CF6",
-      cyan:   "#06b6d4",
-      theme
+    blue: "#2F74D0",
+    blueL: "#4A9EFF",
+    amber: "#F5A623",
+    amberL: "#FFB74D",
+    purple: "#8B5CF6",
+    cyan: "#06b6d4",
+    theme
   };
 
   useEffect(() => {
@@ -978,7 +978,7 @@ export default function EditorProfile() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
               {[
-                { icon: <Mail size={14} />, label: "marcus@skycuts.studio" },
+                { icon: <Mail size={14} />, label: "yashvanth2006k@gmail.com" },
                 { icon: <Video size={14} />, label: "@marcusreid_color" },
                 { icon: <MonitorPlay size={14} />, label: "youtube.com/marcusreid" },
               ].map((c, i) => (
@@ -1020,7 +1020,7 @@ export default function EditorProfile() {
           flexWrap: "wrap", gap: 12,
         }}>
           <p style={{ fontSize: 11, color: 'var(--text-secondary)' }}>
-            © 2025 Marcus Reid · Powered by{" "}
+            © 2025 SKYCUTS · Powered by{"SKY GROUPS"}
             <span style={{ color: colors.blue }}>SkyCuts</span>
           </p>
           <p style={{ fontSize: 10, color: 'var(--text-muted)', fontFamily: "monospace" }}>
@@ -1029,9 +1029,9 @@ export default function EditorProfile() {
         </div>
       </div>
 
-      <GoogleAuthModal 
-        isOpen={authModalOpen} 
-        onClose={() => setAuthModalOpen(false)} 
+      <GoogleAuthModal
+        isOpen={authModalOpen}
+        onClose={() => setAuthModalOpen(false)}
       />
     </div>
   );
