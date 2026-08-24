@@ -10,6 +10,7 @@ import Navbar from "../../components/Navbar.jsx";
 import GoogleAuthModal from "../../components/GoogleAuthModal.jsx";
 import { useAuth } from "../../context/AuthContext.jsx";
 import { useTheme } from "../../context/ThemeContext.jsx";
+import api from "../../api/axiosInstance.js";
 
 const TOOLKIT = [
   { name: "DaVinci Resolve Studio", version: "19.1", icon: <Cpu size={16} />, role: "Color Grading · Editing · Fusion", level: 98 },
@@ -417,13 +418,8 @@ export default function EditorProfile() {
   useEffect(() => {
     const fetchPortfolio = async () => {
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/portfolio/public`);
-        if (res.ok) {
-          const data = await res.json();
-          setPortfolio(data);
-        } else {
-          setPortfolioError(true);
-        }
+        const res = await api.get('/portfolio/public');
+        setPortfolio(res.data);
       } catch {
         setPortfolioError(true);
       } finally {
