@@ -4,6 +4,7 @@ import { GoogleLogin } from '@react-oauth/google';
 import { X, CheckCircle, ChevronRight } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
+import api from '../api/axiosInstance.js';
 
 const PROJECT_TYPES = [
     'Music Video',
@@ -163,25 +164,13 @@ export default function GoogleAuthModal({ isOpen, onClose }) {
         try {
             setLoading(true);
             setError('');
-            const res = await fetch(`${import.meta.env.VITE_API_URL}/project-requests`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`,
-                },
-                body: JSON.stringify({
-                    title: reqTitle,
-                    type: reqType,
-                    description: reqDesc,
-                    requirements: reqReqs,
-                    deadline: reqDeadline || undefined,
-                }),
+            const { data } = await api.post('/project-requests', {
+                title: reqTitle,
+                type: reqType,
+                description: reqDesc,
+                requirements: reqReqs,
+                deadline: reqDeadline || undefined,
             });
-            if (!res.ok) {
-                const err = await res.json();
-                throw new Error(err.message || 'Submission failed');
-            }
-            const data = await res.json();
             setSubmittedRequest(data);
             setStep('submitted');
         } catch (err) {
