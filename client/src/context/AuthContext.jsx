@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
-
+import api from '../api/axiosInstance.js';
 const AuthContext = createContext(null);
 
 export const AuthProvider = ({ children }) => {
@@ -31,30 +31,25 @@ export const AuthProvider = ({ children }) => {
     }, []);
 
     const loginWithGoogle = async (credential) => {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/google`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ credential }),
-        });
-        if (!res.ok) throw new Error('Google login failed');
-        const data = await res.json();
-        login(data, data.token);
-        return data; // contains requiresOnboarding flag
+        try {
+            const { data } = await api.post('/auth/google', { credential });
+            login(data, data.token);
+            return data;
+        } catch (err) {
+            console.error('Google login error:', err);
+            throw new Error('Google login failed');
+        }
     };
 
     const completeOnboarding = async (name, mobileNumber) => {
-        const res = await fetch(`${import.meta.env.VITE_API_URL}/auth/complete-profile`, {
-            method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json',
-                Authorization: `Bearer ${token}`
-            },
-            body: JSON.stringify({ name, mobileNumber }),
-        });
-        if (!res.ok) throw new Error('Profile update failed');
-        const data = await res.json();
-        login(data, data.token);
-        return data;
+        try {
+            const { data } = await api.post('/auth/complete-profile', { name, mobileNumber });
+            login(data, data.token);
+            return data;
+        } catch (err) {
+            console.error('Profile update error:', err);
+            throw new Error('Profile update failed');
+        }
     };
 
     const logout = useCallback(() => {
