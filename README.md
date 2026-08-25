@@ -1,6 +1,6 @@
 <div align="center">
   
-  <img src="./client/public/favicon.svg" alt="SkyCuts Logo" width="100" />
+  <img src="./client/public/logo.png" alt="SkyCuts Logo" width="100" />
   
   # SkyCuts Studio
   
