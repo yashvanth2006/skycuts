@@ -63,7 +63,7 @@ function VideoEmptyState({ status }) {
     >
       <div className="pw-video-empty-bg" />
       <div className="pw-video-empty-icon">
-        <Film size={28} color="var(--accent-indigo)" strokeWidth={1.5} />
+        <Film size={28} color="var(--accent-red)" strokeWidth={1.5} />
       </div>
       <div className="pw-video-empty-text">
         <h3>{isAwaiting ? "AWAITING RAW FOOTAGE" : "EDITOR IS ASSEMBLING YOUR CUT"}</h3>
@@ -289,7 +289,7 @@ export default function ClientProjectPage() {
     <div className="page-container">
       <Navbar showBack />
       <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", flex:1, gap:16, padding:80 }}>
-        <Loader2 size={32} color="var(--accent-blue)" className="spin" />
+        <Loader2 size={32} color="var(--accent-red)" className="spin" />
         <p style={{ color:"var(--text-muted)", fontSize:14 }}>Loading workspace…</p>
       </div>
       <style>{`@keyframes spin{to{transform:rotate(360deg)}} .spin { animation: spin 0.8s linear infinite; }`}</style>
@@ -462,15 +462,15 @@ export default function ClientProjectPage() {
             border-color: #34d399;
         }
         .pw-timeline-circle.active {
-            background: rgba(99,102,241,0.2);
-            border-color: var(--accent-blue);
+            background: rgba(185,28,28,0.15);
+            border-color: var(--accent-red);
         }
         .pw-timeline-dot {
             width: 10px;
             height: 10px;
             border-radius: 50%;
-            background: var(--accent-blue);
-            box-shadow: 0 0 8px rgba(99,102,241,0.6);
+            background: var(--accent-red);
+            box-shadow: 0 0 8px rgba(185,28,28,0.5);
         }
         .pw-timeline-label {
             font-size: 11px;
@@ -481,7 +481,7 @@ export default function ClientProjectPage() {
             white-space: nowrap;
         }
         .pw-timeline-label.active {
-            color: var(--accent-indigo);
+            color: var(--accent-red-bright);
             font-weight: 600;
         }
         .pw-timeline-label.done {
@@ -595,7 +595,7 @@ export default function ClientProjectPage() {
         }
         .pw-btn-empty-upload {
             margin-top: 12px;
-            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            background: var(--accent-red);
             color: #fff;
             border: none;
             padding: 10px 20px;
@@ -606,7 +606,6 @@ export default function ClientProjectPage() {
             align-items: center;
             gap: 8px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(99,102,241,0.2);
         }
 
         /* Action Cards */
@@ -716,7 +715,7 @@ export default function ClientProjectPage() {
           )}
           {paymentState === "verifying" && (
             <motion.div initial={{opacity:0,y:-16}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-16}}
-              style={{ marginBottom:16, padding:"12px 16px", borderRadius:10, background:"rgba(99,102,241,0.08)", border:"1px solid rgba(99,102,241,0.22)", color:"var(--accent-indigo)", display:"flex", alignItems:"center", gap:8, fontSize:13 }}>
+            style={{ marginBottom:16, padding:"12px 16px", borderRadius:10, background:"rgba(185,28,28,0.07)", border:"1px solid rgba(185,28,28,0.2)", color:"var(--accent-red-hover)", display:"flex", alignItems:"center", gap:8, fontSize:13 }}>
               <Loader2 size={15} className="spin"/> Verifying payment...
             </motion.div>
           )}
@@ -770,7 +769,7 @@ export default function ClientProjectPage() {
                             <VideoPlayer hlsUrl={deliverable.videoUrl || deliverable.hlsPlaylistUrl} seekTo={seekTo} onTimeUpdate={setCurrentTime} />
                             {project.status === "in_review" && (
                                 <div style={{ padding:"12px 16px", background:"rgba(99,102,241,0.05)", borderTop:"1px solid var(--border-subtle)", display:"flex", alignItems:"center", gap:8, fontSize:12, color:"var(--text-muted)" }}>
-                                <Lock size={12} color="var(--accent-indigo)"/> Pay the invoice to download the full-resolution original file.
+                                <Lock size={12} color="var(--accent-red-hover)"/> Pay the invoice to download the full-resolution original file.
                                 </div>
                             )}
                         </>
@@ -781,7 +780,7 @@ export default function ClientProjectPage() {
 
                 {/* ACTION REQUIRED: SUBMIT DRIVE LINK */}
                 {canSubmitAssets && ((!project.rawAssets || project.rawAssets.length === 0) || isEditingDriveLink) && (
-                    <div className="pw-action-card" style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.1),rgba(167,139,250,0.07))", border:"1px solid rgba(99,102,241,0.2)" }}>
+                    <div className="pw-action-card" style={{ background:"rgba(185,28,28,0.05)", border:"1px solid rgba(185,28,28,0.2)" }}>
                         <div className="pw-action-header" style={{ color: "#fbbf24" }}>
                             <div style={{ width:8, height:8, borderRadius:"50%", background:"#fbbf24", boxShadow:"0 0 8px rgba(251,191,36,0.4)", animation:"pulse-dot 1.5s ease-in-out infinite" }}/>
                             {isEditingDriveLink ? "EDIT GOOGLE DRIVE LINK" : "ACTION REQUIRED"}
@@ -805,7 +804,7 @@ export default function ClientProjectPage() {
                             {linkError && <span style={{ color: "#f87171", fontSize: 13, display: "flex", alignItems: "center", gap: 4 }}><AlertCircle size={14}/> {linkError}</span>}
                             <span style={{ fontSize: 12, color: "var(--text-muted)", marginBottom: 4 }}>Make sure your Google Drive folder is accessible to the editor before submitting. (Anyone with the link can view)</span>
                             <div style={{ display: "flex", gap: 8 }}>
-                                <button onClick={handleSubmitDriveLink} disabled={isSubmittingDriveLink} className="pw-action-btn" style={{ background:"linear-gradient(135deg,var(--accent-blue),var(--accent-purple))", flex: 1, minHeight: 44 }}>
+                                <button onClick={handleSubmitDriveLink} disabled={isSubmittingDriveLink} className="pw-action-btn" style={{ background:"var(--accent-red)", flex: 1, minHeight: 44 }}>
                                     {isSubmittingDriveLink ? <Loader2 size={16} className="spin" /> : <Link2 size={16}/>} {isEditingDriveLink ? "Update Link" : "Submit Google Drive Link"}
                                 </button>
                                 {isEditingDriveLink && (
@@ -870,10 +869,10 @@ export default function ClientProjectPage() {
                 )}
 
                 {project.status === "paid" && (
-                    <div className="pw-action-card" style={{ background:"linear-gradient(135deg,rgba(99,102,241,0.1),rgba(34,211,238,0.06))", border:"1px solid rgba(99,102,241,0.25)" }}>
-                        <div className="pw-action-header" style={{ color: "var(--accent-indigo)" }}>Project Paid</div>
+                    <div className="pw-action-card" style={{ background:"rgba(185,28,28,0.06)", border:"1px solid rgba(185,28,28,0.2)" }}>
+                        <div className="pw-action-header" style={{ color: "var(--accent-red-hover)" }}>Project Paid</div>
                         <p className="pw-action-desc">Payment received. Download the full-resolution final file below.</p>
-                        <button onClick={handleDownload} disabled={downloading} className="pw-action-btn" style={{ background:"linear-gradient(135deg,#6366f1,#8b5cf6)" }}>
+                        <button onClick={handleDownload} disabled={downloading} className="pw-action-btn" style={{ background:"var(--accent-red)" }}>
                             {downloading ? <Loader2 size={16} className="spin" /> : <Download size={16} />}
                             Download Final File
                         </button>
@@ -883,7 +882,7 @@ export default function ClientProjectPage() {
                 {/* PROJECT DETAILS */}
                 <div className="pw-details-card">
                     <h2 style={{ fontSize:12, fontWeight:600, color:"var(--text-muted)", letterSpacing:"0.08em", textTransform:"uppercase", marginBottom:8 }}>Project Details</h2>
-                    <DetailRow label="Status" value={project.status?.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())} accent="var(--accent-indigo)"/>
+                    <DetailRow label="Status" value={project.status?.replace(/_/g," ").replace(/\b\w/g,c=>c.toUpperCase())} accent="var(--accent-red-bright)"/>
                     <DetailRow label="Created" value={fmtDate(project.createdAt)}/>
                     <DetailRow label="Deadline" value={fmtDate(project.deadline)}/>
                     <DetailRow label="Raw Footage" value={project.rawAssets?.length > 0 ? "Submitted" : "Awaiting"}/>

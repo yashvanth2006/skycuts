@@ -65,11 +65,11 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
       }}>
         <div style={{
           width: 28, height: 28, borderRadius: 8,
-          background: 'linear-gradient(135deg,rgba(99,102,241,0.18),rgba(167,139,250,0.18))',
-          border: '1px solid rgba(99,102,241,0.18)',
+          background: 'rgba(185,28,28,0.1)',
+          border: '1px solid rgba(185,28,28,0.2)',
           display: 'flex', alignItems: 'center', justifyContent: 'center',
         }}>
-          <MessageSquare size={13} color="var(--accent-indigo)" />
+          <MessageSquare size={13} color="var(--accent-red)" />
         </div>
         <div>
           <p style={{ fontSize: 13, fontWeight: 600 }}>Comments</p>
@@ -81,7 +81,7 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
       <div style={{ flex: 1, overflowY: 'auto', padding: '10px 12px', display: 'flex', flexDirection: 'column', gap: 8 }}>
         {loading && (
           <div style={{ display: 'flex', justifyContent: 'center', padding: 16 }}>
-            <Loader2 size={18} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
+            <Loader2 size={18} color="var(--accent-red)" style={{ animation: 'spin 0.8s linear infinite' }} />
           </div>
         )}
         {!loading && comments.length === 0 && (
@@ -115,12 +115,12 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
               <div style={{
                 display: 'inline-flex', alignItems: 'center', gap: 4,
                 padding: '2px 8px', borderRadius: 100,
-                background: 'rgba(99,102,241,0.12)',
-                border: '1px solid rgba(99,102,241,0.2)',
+                background: 'rgba(185,28,28,0.1)',
+                border: '1px solid rgba(185,28,28,0.18)',
                 marginBottom: 6,
               }}>
-                <Clock size={10} color="var(--accent-indigo)" />
-                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-indigo)', fontVariantNumeric: 'tabular-nums' }}>
+                <Clock size={10} color="var(--accent-red)" />
+                <span style={{ fontSize: 10, fontWeight: 700, color: 'var(--accent-red-bright)', fontVariantNumeric: 'tabular-nums' }}>
                   {formatTs(c.timestamp)}
                 </span>
               </div>
@@ -133,9 +133,7 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
                 <div style={{ display: 'flex', alignItems: 'center', gap: 5 }}>
                   <div style={{
                     width: 16, height: 16, borderRadius: '50%',
-                    background: isOwn
-                      ? 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))'
-                      : 'linear-gradient(135deg,var(--accent-cyan),var(--accent-blue))',
+                    background: isOwn ? 'var(--accent-red-dark)' : '#1A1A1A',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 8, fontWeight: 700, color: '#fff',
                   }}>
@@ -163,12 +161,12 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
       <div style={{ padding: '11px 12px', borderTop: '1px solid var(--border-subtle)' }}>
         <div style={{
           padding: '6px 10px', borderRadius: 8,
-          background: 'rgba(99,102,241,0.07)',
-          border: '1px solid rgba(99,102,241,0.12)',
+          background: 'rgba(185,28,28,0.06)',
+          border: '1px solid rgba(185,28,28,0.12)',
           marginBottom: 8, display: 'flex', alignItems: 'center', gap: 5,
         }}>
-          <Clock size={10} color="var(--accent-indigo)" />
-          <span style={{ fontSize: 11, color: 'var(--accent-indigo)', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
+          <Clock size={10} color="var(--accent-red)" />
+          <span style={{ fontSize: 11, color: 'var(--accent-red-bright)', fontVariantNumeric: 'tabular-nums', fontWeight: 600 }}>
             At {formatTs(currentTime)}
           </span>
         </div>
@@ -185,7 +183,7 @@ export default function CommentSidebar({ projectId, currentTime, onSeek }) {
             disabled={!text.trim() || submitting}
             style={{
               width: 44, height: 44, borderRadius: 8, border: 'none',
-              background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
+              background: 'var(--accent-red)',
               color: '#fff', cursor: 'pointer', flexShrink: 0,
               display: 'flex', alignItems: 'center', justifyContent: 'center',
               opacity: !text.trim() ? 0.4 : 1,

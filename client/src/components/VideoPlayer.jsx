@@ -191,7 +191,7 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
           alignItems: 'center', justifyContent: 'center',
           background: 'rgba(0,0,0,0.7)',
         }}>
-          <Loader2 size={40} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
+          <Loader2 size={40} color="var(--accent-red)" style={{ animation: 'spin 0.8s linear infinite' }} />
         </div>
       )}
 
@@ -235,7 +235,7 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
           <div style={{
             position: 'absolute', left: 0, top: 0, bottom: 0,
             width: `${progressPct}%`,
-            background: 'linear-gradient(90deg,var(--accent-blue),var(--accent-purple))',
+            background: 'var(--accent-red)',
             borderRadius: 4, transition: 'width 0.1s',
           }} />
           {/* Thumb */}
@@ -243,7 +243,7 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
             position: 'absolute', top: '50%', left: `${progressPct}%`,
             transform: 'translate(-50%,-50%)',
             width: 12, height: 12, borderRadius: '50%',
-            background: '#fff', boxShadow: '0 0 8px rgba(99,102,241,0.8)',
+            background: '#fff', boxShadow: '0 0 6px rgba(185,28,28,0.6)',
             transition: 'left 0.1s',
           }} />
         </div>
@@ -263,7 +263,7 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
             type="range" min={0} max={1} step={0.05}
             value={muted ? 0 : volume}
             onChange={handleVolume}
-            style={{ width: 72, accentColor: 'var(--accent-blue)', cursor: 'pointer' }}
+            style={{ width: 72, accentColor: 'var(--accent-red)', cursor: 'pointer' }}
           />
 
           {/* Time */}
