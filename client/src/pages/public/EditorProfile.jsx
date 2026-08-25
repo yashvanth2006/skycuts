@@ -102,6 +102,28 @@ function DVDivider({ label, colors }) {
 function ClipCard({ item, colors }) {
   const [hovered, setHovered] = useState(false);
   const [mediaError, setMediaError] = useState(false);
+  const videoRef = useRef(null);
+
+  useEffect(() => {
+    const handleOtherPlay = (e) => {
+      const id = item._id || item.id || item.videoUrl;
+      if (e.detail.id !== id && videoRef.current) {
+        videoRef.current.pause();
+      }
+    };
+    window.addEventListener("skycuts-video-play", handleOtherPlay);
+    return () => window.removeEventListener("skycuts-video-play", handleOtherPlay);
+  }, [item]);
+
+  const handlePlay = () => {
+    const id = item._id || item.id || item.videoUrl;
+    window.dispatchEvent(
+      new CustomEvent("skycuts-video-play", {
+        detail: { id }
+      })
+    );
+  };
+
   const cat = CATEGORY_COLORS(colors.theme === 'dark')[item.category] || CATEGORY_COLORS(colors.theme === 'dark')["Documentary"];
   const accentColor = item.accent || colors.blue;
 
@@ -152,6 +174,9 @@ function ClipCard({ item, colors }) {
             </div>
           ) : hasVideo ? (
             <video
+              ref={videoRef}
+              onPlay={handlePlay}
+              className="ep-portfolio-video"
               src={item.videoUrl}
               poster={item.thumbnail || undefined}
               controls
@@ -163,7 +188,7 @@ function ClipCard({ item, colors }) {
                   setMediaError(true);
                 }
               }}
-              style={{ width: "100%", height: "100%", objectFit: "cover", display: "block" }}
+              style={{ width: "100%", height: "100%", display: "block" }}
             />
           ) : (
             <img
@@ -593,6 +618,20 @@ export default function EditorProfile() {
           .ep-stats-grid > div {
             padding: 16px 12px !important;
           }
+        }
+
+        /* Portfolio video fullscreen fix */
+        .ep-portfolio-video {
+          object-fit: cover;
+        }
+        .ep-portfolio-video:fullscreen {
+          object-fit: contain !important;
+        }
+        .ep-portfolio-video:-webkit-full-screen {
+          object-fit: contain !important;
+        }
+        .ep-portfolio-video:-moz-full-screen {
+          object-fit: contain !important;
         }
       `}</style>
 
