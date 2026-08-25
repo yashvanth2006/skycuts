@@ -27,9 +27,9 @@ const AWARDS = [
 ];
 
 const CATEGORY_COLORS = (isDark) => ({
-  "Commercial": { bg: "rgba(47,116,208,0.12)", border: "rgba(47,116,208,0.3)", text: "#4A9EFF" },
+  "Commercial": { bg: "rgba(185,28,28,0.12)", border: "rgba(185,28,28,0.3)", text: "var(--accent-red-bright)" },
   "Music Video": { bg: "rgba(245,166,35,0.12)", border: "rgba(245,166,35,0.3)", text: "#FFB74D" },
-  "Narrative": { bg: "rgba(74,158,255,0.12)", border: "rgba(74,158,255,0.3)", text: "#7CBFFF" },
+  "Narrative": { bg: "rgba(52,211,153,0.12)", border: "rgba(52,211,153,0.3)", text: "#6EE7B7" },
   "Documentary": { bg: "var(--bg-glass)", border: "var(--border-subtle)", text: "var(--text-secondary)" },
 });
 
@@ -55,10 +55,10 @@ function PanelHeader({ icon, title, subtitle, colors }) {
     <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 28 }}>
       <div style={{
         width: 36, height: 36, borderRadius: 8,
-        background: "rgba(47,116,208,0.15)",
-        border: `1px solid rgba(47,116,208,0.3)`,
+        background: "rgba(185,28,28,0.15)",
+        border: `1px solid rgba(185,28,28,0.3)`,
         display: "flex", alignItems: "center", justifyContent: "center",
-        color: colors.blue,
+        color: "var(--accent-red)",
       }}>
         {icon}
       </div>
@@ -341,10 +341,10 @@ function ToolkitRow({ tool, delay, colors }) {
       <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
         <div style={{
           width: 30, height: 30, borderRadius: 6,
-          background: hovered ? "rgba(47,116,208,0.2)" : "rgba(47,116,208,0.08)",
-          border: `1px solid ${hovered ? "rgba(47,116,208,0.5)" : "var(--border-subtle)"}`,
+          background: hovered ? "rgba(185,28,28,0.15)" : "rgba(185,28,28,0.05)",
+          border: `1px solid ${hovered ? "rgba(185,28,28,0.4)" : "var(--border-subtle)"}`,
           display: "flex", alignItems: "center", justifyContent: "center",
-          color: hovered ? colors.blue : "var(--text-secondary)",
+          color: hovered ? "var(--accent-red-bright)" : "var(--text-secondary)",
           transition: "all 0.2s ease",
           flexShrink: 0,
         }}>
@@ -424,12 +424,12 @@ export default function EditorProfile() {
   const [portfolioError, setPortfolioError] = useState(false);
 
   const colors = {
-    blue: "#2F74D0",
-    blueL: "#4A9EFF",
+    blue: "var(--accent-red)",
+    blueL: "var(--accent-red-bright)",
     amber: "#F5A623",
     amberL: "#FFB74D",
-    purple: "#8B5CF6",
-    cyan: "#06b6d4",
+    purple: "var(--accent-red-hover)",
+    cyan: "var(--accent-red-bright)",
     theme
   };
 
@@ -483,7 +483,7 @@ export default function EditorProfile() {
         /* Scrollbar */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: var(--bg-deep); }
-        ::-webkit-scrollbar-thumb { background: var(--accent-blue); border-radius: 4px; }
+        ::-webkit-scrollbar-thumb { background: var(--accent-red); border-radius: 4px; }
 
         @keyframes clip-select-pulse {
           0%, 100% { box-shadow: 0 0 0 0 rgba(245,166,35,0.3); }
@@ -656,7 +656,7 @@ export default function EditorProfile() {
           {/* Clean CSS-only background replacement */}
           <div style={{
             position: 'absolute', inset: 0,
-            background: 'radial-gradient(circle at 50% 30%, rgba(47,116,208,0.08) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(245,166,35,0.05) 0%, transparent 50%)',
+            background: 'radial-gradient(circle at 50% 30%, rgba(185,28,28,0.08) 0%, transparent 60%), radial-gradient(circle at 80% 80%, rgba(185,28,28,0.05) 0%, transparent 50%)',
           }} />
           <div style={{
             position: 'absolute', inset: 0,
@@ -700,8 +700,8 @@ export default function EditorProfile() {
             style={{
               display: "inline-flex", alignItems: "center", gap: 8,
               padding: "6px 16px", borderRadius: 4,
-              background: "var(--bg-deep)",
-              border: "1px solid rgba(47,116,208,0.3)",
+              background: "var(--bg-card)",
+              border: "1px solid var(--border-subtle)",
               marginBottom: 20,
             }}
           >
@@ -781,16 +781,16 @@ export default function EditorProfile() {
               onClick={() => document.getElementById("portfolio-grid").scrollIntoView({ behavior: "smooth" })}
               style={{
                 display: "flex", alignItems: "center", gap: 8,
-                padding: "12px 24px", borderRadius: 6,
-                background: colors.blue, color: "#fff",
-                border: "none", cursor: "pointer",
+                padding: "12px 24px", borderRadius: 8,
+                background: "#151515", color: "#E5E5E5",
+                border: "1px solid #2A2A2A", cursor: "pointer",
                 fontSize: 14, fontWeight: 600,
                 fontFamily: "'Inter', system-ui",
                 transition: "all 0.2s ease",
                 minHeight: 44,
               }}
-              onMouseEnter={e => e.currentTarget.style.background = colors.blueL}
-              onMouseLeave={e => e.currentTarget.style.background = colors.blue}
+              onMouseEnter={e => { e.currentTarget.style.background = "#1B1B1B"; e.currentTarget.style.borderColor = "#555"; }}
+              onMouseLeave={e => { e.currentTarget.style.background = "#151515"; e.currentTarget.style.borderColor = "#2A2A2A"; }}
             >
               <Play size={15} /> View Portfolio
             </button>
@@ -798,17 +798,16 @@ export default function EditorProfile() {
               onClick={handleStartProject}
               style={{
                 display: "flex", alignItems: "center", gap: 8,
-                padding: "12px 24px", borderRadius: 6,
-                background: colors.amber, color: "#111",
+                padding: "12px 24px", borderRadius: 8,
+                background: "var(--accent-red)", color: "#fff",
                 border: "none", cursor: "pointer",
-                fontSize: 14, fontWeight: 700,
+                fontSize: 14, fontWeight: 600,
                 fontFamily: "'Inter', system-ui",
-                letterSpacing: "0.02em",
                 transition: "all 0.2s ease",
                 minHeight: 44,
               }}
-              onMouseEnter={e => e.currentTarget.style.background = colors.amberL}
-              onMouseLeave={e => e.currentTarget.style.background = colors.amber}
+              onMouseEnter={e => e.currentTarget.style.background = "var(--accent-red-hover)"}
+              onMouseLeave={e => e.currentTarget.style.background = "var(--accent-red)"}
             >
               START PROJECT <ArrowRight size={16} />
             </button>
@@ -898,7 +897,7 @@ export default function EditorProfile() {
                     color: i === 0 ? "var(--text-primary)" : "var(--text-secondary)",
                     letterSpacing: "0.04em",
                     paddingBottom: 2,
-                    borderBottom: i === 0 ? `2px solid ${colors.amber}` : "2px solid transparent",
+                    borderBottom: i === 0 ? `2px solid var(--accent-red)` : "2px solid transparent",
                     cursor: "pointer",
                   }}>
                     {tab}
@@ -1031,17 +1030,16 @@ export default function EditorProfile() {
               onClick={handleStartProject}
               style={{
                 display: "flex", alignItems: "center", gap: 8,
-                padding: "14px 28px", borderRadius: 6,
-                background: colors.amber, color: "#111",
+                padding: "14px 28px", borderRadius: 8,
+                background: "var(--accent-red)", color: "#fff",
                 border: "none", cursor: "pointer",
-                fontSize: 14, fontWeight: 700,
+                fontSize: 14, fontWeight: 600,
                 fontFamily: "'Inter', system-ui",
-                letterSpacing: "0.02em",
                 transition: "all 0.2s ease",
                 whiteSpace: "nowrap",
               }}
-              onMouseEnter={e => e.currentTarget.style.background = colors.amberL}
-              onMouseLeave={e => e.currentTarget.style.background = colors.amber}
+              onMouseEnter={e => e.currentTarget.style.background = "var(--accent-red-hover)"}
+              onMouseLeave={e => e.currentTarget.style.background = "var(--accent-red)"}
             >
               START PROJECT <ArrowRight size={16} />
             </button>
