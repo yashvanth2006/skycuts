@@ -67,7 +67,7 @@ function RequestRow({ req, onAccept, onReject, processing }) {
             {' '}·{' '}{req.client?.email}
             {req.client?.mobileNumber && <>{' · '}{req.client.mobileNumber}</>}
           </p>
-          <p style={{ fontSize: 12, color: 'var(--accent-blue)' }}>{req.type}</p>
+          <p style={{ fontSize: 12, color: 'var(--accent-red-bright)' }}>{req.type}</p>
           {req.description && (
             <p className="request-description" style={{ fontSize: 12, color: 'var(--text-muted)', marginTop: 6, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', maxWidth: 420 }}>
               {req.description}
@@ -216,10 +216,10 @@ export default function AdminDashboard() {
   const pendingRequests = requests.filter(r => r.status === 'pending');
 
   const stats = [
-    { icon: Film,       label: 'Total Projects',    value: projects.length,  color: '#6366f1' },
-    { icon: Users,      label: 'Active Clients',    value: clients.length,   color: '#22d3ee' },
-    { icon: Send,       label: 'Pending Requests',  value: pendingRequests.length, color: '#f59e0b' },
-    { icon: TrendingUp, label: 'Paid',              value: projects.filter(p => p.status === 'paid').length, color: '#34d399' },
+    { icon: Film,       label: 'Total Projects',    value: projects.length,  color: '#B91C1C' },
+    { icon: Users,      label: 'Active Clients',    value: clients.length,   color: '#A3A3A3' },
+    { icon: Send,       label: 'Pending Requests',  value: pendingRequests.length, color: '#F59E0B' },
+    { icon: TrendingUp, label: 'Paid',              value: projects.filter(p => p.status === 'paid').length, color: '#4ADE80' },
   ];
 
   return (

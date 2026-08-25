@@ -106,11 +106,7 @@ export default function LoginPage() {
   return (
     <div style={{ minHeight: '100vh', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
 
-      {/* 3D Background removed */}
-
-      {/* Static glow orbs */}
-      <div className="glow-orb" style={{ width: 600, height: 600, background: 'var(--accent-blue)', top: -200, left: -200 }} />
-      <div className="glow-orb" style={{ width: 400, height: 400, background: 'var(--accent-purple)', bottom: -150, right: -100 }} />
+      {/* No decorative orbs — clean dark background */}
 
       {/* Login Card */}
       <MotionDiv
@@ -125,15 +121,14 @@ export default function LoginPage() {
           <MotionDiv custom={0} variants={fadeUp} initial="hidden" animate="visible" style={{ textAlign: 'center', marginBottom: 36 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
               <div style={{
-                width: 42, height: 42, borderRadius: 12,
-                background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple))',
+                width: 42, height: 42, borderRadius: 10,
+                background: 'var(--accent-red)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 24px rgba(99,102,241,0.5)'
               }}>
                 <Zap size={22} color="#fff" />
               </div>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em' }}>
-                Sky<span className="gradient-text">Cuts</span>
+                Sky<span style={{ color: 'var(--accent-red-bright)' }}>Cuts</span>
               </span>
             </div>
             <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Elite Video Review Studio</p>
@@ -154,9 +149,9 @@ export default function LoginPage() {
                     padding: '10px 0', borderRadius: 9, border: 'none', cursor: 'pointer',
                     fontFamily: 'var(--font-sans)', fontWeight: 600, fontSize: 13,
                     transition: 'all 0.2s ease',
-                    background: mode === m ? 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))' : 'transparent',
+                    background: mode === m ? 'var(--accent-red)' : 'transparent',
                     color: mode === m ? '#fff' : 'var(--text-muted)',
-                    boxShadow: mode === m ? '0 4px 12px rgba(99,102,241,0.35)' : 'none',
+                    boxShadow: mode === m ? '0 2px 8px rgba(185,28,28,0.25)' : 'none',
                   }}
                 >
                   {m === 'login' ? 'Sign In' : 'Create Account'}
@@ -306,7 +301,7 @@ export default function LoginPage() {
           <MotionDiv custom={5} variants={fadeUp} initial="hidden" animate="visible" style={{ textAlign: 'center', marginTop: 24 }}>
             <p style={{ fontSize: 12, color: 'var(--text-muted)' }}>
               {mode === 'login' ? "Don't have an account? " : 'Already have an account? '}
-              <button onClick={switchMode} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-indigo)', fontSize: 12, fontWeight: 600 }}>
+              <button onClick={switchMode} style={{ background: 'none', border: 'none', cursor: 'pointer', color: 'var(--accent-red-bright)', fontSize: 12, fontWeight: 600 }}>
                 {mode === 'login' ? 'Register' : 'Sign in'}
               </button>
             </p>

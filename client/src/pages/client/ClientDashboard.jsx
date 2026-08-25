@@ -102,9 +102,7 @@ export default function ClientDashboard() {
         <div className="page-container">
             <Navbar />
 
-            {/* Ambient glows */}
-            <div className="glow-orb" style={{ width: 500, height: 500, background: 'var(--accent-blue)', top: -200, right: -150 }} />
-            <div className="glow-orb" style={{ width: 300, height: 300, background: 'var(--accent-purple)', bottom: 100, left: -100 }} />
+            {/* No decorative orbs */}
 
             <main className="content-area" style={{ position: 'relative', zIndex: 1, paddingTop: 24 }}>
 
@@ -117,11 +115,11 @@ export default function ClientDashboard() {
                 >
                     <div style={{
                         display: 'inline-flex', alignItems: 'center', gap: 8,
-                        padding: '5px 14px', borderRadius: 100, marginBottom: 16,
-                        background: 'rgba(99,102,241,0.1)', border: '1px solid rgba(99,102,241,0.2)'
+                        padding: '4px 12px', borderRadius: 6, marginBottom: 16,
+                        background: 'rgba(185,28,28,0.1)', border: '1px solid rgba(185,28,28,0.2)'
                     }}>
-                        <Zap size={13} color="var(--accent-blue)" />
-                        <span style={{ fontSize: 12, color: 'var(--accent-indigo)', fontWeight: 500 }}>Your Studio Portal</span>
+                        <Zap size={12} color="var(--accent-red)" />
+                        <span style={{ fontSize: 11, color: 'var(--accent-red-bright)', fontWeight: 500, textTransform: 'uppercase', letterSpacing: '0.06em' }}>Your Studio Portal</span>
                     </div>
                     <h1 style={{
                         fontSize: 'clamp(22px, 6vw, 34px)',
@@ -129,7 +127,7 @@ export default function ClientDashboard() {
                         lineHeight: 1.15,
                     }}>
                         Welcome back,{' '}
-                        <span style={{ background: 'linear-gradient(135deg, var(--accent-blue), var(--accent-purple), var(--accent-luma))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
+                        <span style={{ color: 'var(--accent-red-bright)' }}>
                             {user?.name?.split(' ')[0]}
                         </span>
                     </h1>
@@ -154,7 +152,7 @@ export default function ClientDashboard() {
                                 padding: '10px 16px', border: 'none', background: 'none',
                                 fontSize: 14, fontWeight: activeTab === id ? 600 : 500,
                                 color: activeTab === id ? 'var(--text-primary)' : 'var(--text-muted)',
-                                borderBottom: activeTab === id ? '2px solid var(--accent-blue)' : '2px solid transparent',
+                                borderBottom: activeTab === id ? '2px solid var(--accent-red)' : '2px solid transparent',
                                 marginBottom: -1, cursor: 'pointer', transition: 'all 0.15s ease',
                                 position: 'relative', whiteSpace: 'nowrap', flexShrink: 0,
                             }}
@@ -163,7 +161,7 @@ export default function ClientDashboard() {
                             {badge && (
                                 <span style={{
                                     padding: '1px 7px', borderRadius: 10, fontSize: 11, fontWeight: 700,
-                                    background: 'var(--accent-blue)', color: '#fff', marginLeft: 2,
+                                    background: 'var(--accent-red)', color: '#fff', marginLeft: 2,
                                 }}>
                                     {count}
                                 </span>
@@ -176,10 +174,10 @@ export default function ClientDashboard() {
                 {activeTab === 'projects' && (
                     loadingProjects ? (
                         <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-                            <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
+                            <Loader2 size={32} color="var(--accent-red)" style={{ animation: 'spin 0.8s linear infinite' }} />
                         </div>
                     ) : projects.length === 0 ? (
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card" style={{ textAlign: 'center', padding: '80px 20px' }}>
+                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, textAlign: 'center', padding: '80px 20px' }}>
                             <Film size={48} style={{ margin: '0 auto 20px', opacity: 0.15, display: 'block', color: 'var(--accent-indigo)' }} />
                             <h3 style={{ fontSize: 18, fontWeight: 600, marginBottom: 8 }}>No projects yet</h3>
                             <p style={{ color: 'var(--text-muted)', fontSize: 14, maxWidth: 340, margin: '0 auto 20px' }}>
@@ -187,11 +185,8 @@ export default function ClientDashboard() {
                             </p>
                             <button
                                 onClick={() => setActiveTab('requests')}
-                                style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                                    padding: '10px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600,
-                                    background: 'var(--accent-blue)', color: '#fff', border: 'none', cursor: 'pointer',
-                                }}
+                                className="btn-primary"
+                                style={{ padding: '10px 20px', fontSize: 14 }}
                             >
                                 View Requests <ChevronRight size={15} />
                             </button>
@@ -209,7 +204,7 @@ export default function ClientDashboard() {
                 {activeTab === 'requests' && (
                     loadingRequests ? (
                         <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-                            <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
+                            <Loader2 size={32} color="var(--accent-red)" style={{ animation: 'spin 0.8s linear infinite' }} />
                         </div>
                     ) : requests.length === 0 ? (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card" style={{ textAlign: 'center', padding: '80px 20px' }}>
@@ -220,11 +215,8 @@ export default function ClientDashboard() {
                             </p>
                             <button
                                 onClick={() => navigate('/profile')}
-                                style={{
-                                    display: 'inline-flex', alignItems: 'center', gap: 6,
-                                    padding: '10px 20px', borderRadius: 8, fontSize: 14, fontWeight: 600,
-                                    background: 'var(--accent-blue)', color: '#fff', border: 'none', cursor: 'pointer',
-                                }}
+                                className="btn-primary"
+                                style={{ padding: '10px 20px', fontSize: 14 }}
                             >
                                 Go to Editor Profile <ChevronRight size={15} />
                             </button>
