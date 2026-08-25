@@ -93,6 +93,20 @@ function fmtDate(iso) {
   catch { return null; }
 }
 
+const loadRazorpay = () => {
+  return new Promise((resolve) => {
+    if (window.Razorpay) {
+      resolve(true);
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://checkout.razorpay.com/v1/checkout.js";
+    script.onload = () => resolve(true);
+    script.onerror = () => resolve(false);
+    document.body.appendChild(script);
+  });
+};
+
 export default function ClientProjectPage() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -143,6 +157,14 @@ export default function ClientProjectPage() {
   const handlePay = async () => {
     setPaying(true);
     try {
+      const isLoaded = await loadRazorpay();
+      if (!isLoaded) {
+        console.error("Razorpay SDK failed to load");
+        setPaymentState("failed");
+        setPaying(false);
+        return;
+      }
+
       const { data } = await api.post(`/payments/create-order/${id}`);
       
       const options = {
