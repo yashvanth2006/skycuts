@@ -62,14 +62,13 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
             >
               <div style={{
                 width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
+                background: 'var(--accent-red)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 16px rgba(99,102,241,0.4)'
               }}>
                 <Zap size={15} color="#fff" />
               </div>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
-                Sky<span style={{ background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Cuts</span>
+                Sky<span style={{ color: 'var(--accent-red-bright)' }}>Cuts</span>
               </span>
             </button>
           </div>
@@ -84,9 +83,9 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                     display: 'flex', alignItems: 'center', gap: 6,
                     padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
                     fontSize: 13, fontWeight: 500,
-                    background: location.pathname === '/profile' ? 'var(--bg-glass)' : 'none',
+                    background: 'none',
                     color: location.pathname === '/profile' ? 'var(--text-primary)' : 'var(--text-muted)',
-                    borderBottom: location.pathname === '/profile' ? '2px solid var(--accent-blue)' : '2px solid transparent',
+                    borderBottom: location.pathname === '/profile' ? '2px solid var(--accent-red)' : '2px solid transparent',
                     transition: 'all 0.15s ease',
                   }}
                 >
@@ -99,9 +98,9 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                       display: 'flex', alignItems: 'center', gap: 6,
                       padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
                       fontSize: 13, fontWeight: 500,
-                      background: location.pathname.startsWith('/dashboard') ? 'var(--bg-glass)' : 'none',
+                      background: 'none',
                       color: location.pathname.startsWith('/dashboard') ? 'var(--text-primary)' : 'var(--text-muted)',
-                      borderBottom: location.pathname.startsWith('/dashboard') ? '2px solid var(--accent-blue)' : '2px solid transparent',
+                      borderBottom: location.pathname.startsWith('/dashboard') ? '2px solid var(--accent-red)' : '2px solid transparent',
                       transition: 'all 0.15s ease',
                     }}
                   >
@@ -144,7 +143,7 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                   ) : (
                     <div style={{
                       width: 26, height: 26, borderRadius: '50%', flexShrink: 0,
-                      background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-luma))',
+                      background: 'var(--accent-red-dark)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 11, fontWeight: 700, color: '#fff'
                     }}>
@@ -268,7 +267,7 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                       ) : (
                         <div style={{
                           width: 36, height: 36, borderRadius: '50%',
-                          background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-luma))',
+                          background: 'var(--accent-red-dark)',
                           display: 'flex', alignItems: 'center', justifyContent: 'center',
                           fontSize: 14, fontWeight: 700, color: '#fff', flexShrink: 0,
                         }}>
@@ -304,7 +303,7 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
                     <button
                       onClick={() => { navigate('/login'); closeMenu(); }}
                       className="mobile-nav-item"
-                      style={{ color: 'var(--accent-blue)' }}
+                      style={{ color: 'var(--accent-red-bright)' }}
                     >
                       Login
                     </button>
@@ -385,11 +384,11 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
           color: var(--text-primary);
         }
         .mobile-nav-item.active {
-          background: rgba(99,102,241,0.14);
-          color: var(--accent-indigo);
+          background: rgba(185,28,28,0.12);
+          color: var(--accent-red-bright);
         }
         .mobile-nav-item.active svg {
-          color: var(--accent-indigo);
+          color: var(--accent-red-bright);
         }
         .mobile-nav-item.logout {
           color: #ef4444;

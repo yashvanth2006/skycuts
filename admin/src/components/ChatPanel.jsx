@@ -109,10 +109,10 @@ export default function ChatPanel({ projectId }) {
         style={{
           position: 'fixed', bottom: 28, right: 28, zIndex: 150,
           width: 56, height: 56, borderRadius: '50%', border: 'none',
-          background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
+          background: 'var(--accent-red)',
           color: '#fff', cursor: 'pointer',
           display: open ? 'none' : 'flex', alignItems: 'center', justifyContent: 'center',
-          boxShadow: '0 0 30px rgba(99,102,241,0.5)',
+          boxShadow: '0 4px 16px rgba(185,28,28,0.35)',
         }}
         aria-label="Open chat"
       >
@@ -141,11 +141,9 @@ export default function ChatPanel({ projectId }) {
             style={{
               position: 'fixed', top: 64, right: 0, bottom: 0, zIndex: 150,
               width: 360, display: 'flex', flexDirection: 'column',
-              background: 'rgba(8,8,16,0.9)',
-              backdropFilter: 'blur(24px)',
-              WebkitBackdropFilter: 'blur(24px)',
-              borderLeft: '1px solid var(--border-subtle)',
-              boxShadow: '-16px 0 40px rgba(0,0,0,0.4)',
+              background: 'var(--bg-card)',
+              borderLeft: '1px solid var(--border)',
+              boxShadow: '-8px 0 24px rgba(0,0,0,0.6)',
             }}
           >
             {/* Header */}
@@ -156,8 +154,8 @@ export default function ChatPanel({ projectId }) {
             }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
                 <div style={{
-                  width: 34, height: 34, borderRadius: 10,
-                  background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
+                  width: 34, height: 34, borderRadius: 8,
+                  background: 'var(--accent-red)',
                   display: 'flex', alignItems: 'center', justifyContent: 'center'
                 }}>
                   <MessageCircle size={17} color="#fff" />
@@ -206,9 +204,7 @@ export default function ChatPanel({ projectId }) {
                     {/* Avatar */}
                     <div style={{
                       width: 28, height: 28, borderRadius: '50%', flexShrink: 0,
-                      background: isOwn
-                        ? 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))'
-                        : 'linear-gradient(135deg,var(--accent-cyan),var(--accent-blue))',
+                      background: isOwn ? 'var(--accent-red-dark)' : '#1A1A1A',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 11, fontWeight: 700, color: '#fff',
                     }}>
@@ -224,9 +220,9 @@ export default function ChatPanel({ projectId }) {
                         padding: '10px 14px',
                         borderRadius: isOwn ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
                         background: isOwn
-                          ? 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))'
-                          : 'rgba(255,255,255,0.07)',
-                        border: isOwn ? 'none' : '1px solid var(--border-subtle)',
+                          ? 'var(--accent-red)'
+                          : 'rgba(255,255,255,0.06)',
+                        border: isOwn ? 'none' : '1px solid var(--border)',
                         fontSize: 13, color: '#fff', lineHeight: 1.45,
                       }}>
                         {msg.text}
@@ -263,7 +259,7 @@ export default function ChatPanel({ projectId }) {
                 disabled={!text.trim() || sending}
                 style={{
                   width: 42, height: 42, borderRadius: '50%', border: 'none',
-                  background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
+                  background: 'var(--accent-red)',
                   color: '#fff', cursor: 'pointer', flexShrink: 0,
                   display: 'flex', alignItems: 'center', justifyContent: 'center',
                   opacity: !text.trim() ? 0.4 : 1,

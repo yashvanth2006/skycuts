@@ -50,14 +50,13 @@ export default function Navbar({ showBack = false }) {
             >
               <div style={{
                 width: 32, height: 32, borderRadius: 8,
-                background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))',
+                background: 'var(--accent-red)',
                 display: 'flex', alignItems: 'center', justifyContent: 'center',
-                boxShadow: '0 0 16px rgba(99,102,241,0.4)'
               }}>
                 <Zap size={17} color="#fff" />
               </div>
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 18, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)' }}>
-                Sky<span style={{ background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-purple))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>Cuts</span>
+                Sky<span style={{ color: 'var(--accent-red-bright)' }}>Cuts</span>
               </span>
             </button>
           </div>
@@ -77,9 +76,9 @@ export default function Navbar({ showBack = false }) {
                       display: 'flex', alignItems: 'center', gap: 6,
                       padding: '6px 14px', borderRadius: 6, border: 'none', cursor: 'pointer',
                       fontSize: 13, fontWeight: 500,
-                      background: location.pathname.startsWith(path) ? 'var(--bg-glass)' : 'none',
+                      background: 'none',
                       color: location.pathname.startsWith(path) ? 'var(--text-primary)' : 'var(--text-muted)',
-                      borderBottom: location.pathname.startsWith(path) ? '2px solid var(--accent-blue)' : '2px solid transparent',
+                      borderBottom: location.pathname.startsWith(path) ? '2px solid var(--accent-red)' : '2px solid transparent',
                       transition: 'all 0.15s ease',
                     }}
                   >
@@ -116,7 +115,7 @@ export default function Navbar({ showBack = false }) {
                 }}>
                   <div style={{
                     width: 30, height: 30, borderRadius: '50%',
-                    background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-luma))',
+                    background: 'var(--accent-red-dark)',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 12, fontWeight: 700, color: '#fff'
                   }}>
@@ -196,7 +195,7 @@ export default function Navbar({ showBack = false }) {
                   <div style={{ display: 'flex', alignItems: 'center', gap: 12, padding: '12px 14px', minHeight: 48 }}>
                     <div style={{
                       width: 36, height: 36, borderRadius: '50%',
-                      background: 'linear-gradient(135deg,var(--accent-blue),var(--accent-luma))',
+                      background: 'var(--accent-red-dark)',
                       display: 'flex', alignItems: 'center', justifyContent: 'center',
                       fontSize: 14, fontWeight: 700, color: '#fff', flexShrink: 0,
                     }}>
@@ -289,11 +288,11 @@ export default function Navbar({ showBack = false }) {
           color: var(--text-primary);
         }
         .mobile-nav-item.active {
-          background: rgba(99,102,241,0.14);
-          color: var(--accent-indigo);
+          background: rgba(185,28,28,0.12);
+          color: var(--accent-red-bright);
         }
         .mobile-nav-item.active svg {
-          color: var(--accent-indigo);
+          color: var(--accent-red-bright);
         }
         .mobile-nav-item.logout {
           color: #ef4444;
