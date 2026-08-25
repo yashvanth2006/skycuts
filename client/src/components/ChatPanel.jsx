@@ -7,6 +7,10 @@ import api from '../api/axiosInstance.js';
 
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || 'http://localhost:5000';
 
+let sharedSocket = null;
+let socketRefCount = 0;
+let socketTimeout = null;
+
 export default function ChatPanel({ projectId }) {
   const { user } = useAuth();
   const [open, setOpen]       = useState(false);
@@ -27,27 +31,58 @@ export default function ChatPanel({ projectId }) {
 
   // ── Init Socket.io ────────────────────────────────────────────────────────
   useEffect(() => {
-    const token = localStorage.getItem('skycuts_token');
-    const socket = io(SOCKET_URL, { 
-        transports: ['websocket'],
-        auth: { token }
-    });
-    socketRef.current = socket;
+    if (!sharedSocket) {
+        const token = localStorage.getItem('skycuts_token');
+        sharedSocket = io(SOCKET_URL, { 
+            transports: ['websocket'],
+            auth: { token }
+        });
+    }
+    
+    if (socketTimeout) {
+        clearTimeout(socketTimeout);
+        socketTimeout = null;
+    }
+    
+    socketRefCount++;
+    socketRef.current = sharedSocket;
 
-    socket.on('connect', () => {
-      socket.emit('join_project', projectId);
-    });
+    const handleConnect = () => {
+      sharedSocket.emit('join_project', projectId);
+    };
 
-    socket.on('receive_message', (msg) => {
+    const handleReceive = (msg) => {
       setMessages(prev => [...prev, msg]);
       if (!openRef.current) setUnread(n => n + 1);
-    });
+    };
 
-    socket.on('socket_error', (err) => {
+    const handleError = (err) => {
       console.error('Socket error:', err.message);
-    });
+    };
 
-    return () => socket.disconnect();
+    sharedSocket.on('connect', handleConnect);
+    sharedSocket.on('receive_message', handleReceive);
+    sharedSocket.on('socket_error', handleError);
+
+    if (sharedSocket.connected) {
+      handleConnect();
+    }
+
+    return () => {
+      sharedSocket.off('connect', handleConnect);
+      sharedSocket.off('receive_message', handleReceive);
+      sharedSocket.off('socket_error', handleError);
+      
+      socketRefCount--;
+      if (socketRefCount === 0) {
+        socketTimeout = setTimeout(() => {
+          if (socketRefCount === 0 && sharedSocket) {
+            sharedSocket.disconnect();
+            sharedSocket = null;
+          }
+        }, 100);
+      }
+    };
   }, [projectId]);
 
   // ── Fetch history ─────────────────────────────────────────────────────────
