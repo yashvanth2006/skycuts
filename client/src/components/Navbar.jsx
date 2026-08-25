@@ -60,13 +60,11 @@ export default function Navbar({ showBack = false, showDashboard = false }) {
               }}
               style={{ display: 'flex', alignItems: 'center', gap: 8, background: 'none', border: 'none', cursor: 'pointer' }}
             >
-              <div style={{
-                width: 30, height: 30, borderRadius: 8, flexShrink: 0,
-                background: 'var(--accent-red)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Zap size={15} color="#fff" />
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="SkyCuts Logo" 
+                style={{ width: 30, height: 30, borderRadius: 8, objectFit: 'cover', flexShrink: 0 }} 
+              />
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 17, fontWeight: 700, letterSpacing: '-0.02em', color: 'var(--text-primary)', whiteSpace: 'nowrap' }}>
                 Sky<span style={{ color: 'var(--accent-red-bright)' }}>Cuts</span>
               </span>

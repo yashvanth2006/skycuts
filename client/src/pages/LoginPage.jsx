@@ -120,13 +120,11 @@ export default function LoginPage() {
           {/* Logo */}
           <MotionDiv custom={0} variants={fadeUp} initial="hidden" animate="visible" style={{ textAlign: 'center', marginBottom: 36 }}>
             <div style={{ display: 'inline-flex', alignItems: 'center', gap: 10, marginBottom: 12 }}>
-              <div style={{
-                width: 42, height: 42, borderRadius: 10,
-                background: 'var(--accent-red)',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-              }}>
-                <Zap size={22} color="#fff" />
-              </div>
+              <img 
+                src="/logo.png" 
+                alt="SkyCuts Logo" 
+                style={{ width: 42, height: 42, borderRadius: 10, objectFit: 'cover' }} 
+              />
               <span style={{ fontFamily: 'var(--font-display)', fontSize: 26, fontWeight: 700, letterSpacing: '-0.03em' }}>
                 Sky<span style={{ color: 'var(--accent-red-bright)' }}>Cuts</span>
               </span>
