@@ -180,6 +180,7 @@ function ClipCard({ item, colors }) {
               src={item.videoUrl}
               poster={item.thumbnail || undefined}
               controls
+              controlsList="nodownload"
               playsInline
               preload="metadata"
               onError={() => {
