@@ -20,6 +20,10 @@ export default function AppDownloadPrompt() {
   const user = auth?.user;
 
   useEffect(() => {
+    // Check if already installed
+    const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
+    if (isStandalone) return;
+
     // Check dismissal state
     const checkDismissal = () => {
       try {
@@ -69,6 +73,13 @@ export default function AppDownloadPrompt() {
     };
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
 
+    const handleAppInstalled = () => {
+      setIsVisible(false);
+      setDeferredPrompt(null);
+      console.log('PWA was installed');
+    };
+    window.addEventListener('appinstalled', handleAppInstalled);
+
     // Show after delay
     const timer = setTimeout(() => {
       setIsVisible(true);
@@ -76,6 +87,7 @@ export default function AppDownloadPrompt() {
 
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
       clearTimeout(timer);
     };
   }, []);
@@ -125,19 +137,17 @@ export default function AppDownloadPrompt() {
 
   // App store labels
   let installLabel = "Get the App";
+  const isIosPwaFallback = deviceInfo.platform === 'ios' && !deferredPrompt && !APP_DOWNLOAD_CONFIG.iosUrl;
+
   if (deferredPrompt) {
+    installLabel = "Install SkyCuts";
+  } else if (isIosPwaFallback) {
     installLabel = "Install SkyCuts";
   } else if (deviceInfo.platform === 'android') {
     installLabel = "Get it on Google Play";
   } else if (deviceInfo.platform === 'ios') {
-    if (!APP_DOWNLOAD_CONFIG.iosUrl) {
-      installLabel = "Coming soon to iOS";
-    } else {
-      installLabel = "Download on App Store";
-    }
+    installLabel = "Download on App Store";
   }
-
-  const isIosPending = deviceInfo.platform === 'ios' && !APP_DOWNLOAD_CONFIG.iosUrl && !deferredPrompt;
 
   // Mobile Bottom Sheet
   if (deviceInfo.isMobile) {
@@ -175,14 +185,22 @@ export default function AppDownloadPrompt() {
               </p>
               
               <div className="w-full space-y-3">
-                <button 
-                  onClick={handleInstall}
-                  disabled={isIosPending}
-                  className="w-full btn-primary"
-                >
-                  <Smartphone className="w-4 h-4 shrink-0" />
-                  {installLabel}
-                </button>
+                {isIosPwaFallback ? (
+                  <div className="flex flex-col items-center gap-2 mb-4 p-3 rounded-[var(--radius-md)] bg-[var(--bg-surface)] border border-[var(--border)]">
+                    <p className="text-sm font-semibold text-[var(--text-primary)]">Install SkyCuts</p>
+                    <p className="text-xs text-[var(--text-secondary)] text-center">
+                      Tap <span className="font-semibold text-[var(--text-primary)]">Share</span> below, then select <span className="font-semibold text-[var(--text-primary)]">Add to Home Screen</span>.
+                    </p>
+                  </div>
+                ) : (
+                  <button 
+                    onClick={handleInstall}
+                    className="w-full btn-primary"
+                  >
+                    <Smartphone className="w-4 h-4 shrink-0" />
+                    {installLabel}
+                  </button>
+                )}
                 <button 
                   onClick={handleDismiss}
                   className="w-full btn-ghost"
@@ -226,13 +244,18 @@ export default function AppDownloadPrompt() {
             </div>
           </div>
           
-          <button 
-            onClick={handleInstall}
-            disabled={isIosPending}
-            className="btn-primary w-full py-2 min-h-0 text-[13px]"
-          >
-            {installLabel}
-          </button>
+          {isIosPwaFallback ? (
+             <div className="text-xs text-center text-[var(--text-secondary)] p-2 bg-[var(--bg-surface)] rounded border border-[var(--border)] mt-2">
+                Tap <b className="text-[var(--text-primary)]">Share</b> → <b className="text-[var(--text-primary)]">Add to Home Screen</b>
+             </div>
+          ) : (
+            <button 
+              onClick={handleInstall}
+              className="btn-primary w-full py-2 min-h-0 text-[13px]"
+            >
+              {installLabel}
+            </button>
+          )}
         </motion.div>
       )}
     </AnimatePresence>
