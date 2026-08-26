@@ -4,7 +4,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import ClientDashboard from './pages/client/ClientDashboard.jsx';
 import ClientProjectPage from './pages/client/ClientProjectPage.jsx';
 import EditorProfile from './pages/public/EditorProfile.jsx';
-
+import AppDownloadPrompt from './components/AppDownloadPrompt.jsx';
 
 // ─── Route Guards ──────────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -53,20 +53,23 @@ const RootRedirect = () => {
 
 export default function App() {
   return (
-    <Routes>
-      <Route path="/" element={<RootRedirect />} />
-      <Route path="/login" element={<LoginPage />} />
+    <>
+      <Routes>
+        <Route path="/" element={<RootRedirect />} />
+        <Route path="/login" element={<LoginPage />} />
 
-      {/* Public Route */}
-      <Route path="/profile" element={<EditorProfile />} />
+        {/* Public Route */}
+        <Route path="/profile" element={<EditorProfile />} />
 
-      {/* Client Routes */}
-      <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
-      <Route path="/dashboard/project/:id" element={<ClientRoute><ClientProjectPage /></ClientRoute>} />
+        {/* Client Routes */}
+        <Route path="/dashboard" element={<ClientRoute><ClientDashboard /></ClientRoute>} />
+        <Route path="/dashboard/project/:id" element={<ClientRoute><ClientProjectPage /></ClientRoute>} />
 
 
-      {/* Fallback */}
-      <Route path="*" element={<Navigate to="/" replace />} />
-    </Routes>
+        {/* Fallback */}
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+      <AppDownloadPrompt />
+    </>
   );
 }
