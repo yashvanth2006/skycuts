@@ -4,7 +4,6 @@ import LoginPage from './pages/LoginPage.jsx';
 import AdminDashboard from './pages/admin/AdminDashboard.jsx';
 import AdminProjectPage from './pages/admin/AdminProjectPage.jsx';
 import AdminPortfolioPage from './pages/admin/AdminPortfolioPage.jsx';
-import AppDownloadPrompt from './components/AppDownloadPrompt.jsx';
 
 // ─── Route Guards ──────────────────────────────────────────────────────────────
 const ProtectedRoute = ({ children }) => {
@@ -46,20 +45,17 @@ const RootRedirect = () => {
 
 export default function App() {
   return (
-    <>
-      <Routes>
-        <Route path="/" element={<RootRedirect />} />
-        <Route path="/login" element={<LoginPage />} />
+    <Routes>
+      <Route path="/" element={<RootRedirect />} />
+      <Route path="/login" element={<LoginPage />} />
 
-        {/* Admin Routes */}
-        <Route path="/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
-        <Route path="/project/:id" element={<AdminRoute><AdminProjectPage /></AdminRoute>} />
-        <Route path="/portfolio" element={<AdminRoute><AdminPortfolioPage /></AdminRoute>} />
+      {/* Admin Routes */}
+      <Route path="/dashboard" element={<AdminRoute><AdminDashboard /></AdminRoute>} />
+      <Route path="/project/:id" element={<AdminRoute><AdminProjectPage /></AdminRoute>} />
+      <Route path="/portfolio" element={<AdminRoute><AdminPortfolioPage /></AdminRoute>} />
 
-        {/* Fallback */}
-        <Route path="*" element={<Navigate to="/" replace />} />
-      </Routes>
-      <AppDownloadPrompt />
-    </>
+      {/* Fallback */}
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
   );
 }
