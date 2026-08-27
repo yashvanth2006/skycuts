@@ -7,6 +7,7 @@ import {
   CheckCircle, FileText
 } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
+import GlobalLoader from '../../components/GlobalLoader.jsx';
 import StatusBadge from '../../components/StatusBadge.jsx';
 import VideoPlayer from '../../components/VideoPlayer.jsx';
 import CommentSidebar from '../../components/CommentSidebar.jsx';
@@ -129,10 +130,7 @@ export default function AdminProjectPage() {
     return (
       <div className="page-container">
         <Navbar showBack />
-        <div style={{ display: 'flex', justifyContent: 'center', padding: 80 }}>
-          <Loader2 size={36} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
-        </div>
-        <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
+        <GlobalLoader />
       </div>
     );
   }
