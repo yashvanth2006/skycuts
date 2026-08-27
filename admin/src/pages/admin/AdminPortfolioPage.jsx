@@ -5,6 +5,7 @@ import {
     Film, Loader2, CheckCircle, X, AlertTriangle, PlayCircle
 } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
+import GlobalLoader from '../../components/GlobalLoader.jsx';
 import api from '../../api/axiosInstance.js';
 
 // ─── Status Badge ─────────────────────────────────────────────────────────────
@@ -315,10 +316,7 @@ export default function AdminPortfolioPage() {
 
                 {/* Loading */}
                 {loading && (
-                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 12, padding: '80px 0', color: 'var(--text-muted)' }}>
-                        <Loader2 size={24} className="spin" color="var(--accent-blue)" />
-                        <span style={{ fontSize: 14 }}>Loading portfolio items...</span>
-                    </div>
+                    <GlobalLoader />
                 )}
 
                 {/* Empty state */}
