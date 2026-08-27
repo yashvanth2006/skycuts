@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import Navbar from '../../components/Navbar.jsx';
 import ProjectCard from '../../components/ProjectCard.jsx';
+import GlobalLoader from '../../components/GlobalLoader.jsx';
 import Modal from '../../components/Modal.jsx';
 import api from '../../api/axiosInstance.js';
 
@@ -290,9 +291,7 @@ export default function AdminDashboard() {
             </div>
 
             {loading ? (
-              <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-                <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
-              </div>
+              <GlobalLoader />
             ) : filtered.length === 0 ? (
               <div className="glass-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
                 <Film size={40} style={{ margin: '0 auto 16px', opacity: 0.2, display: 'block', color: 'var(--accent-indigo)' }} />
@@ -313,9 +312,7 @@ export default function AdminDashboard() {
         {/* ── Requests tab ── */}
         {activeTab === 'requests' && (
           loading ? (
-            <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-              <Loader2 size={32} color="var(--accent-blue)" style={{ animation: 'spin 0.8s linear infinite' }} />
-            </div>
+            <GlobalLoader />
           ) : requests.length === 0 ? (
             <div className="glass-card" style={{ textAlign: 'center', padding: '60px 20px' }}>
               <Send size={40} style={{ margin: '0 auto 16px', opacity: 0.2, display: 'block', color: 'var(--accent-indigo)' }} />
