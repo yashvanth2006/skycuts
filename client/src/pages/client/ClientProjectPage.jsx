@@ -8,6 +8,7 @@ import {
   CheckCircle, Circle,
 } from "lucide-react";
 import Navbar from "../../components/Navbar.jsx";
+import GlobalLoader from "../../components/GlobalLoader.jsx";
 import StatusBadge from "../../components/StatusBadge.jsx";
 import VideoPlayer from "../../components/VideoPlayer.jsx";
 import CommentSidebar from "../../components/CommentSidebar.jsx";
@@ -288,11 +289,7 @@ export default function ClientProjectPage() {
   if (loading) return (
     <div className="page-container">
       <Navbar showBack />
-      <div style={{ display:"flex", flexDirection:"column", alignItems:"center", justifyContent:"center", flex:1, gap:16, padding:80 }}>
-        <Loader2 size={32} color="var(--accent-red)" className="spin" />
-        <p style={{ color:"var(--text-muted)", fontSize:14 }}>Loading workspace…</p>
-      </div>
-      <style>{`@keyframes spin{to{transform:rotate(360deg)}} .spin { animation: spin 0.8s linear infinite; }`}</style>
+      <GlobalLoader />
     </div>
   );
 
