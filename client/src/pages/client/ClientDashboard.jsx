@@ -6,6 +6,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '../../components/Navbar.jsx';
+import GlobalLoader from '../../components/GlobalLoader.jsx';
 import ProjectCard from '../../components/ProjectCard.jsx';
 import { useAuth } from '../../context/AuthContext.jsx';
 import api from '../../api/axiosInstance.js';
@@ -173,9 +174,7 @@ export default function ClientDashboard() {
                 {/* ── Projects tab ── */}
                 {activeTab === 'projects' && (
                     loadingProjects ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-                            <Loader2 size={32} color="var(--accent-red)" style={{ animation: 'spin 0.8s linear infinite' }} />
-                        </div>
+                        <GlobalLoader />
                     ) : projects.length === 0 ? (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} style={{ background: 'var(--bg-card)', border: '1px solid var(--border)', borderRadius: 10, textAlign: 'center', padding: '80px 20px' }}>
                             <Film size={48} style={{ margin: '0 auto 20px', opacity: 0.15, display: 'block', color: 'var(--accent-indigo)' }} />
@@ -203,9 +202,7 @@ export default function ClientDashboard() {
                 {/* ── Requests tab ── */}
                 {activeTab === 'requests' && (
                     loadingRequests ? (
-                        <div style={{ display: 'flex', justifyContent: 'center', padding: 60 }}>
-                            <Loader2 size={32} color="var(--accent-red)" style={{ animation: 'spin 0.8s linear infinite' }} />
-                        </div>
+                        <GlobalLoader />
                     ) : requests.length === 0 ? (
                         <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="glass-card" style={{ textAlign: 'center', padding: '80px 20px' }}>
                             <Send size={48} style={{ margin: '0 auto 20px', opacity: 0.15, display: 'block', color: 'var(--accent-indigo)' }} />
