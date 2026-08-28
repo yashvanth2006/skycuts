@@ -4,6 +4,7 @@ import LoginPage from './pages/LoginPage.jsx';
 import ClientDashboard from './pages/client/ClientDashboard.jsx';
 import ClientProjectPage from './pages/client/ClientProjectPage.jsx';
 import EditorProfile from './pages/public/EditorProfile.jsx';
+import GlobalLoader from './components/GlobalLoader.jsx';
 
 
 // ─── Route Guards ──────────────────────────────────────────────────────────────
@@ -22,20 +23,7 @@ const ClientRoute = ({ children }) => {
 };
 
 
-const FullPageLoader = () => (
-  <div style={{
-    minHeight: '100vh', display: 'flex', alignItems: 'center',
-    justifyContent: 'center', background: 'var(--bg-void)'
-  }}>
-    <div style={{
-      width: 48, height: 48, borderRadius: '50%',
-      border: '3px solid var(--border-subtle)',
-      borderTopColor: 'var(--accent-red)',
-      animation: 'spin 0.8s linear infinite'
-    }} />
-    <style>{`@keyframes spin { to { transform: rotate(360deg); } }`}</style>
-  </div>
-);
+const FullPageLoader = () => <GlobalLoader fullScreen={true} />;
 
 // ─── Auth redirect helper ──────────────────────────────────────────────────────
 const RootRedirect = () => {
