@@ -75,8 +75,6 @@ export default function LoginPage() {
       setError('');
       const data = await loginWithGoogle(credentialResponse.credential);
       
-      // Removed manual synchronous navigate.
-      // The useEffect will handle redirection once the AuthContext state updates.
     } catch {
       setError('Google sign-in failed. Please try again.');
     } finally {
