@@ -156,7 +156,6 @@ export default function ChatPanel({ projectId }) {
           }
         }
       `}</style>
-      {/* FAB Trigger */}
       <motion.button
         whileHover={{ scale: 1.08 }}
         whileTap={{ scale: 0.95 }}
@@ -179,7 +178,6 @@ export default function ChatPanel({ projectId }) {
         )}
       </motion.button>
 
-      {/* Slide-out Panel */}
       <AnimatePresence>
         {open && (
           <motion.div
