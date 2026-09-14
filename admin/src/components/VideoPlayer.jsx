@@ -176,7 +176,6 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
         boxShadow: '0 0 60px rgba(99,102,241,0.15)',
       }}
     >
-      {/* Video Element */}
       <video
         ref={videoRef}
         style={{ width: '100%', height: '100%', objectFit: 'contain', display: 'block' }}
@@ -184,7 +183,6 @@ export default function VideoPlayer({ hlsUrl, seekTo, onTimeUpdate }) {
         onClick={togglePlay}
       />
 
-      {/* Loading Overlay */}
       {loading && (
         <div style={{
           position: 'absolute', inset: 0, display: 'flex',
