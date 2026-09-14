@@ -6,7 +6,6 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 520
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -20,7 +19,6 @@ export default function Modal({ isOpen, onClose, title, children, maxWidth = 520
             }}
           />
 
-          {/* Panel */}
           <motion.div
             initial={{ opacity: 0, scale: 0.92, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
