@@ -1,8 +1,6 @@
 import jwt from 'jsonwebtoken';
 import User from '../models/User.js';
 
-// ─── protect ─────────────────────────────────────────────────────────────────
-// Validates JWT and attaches req.user.
 // Guarantees: next() is NEVER called unless req.user is a valid, existing User document.
 export const protect = async (req, res, next) => {
     const authHeader = req.headers.authorization;
