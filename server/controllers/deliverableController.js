@@ -8,8 +8,6 @@ import { uploadLargeVideo, deleteMedia } from '../services/cloudinaryService.js'
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// @desc   Upload final .mp4 to Cloudinary (Admin only)
-// @route  POST /api/deliverables/:projectId
 export const uploadDeliverable = async (req, res) => {
     const { projectId } = req.params;
 
