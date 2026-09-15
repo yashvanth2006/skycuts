@@ -32,7 +32,6 @@ export default function LoginPage() {
 
   const [form, setForm] = useState({ name: '', email: '', password: '' });
 
-  // Check if user came from START PROJECT button
   const fromStartProject = location.state?.from === 'start-project';
 
   const handleChange = (e) => {
@@ -57,7 +56,6 @@ export default function LoginPage() {
       // Removed manual synchronous navigate.
       // The useEffect will handle redirection once the AuthContext state updates.
     } catch (err) {
-      // Show the server's specific message if available and safe, otherwise generic
       const msg = err.response?.data?.message;
       if (msg && msg !== 'Invalid email or password') {
         setError(msg);
