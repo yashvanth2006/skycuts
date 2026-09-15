@@ -2,7 +2,6 @@ import { createContext, useContext, useState, useEffect, useCallback } from 'rea
 
 const ThemeContext = createContext(null);
 
-// Resolve initial theme: saved preference → system preference → 'dark'
 function getInitialTheme() {
   try {
     const saved = localStorage.getItem('skycuts_theme');
@@ -15,7 +14,6 @@ function getInitialTheme() {
 export const ThemeProvider = ({ children }) => {
   const [theme, setTheme] = useState(getInitialTheme);
 
-  // Apply class to <html> and persist whenever theme changes
   useEffect(() => {
     const root = document.documentElement;
     if (theme === 'light') {
