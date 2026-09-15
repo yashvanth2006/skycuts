@@ -67,7 +67,6 @@
   --font-display: 'Inter', system-ui, sans-serif;
 }
 
-/* ─── Light Mode — Editorial Studio ─────────────────────────────────────────── */
 html.light {
   --bg-void:        #F5F5F5;
   --bg-deep:        #EFEFEF;
@@ -106,7 +105,6 @@ html.light {
   --shadow-glow-lg: 0 0 48px rgba(185,28,28,0.12);
 }
 
-/* ─── Base Reset ─────────────────────────────────────────────────────────────── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 html, body, #root {
