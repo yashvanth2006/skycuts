@@ -5,7 +5,6 @@ const userSchema = new mongoose.Schema(
     {
         name: { type: String, required: true },
         email: { type: String, required: true, unique: true },
-        // password is optional for Google-only accounts
         password: {
             type: String,
             required: function () { return !this.googleId; },
@@ -40,7 +39,6 @@ userSchema.pre('save', async function (next) {
 //   - enteredPassword is undefined    → false  (never calls bcrypt.compare)
 //   - enteredPassword is null/''      → false  (never calls bcrypt.compare)
 userSchema.methods.matchPassword = async function (enteredPassword) {
-    // Guard 1: this account has no password hash (Google-only or unset)
     if (!this.password) return false;
     // Guard 2: caller passed a falsy value — reject without calling bcrypt
     if (!enteredPassword) return false;
