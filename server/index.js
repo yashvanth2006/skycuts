@@ -27,13 +27,11 @@ dotenv.config();
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Ensure upload directories exist
 ['uploads/raw', 'uploads/hls'].forEach((dir) => {
     const fullPath = path.join(__dirname, dir);
     if (!fs.existsSync(fullPath)) fs.mkdirSync(fullPath, { recursive: true });
 });
 
-// Connect to MongoDB
 connectDB();
 
 const app = express();
