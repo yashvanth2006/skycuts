@@ -15,12 +15,10 @@ export default function AppDownloadPrompt() {
   const [deviceInfo, setDeviceInfo] = useState({ isMobile: false, platform: 'desktop' });
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   
-  // Always call useAuth
   const auth = useAuth();
   const user = auth?.user;
 
   useEffect(() => {
-    // Check if already installed
     const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone;
     if (isStandalone) return;
 
