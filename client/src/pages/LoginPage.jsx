@@ -86,7 +86,6 @@ export default function LoginPage() {
     setForm({ name: '', email: '', password: '' });
   };
 
-  // Redirect authenticated users AFTER state has updated
   useEffect(() => {
     if (user && !fromStartProject) {
       if (user.role === 'admin') {
@@ -101,8 +100,6 @@ export default function LoginPage() {
 
   return (
     <div style={{ minHeight: '100vh', position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', overflow: 'hidden' }}>
-
-      {/* No decorative orbs — clean dark background */}
 
       {/* Login Card */}
       <MotionDiv
