@@ -28,7 +28,6 @@
   --accent-red-dark:    #7F1D1D;
   --accent-red-surface: #160808;
 
-  /* Legacy aliases */
   --accent-blue:    #B91C1C;
   --accent-indigo:  #DC2626;
   --accent-purple:  #7F1D1D;
@@ -57,7 +56,6 @@
   --font-sans:    'Inter', system-ui, sans-serif;
   --font-display: 'Inter', system-ui, sans-serif;
 
-  /* Admin-specific panel vars */
   --bg-panel:  #0F0F0F;
 }
 
