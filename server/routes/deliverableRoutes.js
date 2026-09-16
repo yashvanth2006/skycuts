@@ -8,7 +8,6 @@ import { protect, adminOnly, projectParticipant } from '../middleware/auth.js';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Multer disk storage — store raw uploads in /uploads/raw/
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
         cb(null, path.join(__dirname, '..', 'uploads', 'raw'));
@@ -24,7 +23,7 @@ const upload = multer({
         if (file.mimetype === 'video/mp4') cb(null, true);
         else cb(new Error('Only .mp4 files are accepted'), false);
     },
-    limits: { fileSize: 5 * 1024 * 1024 * 1024 }, // 5GB limit
+    limits: { fileSize: 5 * 1024 * 1024 * 1024 },
 });
 
 const router = express.Router();
